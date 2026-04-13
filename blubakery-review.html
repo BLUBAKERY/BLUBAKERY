@@ -277,6 +277,35 @@
 
 <script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyuiw8U4dZDFY83EXtZ8pg3MgPllTUVKUQsp8ToR77WXcKxPu2H9HSMs47XtTXehIDG/exec";
+const SHEET_ID = "1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI";
+const PRODUCTOS_DEFAULT = ["Cookie Clásica","Cookie Triple Chocolate","Cookie Salted Caramel","Cookie Limón y Coco","Cookie Pistachio","Pack de cookies","Varios / todos"];
+
+function poblarProductos(lista) {
+  var sel = document.getElementById("f-producto");
+  lista.forEach(function(n){
+    var opt = document.createElement("option");
+    opt.value = n; opt.textContent = n; sel.appendChild(opt);
+  });
+}
+
+fetch("https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config&range=A1")
+  .then(function(r){ return r.text(); })
+  .then(function(text){
+    try {
+      var raw = text.replace(/^[^(]+\(/, "").replace(/\);?\s*$/, "");
+      var json = JSON.parse(raw);
+      var val = json.table.rows[0].c[0].v;
+      var data = JSON.parse(val);
+      var lista = [];
+      if (data && data.productos) {
+        data.productos.filter(function(p){ return p.activo !== false; }).forEach(function(p){ lista.push(p.nombre); });
+      }
+      if (data.pack && data.pack.activo !== false) lista.push("Pack de cookies");
+      lista.push("Varios / todos");
+      poblarProductos(lista);
+    } catch(e) { poblarProductos(PRODUCTOS_DEFAULT); }
+  })
+  .catch(function(){ poblarProductos(PRODUCTOS_DEFAULT); });
 
 let estrellas = 0;
 const starLabels = ['', 'Malo', 'Regular', 'Bien', 'Muy bien', '¡Excelente!'];
