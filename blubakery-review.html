@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Blu Bakery — Tu opinión</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fff9e5;
+    --ink: #004e64;
+    --ink-light: #1B6B8A;
+    --border: #d4c9a0;
+    --muted: #7a7060;
+    --star-on: #c8a84b;
+    --star-off: #d4c9a0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Jost', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    line-height: 1;
+    margin-bottom: 0.35rem;
+  }
+  .tagline {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: var(--border);
+    margin: 1.5rem auto;
+  }
+
+  .intro {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .intro h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .intro p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: white;
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 2px 20px rgba(0,78,100,0.06);
+  }
+
+  .field {
+    margin-bottom: 1.25rem;
+  }
+  .field:last-child { margin-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-family: 'Jost', sans-serif;
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--ink);
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--ink);
+  }
+  textarea {
+    resize: none;
+    height: 90px;
+    line-height: 1.5;
+  }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23004e64' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  /* Stars */
+  .stars-wrap {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .star {
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--star-off);
+    transition: color 0.15s, transform 0.1s;
+    user-select: none;
+    line-height: 1;
+  }
+  .star.on { color: var(--star-on); }
+  .star:hover { transform: scale(1.15); }
+  .star-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 6px;
+    min-height: 1.2em;
+    font-style: italic;
+  }
+
+  .submit-btn {
+    width: 100%;
+    max-width: 480px;
+    padding: 15px;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 1.25rem;
+    transition: opacity 0.2s;
+  }
+  .submit-btn:active { opacity: 0.75; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Success */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 2rem 1rem;
+    max-width: 480px;
+    animation: fadeIn 0.4s ease;
+  }
+  .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .success-screen h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 0.75rem;
+  }
+  .success-screen p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #A32D2D; color: white; padding: 11px 22px;
+    border-radius: 24px; font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">BLU BAKERY</div>
+  <div class="tagline">Lo bueno no necesita explicación</div>
+</div>
+
+<div class="divider"></div>
+
+<div class="intro">
+  <h2>¿Qué te pareció?</h2>
+  <p>Tu opinión nos ayuda a seguir mejorando<br>y llega directo a nuestras manos.</p>
+</div>
+
+<div class="card" id="form-card">
+  <div class="field">
+    <label>Tu nombre</label>
+    <input type="text" id="f-nombre" placeholder="ej: María" autocomplete="given-name" />
+  </div>
+
+  <div class="field">
+    <label>¿Qué probaste?</label>
+    <select id="f-producto">
+      <option value="">Seleccioná un producto</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Tu calificación</label>
+    <div class="stars-wrap" id="stars">
+      <span class="star" data-v="1">★</span>
+      <span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span>
+      <span class="star" data-v="4">★</span>
+      <span class="star" data-v="5">★</span>
+    </div>
+    <div class="star-label" id="star-label">Tocá para calificar</div>
+  </div>
+
+  <div class="field">
+    <label>Tu opinión</label>
+    <textarea id="f-comentario" placeholder="Contanos cómo fue tu experiencia..."></textarea>
+  </div>
+
+  <div class="field">
+    <label>¿Cómo nos conociste?</label>
+    <select id="f-origen">
+      <option value="">Seleccioná una opción</option>
+      <option>Instagram</option>
+      <option>Me lo recomendaron</option>
+      <option>WhatsApp / difusión</option>
+      <option>Ya te conocía</option>
+      <option>Otro</option>
+    </select>
+  </div>
+</div>
+
+<button class="submit-btn" id="submit-btn" onclick="enviarReview()">Enviar mi opinión</button>
+
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🍪</div>
+  <h2>¡Muchas gracias!</h2>
+  <p>Tu opinión ya llegó a nuestras manos.<br>Nos alegra mucho que hayas elegido<br><strong>Blu Bakery</strong>.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyuiw8U4dZDFY83EXtZ8pg3MgPllTUVKUQsp8ToR77WXcKxPu2H9HSMs47XtTXehIDG/exec";
+
+let estrellas = 0;
+const starLabels = ['', 'Malo', 'Regular', 'Bien', 'Muy bien', '¡Excelente!'];
+
+document.getElementById('stars').addEventListener('click', function(e) {
+  const star = e.target.closest('.star');
+  if (!star) return;
+  estrellas = parseInt(star.dataset.v);
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= estrellas);
+  });
+  document.getElementById('star-label').textContent = starLabels[estrellas];
+});
+
+document.getElementById('stars').addEventListener('mouseover', function(e) {
+  const star = e.target.closest('.star');
+  if (!star) return;
+  const v = parseInt(star.dataset.v);
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= v);
+  });
+});
+
+document.getElementById('stars').addEventListener('mouseleave', function() {
+  document.querySelectorAll('.star').forEach(s => {
+    s.classList.toggle('on', parseInt(s.dataset.v) <= estrellas);
+  });
+});
+
+async function enviarReview() {
+  const nombre = document.getElementById('f-nombre').value.trim();
+  const producto = document.getElementById('f-producto').value;
+  const comentario = document.getElementById('f-comentario').value.trim();
+  const origen = document.getElementById('f-origen').value;
+
+  if (!nombre) { showToast('Escribí tu nombre'); return; }
+  if (!producto) { showToast('Seleccioná un producto'); return; }
+  if (!estrellas) { showToast('Calificá tu experiencia'); return; }
+  if (!comentario) { showToast('Dejá un comentario'); return; }
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const now = new Date();
+  const fecha = now.toLocaleDateString('es-AR');
+  const hora = now.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+
+  const data = {
+    tipo: 'review',
+    fecha, hora, nombre, producto,
+    estrellas, comentario, origen
+  };
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch(e) {}
+
+  document.getElementById('form-card').style.display = 'none';
+  btn.style.display = 'none';
+  document.querySelector('.intro').style.display = 'none';
+  document.querySelector('.divider').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+</script>
+</body>
+</html>
