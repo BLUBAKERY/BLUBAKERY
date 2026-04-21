@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blu Bakery · Calculadora de Costos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root{
+    --cream:#fff9e5;
+    --cream-dark:#f5efd7;
+    --teal:#004e64;
+    --teal-dark:#003540;
+    --teal-light:#e6eff2;
+    --ink:#1a1a1a;
+    --muted:#6b6b6b;
+    --border:#d9d3bc;
+    --success:#1d9e75;
+    --warning:#b8860b;
+    --danger:#a52a2a;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--cream);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5}
+  body{min-height:100vh}
+
+  /* Header */
+  .topbar{background:var(--teal);color:var(--cream);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--teal-dark)}
+  .brand{font-family:'DM Serif Display',serif;font-size:22px;letter-spacing:0.5px}
+  .brand span{opacity:0.7;font-size:13px;font-family:'Inter',sans-serif;font-weight:400;margin-left:8px}
+  .auth{display:flex;align-items:center;gap:12px;font-size:13px}
+  .auth-status{opacity:0.85}
+  .auth-btn{background:var(--cream);color:var(--teal);border:none;padding:7px 14px;border-radius:var(--radius);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
+  .auth-btn:hover{background:#fff}
+
+  /* Tabs */
+  .tabs{display:flex;background:var(--cream-dark);border-bottom:1px solid var(--border);padding:0 16px;overflow-x:auto}
+  .tab{padding:14px 20px;cursor:pointer;font-weight:500;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-size:14px}
+  .tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+  .tab:hover:not(.active){color:var(--teal-dark);background:rgba(0,78,100,0.04)}
+
+  /* Content */
+  .content{padding:24px;max-width:1200px;margin:0 auto}
+  .panel{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+  .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .panel-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal)}
+  .panel-subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+
+  /* Buttons */
+  .btn{background:var(--teal);color:var(--cream);border:none;padding:9px 16px;border-radius:var(--radius);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--teal-dark)}
+  .btn:disabled{opacity:0.5;cursor:not-allowed}
+  .btn-sm{padding:5px 10px;font-size:12px}
+  .btn-outline{background:transparent;color:var(--teal);border:1px solid var(--teal)}
+  .btn-outline:hover{background:var(--teal-light)}
+  .btn-danger{background:var(--danger)}
+  .btn-danger:hover{background:#8a2222}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{background:var(--cream-dark);color:var(--ink)}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;padding:10px 12px;background:var(--cream-dark);color:var(--teal);font-weight:600;border-bottom:2px solid var(--border);white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+  tr:hover td{background:#fdfbf3}
+  .t-num{text-align:right;font-variant-numeric:tabular-nums}
+  .t-center{text-align:center}
+  .t-muted{color:var(--muted);font-size:12px}
+
+  /* Inputs */
+  input,select,textarea{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;width:100%}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px rgba(0,78,100,0.1)}
+  input.inline{padding:4px 6px;font-size:13px;width:70px}
+  input.inline-sm{padding:4px 6px;font-size:13px;width:50px}
+  input.inline-price{padding:4px 6px;font-size:13px;width:90px}
+  label{font-size:12px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px}
+  .form-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px}
+  .form-row input,.form-row select{width:100%}
+
+  /* Cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:box-shadow 0.2s}
+  .card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+  .card-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--teal);margin-bottom:4px}
+  .card-meta{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .card-cost{font-size:24px;font-weight:600;color:var(--teal);font-variant-numeric:tabular-nums}
+  .card-cost-label{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:2px}
+  .card-section{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+  .card-actions{display:flex;gap:8px;margin-top:12px}
+
+  /* Badges */
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500;background:var(--cream-dark);color:var(--teal)}
+  .badge-warn{background:#fff4d6;color:#8a6608}
+  .badge-ok{background:#d6f0e4;color:#0d6b4a}
+
+  /* Recipe editor */
+  .recipe-editor{background:var(--cream);padding:16px;border-radius:var(--radius);margin-top:12px}
+  .section-header{font-weight:600;color:var(--teal);margin:12px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:0.5px}
+  .ingr-row{display:grid;grid-template-columns:2fr 1fr 1fr auto auto;gap:8px;padding:6px 0;align-items:center;border-bottom:1px solid var(--border)}
+  .ingr-row:last-child{border-bottom:none}
+  .ingr-name{font-weight:500}
+  .ingr-cost{color:var(--teal);font-weight:500;font-variant-numeric:tabular-nums}
+
+  /* Status */
+  .status-bar{padding:10px 16px;background:var(--teal-light);border-left:3px solid var(--teal);margin-bottom:16px;font-size:13px;display:none}
+  .status-bar.show{display:block}
+  .status-bar.error{background:#fde8e8;border-color:var(--danger);color:var(--danger)}
+  .status-bar.success{background:#d6f0e4;border-color:var(--success);color:#0d6b4a}
+
+  /* Empty state */
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.3}
+
+  /* Summary */
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+  .stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+  .stat-label{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:0.5px;margin-bottom:4px}
+  .stat-value{font-size:22px;font-weight:600;color:var(--teal);font-variant-numeric:tabular-nums}
+
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:var(--radius);max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:24px}
+  .modal-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--teal);margin-bottom:16px}
+
+  /* Responsive */
+  @media (max-width:640px){
+    .content{padding:16px}
+    .form-row{grid-template-columns:1fr 1fr;gap:8px}
+    .topbar{padding:12px 16px;flex-direction:column;align-items:flex-start;gap:8px}
+    .ingr-row{grid-template-columns:1fr 60px 80px auto;font-size:12px}
+  }
+
+  .hidden{display:none !important}
+  .loading{opacity:0.5;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Blu Bakery <span>· calculadora de costos</span></div>
+  <div class="auth">
+    <span class="auth-status" id="authStatus">No conectado</span>
+    <button class="auth-btn" id="btnLogin">Conectar Google</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="resumen">Resumen</div>
+  <div class="tab" data-tab="recetas">Recetas</div>
+  <div class="tab" data-tab="ingredientes">Ingredientes</div>
+  <div class="tab" data-tab="packaging">Packaging</div>
+  <div class="tab" data-tab="fijos">Costos fijos</div>
+</div>
+
+<div class="content">
+  <div class="status-bar" id="statusBar"></div>
+
+  <!-- RESUMEN -->
+  <div class="view" id="view-resumen">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Resumen de costos por cookie</div>
+          <div class="panel-subtitle">Costo unitario calculado sobre una tanda. Incluye ingredientes, packaging y costos fijos.</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="recalcularTodo()">↻ Recalcular</button>
+      </div>
+      <div id="resumenContent"></div>
+    </div>
+  </div>
+
+  <!-- RECETAS -->
+  <div class="view hidden" id="view-recetas">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Recetas</div>
+          <div class="panel-subtitle">Editá cantidades, agregá o quitá ingredientes. El costo se recalcula automáticamente.</div>
+        </div>
+        <button class="btn" onclick="nuevaReceta()">+ Nueva receta</button>
+      </div>
+      <div id="recetasContent"></div>
+    </div>
+  </div>
+
+  <!-- INGREDIENTES -->
+  <div class="view hidden" id="view-ingredientes">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Ingredientes</div>
+          <div class="panel-subtitle">Catálogo de insumos. El costo por gramo se calcula automáticamente según la presentación.</div>
+        </div>
+        <button class="btn" onclick="agregarIngrediente()">+ Agregar ingrediente</button>
+      </div>
+      <div id="ingredientesContent"></div>
+    </div>
+  </div>
+
+  <!-- PACKAGING -->
+  <div class="view hidden" id="view-packaging">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Packaging</div>
+          <div class="panel-subtitle">Bolsas, stickers, cajas y cualquier elemento de empaque por cookie.</div>
+        </div>
+        <button class="btn" onclick="agregarPackaging()">+ Agregar item</button>
+      </div>
+      <div id="packagingContent"></div>
+    </div>
+  </div>
+
+  <!-- FIJOS -->
+  <div class="view hidden" id="view-fijos">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Costos fijos por tanda</div>
+          <div class="panel-subtitle">Gas, luz, o cualquier costo que se prorratea sobre el total de cookies horneadas por tanda.</div>
+        </div>
+        <button class="btn" onclick="agregarCostoFijo()">+ Agregar costo fijo</button>
+      </div>
+      <div id="fijosContent"></div>
+    </div>
+  </div>
+
+  <!-- Botón flotante de guardar -->
+  <div style="position:fixed;bottom:24px;right:24px;z-index:50" id="guardarWrap" class="hidden">
+    <button class="btn" onclick="guardarTodo()" style="padding:14px 20px;font-size:14px;box-shadow:0 4px 16px rgba(0,78,100,0.3)">
+      💾 Guardar cambios
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+/* ========== CONFIGURACIÓN ========== */
+const SHEET_ID = '1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI';
+const CLIENT_ID = '507038647920-d9a358fea6547uu25vlr5l39svskhnmp.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+/* Celdas de almacenamiento (un JSON por pestaña) */
+const CELLS = {
+  ingredientes: 'Ingredientes!A1',
+  packaging:    'Packaging!A1',
+  fijos:        'CostosFijos!A1',
+  recetas:      'Recetas!A1'
+};
+
+/* ========== ESTADO ========== */
+let state = {
+  ingredientes: [],
+  packaging: [],
+  fijos: [],
+  recetas: [],
+  cookiesPorTanda: 12,  // default global
+  dirty: false,
+  loaded: false
+};
+
+let tokenClient = null;
+let accessToken = null;
+
+/* ========== GOOGLE AUTH ========== */
+window.onload = function(){
+  setTimeout(initAuth, 500);
+  cargarDatos();
+};
+
+function initAuth(){
+  if (!window.google || !google.accounts) {
+    setTimeout(initAuth, 300);
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (resp) => {
+      if (resp.access_token) {
+        accessToken = resp.access_token;
+        document.getElementById('authStatus').textContent = 'Conectado ✓';
+        document.getElementById('btnLogin').textContent = 'Desconectar';
+      }
+    }
+  });
+  document.getElementById('btnLogin').onclick = () => {
+    if (accessToken) {
+      accessToken = null;
+      document.getElementById('authStatus').textContent = 'No conectado';
+      document.getElementById('btnLogin').textContent = 'Conectar Google';
+    } else {
+      tokenClient.requestAccessToken();
+    }
+  };
+}
+
+/* ========== STATUS ========== */
+function status(msg, type){
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.className = 'status-bar show ' + (type || '');
+  if (type !== 'error') setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+/* ========== TABS ========== */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+    document.getElementById('view-' + tab.dataset.tab).classList.remove('hidden');
+    render();
+  };
+});
+
+/* ========== CARGAR DATOS ========== */
+async function cargarDatos(){
+  status('Cargando datos...');
+  try {
+    const ranges = Object.values(CELLS).map(c => `&ranges=${encodeURIComponent(c)}`).join('');
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchGet?key=AIzaSyBxxx${ranges}`;
+
+    // Usamos gviz endpoint público (no requiere API key)
+    const claves = Object.keys(CELLS);
+    for (let i = 0; i < claves.length; i++) {
+      const tabla = CELLS[claves[i]].split('!')[0];
+      try {
+        const r = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabla)}&range=A1`);
+        const txt = await r.text();
+        const json = JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+        const val = json.table && json.table.rows && json.table.rows[0] && json.table.rows[0].c && json.table.rows[0].c[0] ? json.table.rows[0].c[0].v : null;
+        if (val) {
+          try {
+            state[claves[i]] = JSON.parse(val);
+          } catch(e) {
+            console.warn(`No se pudo parsear ${claves[i]}:`, e);
+          }
+        }
+      } catch(e) {
+        console.warn(`Error cargando ${claves[i]}:`, e);
+      }
+    }
+
+    // Si no hay datos, cargar datos iniciales de Blu Bakery
+    if (!state.ingredientes.length) cargarDatosIniciales();
+
+    state.loaded = true;
+    render();
+    status('Datos cargados correctamente', 'success');
+  } catch(e) {
+    console.error(e);
+    cargarDatosIniciales();
+    state.loaded = true;
+    render();
+    status('No se pudieron cargar datos del Sheet. Trabajando con datos locales.', 'error');
+  }
+}
+
+/* ========== DATOS INICIALES (pre-cargados) ========== */
+function cargarDatosIniciales(){
+  state.ingredientes = [
+    // id, nombre, marca, presentacion, cantidad, unidad, precio
+    {id:'harina0000', nombre:'Harina 0000', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'manteca', nombre:'Manteca', marca:'', presentacion:200, unidad:'g', precio:0},
+    {id:'azucarBlanca', nombre:'Azúcar blanca', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'azucarRubia', nombre:'Azúcar rubia', marca:'Ledesma', presentacion:1000, unidad:'g', precio:0},
+    {id:'huevos', nombre:'Huevos', marca:'', presentacion:12, unidad:'u', precio:0},
+    {id:'cacaoComun', nombre:'Cacao común', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'cacaoAlcalino', nombre:'Cacao alcalino', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'polvoHornear', nombre:'Polvo de hornear', marca:'', presentacion:100, unidad:'g', precio:0},
+    {id:'bicarbonato', nombre:'Bicarbonato', marca:'', presentacion:100, unidad:'g', precio:0},
+    {id:'sal', nombre:'Sal fina', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'salEscamas', nombre:'Sal en escamas', marca:'Maldon', presentacion:250, unidad:'g', precio:0},
+    {id:'vainilla', nombre:'Esencia de vainilla', marca:'Nielsen-Massey', presentacion:60, unidad:'ml', precio:0},
+    {id:'chocoBlanco', nombre:'Chocolate blanco', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'chocoSemi', nombre:'Chocolate semiamargo', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'chocoLeche', nombre:'Chocolate con leche', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'chipsChoco', nombre:'Chips de chocolate', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'pastaPistacho', nombre:'Pasta de pistacho', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'pistachos', nombre:'Pistachos triturados', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'arandanos', nombre:'Arándanos deshidratados', marca:'', presentacion:200, unidad:'g', precio:0},
+    {id:'castanasCaju', nombre:'Castañas de cajú', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'mani', nombre:'Maní caramelizado', marca:'', presentacion:500, unidad:'g', precio:0},
+    {id:'crema', nombre:'Crema', marca:'', presentacion:200, unidad:'ml', precio:0},
+    {id:'ddl', nombre:'Dulce de leche repostero', marca:'', presentacion:1000, unidad:'g', precio:0},
+    {id:'licor', nombre:'Licor', marca:'', presentacion:750, unidad:'ml', precio:0},
+    {id:'limon', nombre:'Limón', marca:'', presentacion:1, unidad:'u', precio:0},
+  ];
+
+  state.packaging = [
+    {id:'bolsaKraft', nombre:'Bolsa kraft individual', precio:0},
+  ];
+
+  state.fijos = [
+    {id:'gas', nombre:'Gas por tanda', precio:0, cookiesPorTanda:12},
+    {id:'luz', nombre:'Luz eléctrica por tanda', precio:0, cookiesPorTanda:12},
+  ];
+
+  state.recetas = [
+    {
+      id:'clasica',
+      nombre:'Clásica Chocolate Chip',
+      cookiesPorTanda:12,
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:200, seccion:'masa', nota:'avellanada'},
+        {ingredienteId:'huevos', cantidad:2, seccion:'masa'},
+        {ingredienteId:'harina0000', cantidad:320, seccion:'masa'},
+        {ingredienteId:'polvoHornear', cantidad:4, seccion:'masa', nota:'1 cdta'},
+        {ingredienteId:'bicarbonato', cantidad:2, seccion:'masa', nota:'½ cdta'},
+        {ingredienteId:'sal', cantidad:5, seccion:'masa', nota:'1 cdta'},
+        {ingredienteId:'azucarBlanca', cantidad:100, seccion:'masa'},
+        {ingredienteId:'azucarRubia', cantidad:100, seccion:'masa'},
+        {ingredienteId:'vainilla', cantidad:5, seccion:'masa', nota:'c/n'},
+        {ingredienteId:'chocoSemi', cantidad:180, seccion:'masa'},
+      ]
+    },
+    {
+      id:'arandanosCastanas',
+      nombre:'Castañas y Arándanos',
+      cookiesPorTanda:10,
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:170, seccion:'masa', nota:'beurre noisette'},
+        {ingredienteId:'azucarRubia', cantidad:120, seccion:'masa', nota:'mascabo'},
+        {ingredienteId:'azucarBlanca', cantidad:80, seccion:'masa'},
+        {ingredienteId:'huevos', cantidad:1, seccion:'masa'},
+        {ingredienteId:'harina0000', cantidad:260, seccion:'masa'},
+        {ingredienteId:'bicarbonato', cantidad:3, seccion:'masa'},
+        {ingredienteId:'polvoHornear', cantidad:2, seccion:'masa'},
+        {ingredienteId:'sal', cantidad:4, seccion:'masa'},
+        {ingredienteId:'limon', cantidad:1, seccion:'masa', nota:'ralladura'},
+        {ingredienteId:'chocoBlanco', cantidad:120, seccion:'masa'},
+        {ingredienteId:'arandanos', cantidad:100, seccion:'masa'},
+        {ingredienteId:'castanasCaju', cantidad:120, seccion:'topping', nota:'tostadas y caramelizadas'},
+        {ingredienteId:'chocoBlanco', cantidad:100, seccion:'topping', nota:'drizzle'},
+      ]
+    },
+    {
+      id:'tripleChoco',
+      nombre:'Triple Chocolate',
+      cookiesPorTanda:24,
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:460, seccion:'masa', nota:'pomada'},
+        {ingredienteId:'azucarBlanca', cantidad:200, seccion:'masa'},
+        {ingredienteId:'azucarRubia', cantidad:360, seccion:'masa'},
+        {ingredienteId:'huevos', cantidad:4, seccion:'masa', nota:'240g ≈ 4 unid.'},
+        {ingredienteId:'harina0000', cantidad:755, seccion:'masa'},
+        {ingredienteId:'cacaoComun', cantidad:80, seccion:'masa'},
+        {ingredienteId:'cacaoAlcalino', cantidad:80, seccion:'masa'},
+        {ingredienteId:'polvoHornear', cantidad:20, seccion:'masa'},
+        {ingredienteId:'bicarbonato', cantidad:10, seccion:'masa'},
+        {ingredienteId:'sal', cantidad:10, seccion:'masa'},
+        {ingredienteId:'chocoBlanco', cantidad:175, seccion:'masa'},
+        {ingredienteId:'chocoSemi', cantidad:175, seccion:'masa'},
+        {ingredienteId:'chocoLeche', cantidad:175, seccion:'masa'},
+      ]
+    },
+    {
+      id:'pistacho',
+      nombre:'Pistacho',
+      cookiesPorTanda:24,
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:460, seccion:'masa', nota:'pomada'},
+        {ingredienteId:'azucarBlanca', cantidad:200, seccion:'masa'},
+        {ingredienteId:'azucarRubia', cantidad:360, seccion:'masa'},
+        {ingredienteId:'huevos', cantidad:4, seccion:'masa', nota:'240g ≈ 4 unid.'},
+        {ingredienteId:'pastaPistacho', cantidad:140, seccion:'masa'},
+        {ingredienteId:'pistachos', cantidad:200, seccion:'masa', nota:'triturados'},
+        {ingredienteId:'harina0000', cantidad:980, seccion:'masa'},
+        {ingredienteId:'polvoHornear', cantidad:20, seccion:'masa'},
+        {ingredienteId:'bicarbonato', cantidad:10, seccion:'masa'},
+        {ingredienteId:'sal', cantidad:10, seccion:'masa'},
+        {ingredienteId:'chocoBlanco', cantidad:425, seccion:'masa', nota:'cobertura'},
+      ]
+    },
+    {
+      id:'bariloche',
+      nombre:'Bariloche',
+      cookiesPorTanda:12,
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:200, seccion:'masa', nota:'avellanada'},
+        {ingredienteId:'huevos', cantidad:2, seccion:'masa'},
+        {ingredienteId:'harina0000', cantidad:320, seccion:'masa'},
+        {ingredienteId:'polvoHornear', cantidad:4, seccion:'masa', nota:'1 cdta'},
+        {ingredienteId:'bicarbonato', cantidad:2, seccion:'masa', nota:'½ cdta'},
+        {ingredienteId:'sal', cantidad:5, seccion:'masa', nota:'1 cdta'},
+        {ingredienteId:'azucarBlanca', cantidad:100, seccion:'masa'},
+        {ingredienteId:'azucarRubia', cantidad:100, seccion:'masa'},
+        {ingredienteId:'vainilla', cantidad:5, seccion:'masa', nota:'c/n'},
+        {ingredienteId:'mani', cantidad:150, seccion:'masa', nota:'caramelizado'},
+        {ingredienteId:'chocoSemi', cantidad:200, seccion:'relleno'},
+        {ingredienteId:'crema', cantidad:100, seccion:'relleno'},
+        {ingredienteId:'ddl', cantidad:400, seccion:'relleno'},
+        {ingredienteId:'licor', cantidad:15, seccion:'relleno'},
+      ]
+    }
+  ];
+}
+
+/* ========== CÁLCULOS ========== */
+function costoPorUnidad(ingId){
+  const ing = state.ingredientes.find(i => i.id === ingId);
+  if (!ing || !ing.precio || !ing.presentacion) return 0;
+  return ing.precio / ing.presentacion;
+}
+
+function costoReceta(receta){
+  let costoIng = 0;
+  let advertencias = [];
+  receta.ingredientes.forEach(item => {
+    const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
+    if (!ing) {
+      advertencias.push(`Ingrediente no encontrado`);
+      return;
+    }
+    if (!ing.precio) advertencias.push(ing.nombre);
+    costoIng += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
+  });
+
+  const costoPackaging = state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
+
+  let costoFijoTanda = 0;
+  state.fijos.forEach(f => {
+    const cxt = f.cookiesPorTanda || receta.cookiesPorTanda || 12;
+    costoFijoTanda += (f.precio || 0) / cxt;
+  });
+
+  const cookies = receta.cookiesPorTanda || 12;
+  const costoIngUnit = costoIng / cookies;
+  const costoTotalUnit = costoIngUnit + costoPackaging + costoFijoTanda;
+
+  return {
+    costoIng,
+    costoIngUnit,
+    costoPackaging,
+    costoFijoUnit: costoFijoTanda,
+    costoTotalUnit,
+    cookies,
+    advertencias: [...new Set(advertencias)]
+  };
+}
+
+function formatAR(n){
+  if (!n && n !== 0) return '-';
+  return '$' + Math.round(n).toLocaleString('es-AR');
+}
+
+function formatARdec(n){
+  if (!n && n !== 0) return '-';
+  return '$' + n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+/* ========== RENDER ========== */
+function render(){
+  renderResumen();
+  renderRecetas();
+  renderIngredientes();
+  renderPackaging();
+  renderFijos();
+  document.getElementById('guardarWrap').classList.toggle('hidden', !state.dirty);
+}
+
+function renderResumen(){
+  const container = document.getElementById('resumenContent');
+  if (!state.recetas.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay recetas cargadas. Agregá una en la pestaña Recetas.</div>';
+    return;
+  }
+
+  const packTotal = state.packaging.reduce((s,p) => s + (p.precio||0), 0);
+  const totalIng = state.ingredientes.length;
+  const ingSinPrecio = state.ingredientes.filter(i => !i.precio).length;
+
+  let html = `
+    <div class="summary-grid">
+      <div class="stat"><div class="stat-label">Recetas</div><div class="stat-value">${state.recetas.length}</div></div>
+      <div class="stat"><div class="stat-label">Ingredientes</div><div class="stat-value">${totalIng}</div></div>
+      <div class="stat"><div class="stat-label">Sin precio cargado</div><div class="stat-value" style="color:${ingSinPrecio > 0 ? 'var(--warning)' : 'var(--success)'}">${ingSinPrecio}</div></div>
+      <div class="stat"><div class="stat-label">Packaging por cookie</div><div class="stat-value">${formatAR(packTotal)}</div></div>
+    </div>
+  `;
+
+  html += `<table><thead><tr>
+    <th>Receta</th>
+    <th class="t-center">Cookies/tanda</th>
+    <th class="t-num">Costo ingredientes</th>
+    <th class="t-num">+ Packaging</th>
+    <th class="t-num">+ Fijos</th>
+    <th class="t-num">Costo por cookie</th>
+    <th></th>
+  </tr></thead><tbody>`;
+
+  state.recetas.forEach(r => {
+    const c = costoReceta(r);
+    const warn = c.advertencias.length > 0;
+    html += `<tr>
+      <td><strong>${escape(r.nombre)}</strong>${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
+      <td class="t-center">${c.cookies}</td>
+      <td class="t-num">${formatAR(c.costoIngUnit)}</td>
+      <td class="t-num">${formatAR(c.costoPackaging)}</td>
+      <td class="t-num">${formatAR(c.costoFijoUnit)}</td>
+      <td class="t-num" style="font-weight:600;color:var(--teal);font-size:15px">${formatAR(c.costoTotalUnit)}</td>
+      <td><button class="btn btn-sm btn-ghost" onclick="verReceta('${r.id}')">Ver</button></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderRecetas(){
+  const container = document.getElementById('recetasContent');
+  if (!state.recetas.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay recetas cargadas.</div>';
+    return;
+  }
+
+  let html = '<div class="cards">';
+  state.recetas.forEach(r => {
+    const c = costoReceta(r);
+    html += `
+      <div class="card">
+        <div class="card-title">${escape(r.nombre)}</div>
+        <div class="card-meta">${c.cookies} cookies por tanda · ${r.ingredientes.length} ingredientes</div>
+        <div class="card-cost-label">Costo por cookie</div>
+        <div class="card-cost">${formatAR(c.costoTotalUnit)}</div>
+        <div class="card-section">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+            <span>Ingredientes</span><span>${formatAR(c.costoIngUnit)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+            <span>Packaging</span><span>${formatAR(c.costoPackaging)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted)">
+            <span>Fijos</span><span>${formatAR(c.costoFijoUnit)}</span>
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="editarReceta('${r.id}')">Editar</button>
+          <button class="btn btn-sm btn-outline" onclick="duplicarReceta('${r.id}')">Duplicar</button>
+          <button class="btn btn-sm btn-ghost" onclick="borrarReceta('${r.id}')">×</button>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderIngredientes(){
+  const container = document.getElementById('ingredientesContent');
+  if (!state.ingredientes.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay ingredientes cargados.</div>';
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Ingrediente</th>
+    <th>Marca</th>
+    <th class="t-center">Presentación</th>
+    <th class="t-num">Precio</th>
+    <th class="t-num">Costo/unidad</th>
+    <th></th>
+  </tr></thead><tbody>`;
+
+  state.ingredientes.forEach((ing, idx) => {
+    const costoUnit = costoPorUnidad(ing.id);
+    const sinPrecio = !ing.precio;
+    html += `<tr>
+      <td><input class="inline" style="width:100%" type="text" value="${escape(ing.nombre)}" onchange="actIng(${idx},'nombre',this.value)"></td>
+      <td><input class="inline" style="width:100%" type="text" value="${escape(ing.marca||'')}" onchange="actIng(${idx},'marca',this.value)" placeholder="-"></td>
+      <td class="t-center">
+        <input class="inline-sm" type="number" value="${ing.presentacion}" onchange="actIng(${idx},'presentacion',parseFloat(this.value)||0)" step="0.01">
+        <select class="inline-sm" style="width:55px" onchange="actIng(${idx},'unidad',this.value)">
+          <option value="g" ${ing.unidad==='g'?'selected':''}>g</option>
+          <option value="ml" ${ing.unidad==='ml'?'selected':''}>ml</option>
+          <option value="u" ${ing.unidad==='u'?'selected':''}>u</option>
+          <option value="kg" ${ing.unidad==='kg'?'selected':''}>kg</option>
+        </select>
+      </td>
+      <td class="t-num"><input class="inline-price" type="number" value="${ing.precio||''}" onchange="actIng(${idx},'precio',parseFloat(this.value)||0)" placeholder="0" step="0.01"></td>
+      <td class="t-num ${sinPrecio?'t-muted':''}">${sinPrecio ? '-' : formatARdec(costoUnit) + '/' + ing.unidad}</td>
+      <td><button class="btn btn-sm btn-ghost" onclick="borrarIngrediente(${idx})">×</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderPackaging(){
+  const container = document.getElementById('packagingContent');
+  if (!state.packaging.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay packaging cargado.</div>';
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Item</th>
+    <th class="t-num">Precio por cookie</th>
+    <th></th>
+  </tr></thead><tbody>`;
+  state.packaging.forEach((p, idx) => {
+    html += `<tr>
+      <td><input class="inline" style="width:100%" type="text" value="${escape(p.nombre)}" onchange="actPack(${idx},'nombre',this.value)"></td>
+      <td class="t-num"><input class="inline-price" type="number" value="${p.precio||''}" onchange="actPack(${idx},'precio',parseFloat(this.value)||0)" placeholder="0" step="0.01"></td>
+      <td><button class="btn btn-sm btn-ghost" onclick="borrarPack(${idx})">×</button></td>
+    </tr>`;
+  });
+  html += `<tr style="background:var(--cream-dark);font-weight:600">
+    <td>Total por cookie</td>
+    <td class="t-num">${formatAR(state.packaging.reduce((s,p)=>s+(p.precio||0),0))}</td>
+    <td></td>
+  </tr>`;
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+function renderFijos(){
+  const container = document.getElementById('fijosContent');
+  if (!state.fijos.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay costos fijos cargados.</div>';
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Concepto</th>
+    <th class="t-num">Costo por tanda</th>
+    <th class="t-center">Cookies/tanda</th>
+    <th class="t-num">Por cookie</th>
+    <th></th>
+  </tr></thead><tbody>`;
+  state.fijos.forEach((f, idx) => {
+    const porCookie = (f.precio||0) / (f.cookiesPorTanda || 12);
+    html += `<tr>
+      <td><input class="inline" style="width:100%" type="text" value="${escape(f.nombre)}" onchange="actFijo(${idx},'nombre',this.value)"></td>
+      <td class="t-num"><input class="inline-price" type="number" value="${f.precio||''}" onchange="actFijo(${idx},'precio',parseFloat(this.value)||0)" placeholder="0" step="0.01"></td>
+      <td class="t-center"><input class="inline-sm" type="number" value="${f.cookiesPorTanda||12}" onchange="actFijo(${idx},'cookiesPorTanda',parseInt(this.value)||12)"></td>
+      <td class="t-num">${formatAR(porCookie)}</td>
+      <td><button class="btn btn-sm btn-ghost" onclick="borrarFijo(${idx})">×</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+/* ========== ACTUALIZADORES ========== */
+function markDirty(){ state.dirty = true; document.getElementById('guardarWrap').classList.remove('hidden'); }
+
+function actIng(idx, key, val){ state.ingredientes[idx][key] = val; markDirty(); renderResumen(); renderRecetas(); renderIngredientes(); }
+function actPack(idx, key, val){ state.packaging[idx][key] = val; markDirty(); renderResumen(); renderPackaging(); }
+function actFijo(idx, key, val){ state.fijos[idx][key] = val; markDirty(); renderResumen(); renderFijos(); }
+
+function borrarIngrediente(idx){
+  if (!confirm('¿Borrar este ingrediente? Puede afectar recetas que lo usen.')) return;
+  state.ingredientes.splice(idx, 1);
+  markDirty(); render();
+}
+function borrarPack(idx){
+  if (!confirm('¿Borrar este item de packaging?')) return;
+  state.packaging.splice(idx, 1);
+  markDirty(); render();
+}
+function borrarFijo(idx){
+  if (!confirm('¿Borrar este costo fijo?')) return;
+  state.fijos.splice(idx, 1);
+  markDirty(); render();
+}
+
+function agregarIngrediente(){
+  const nombre = prompt('Nombre del ingrediente:');
+  if (!nombre) return;
+  const id = 'ing_' + Date.now();
+  state.ingredientes.push({id, nombre, marca:'', presentacion:1000, unidad:'g', precio:0});
+  markDirty(); render();
+}
+
+function agregarPackaging(){
+  const nombre = prompt('Nombre del item de packaging:');
+  if (!nombre) return;
+  state.packaging.push({id:'pack_'+Date.now(), nombre, precio:0});
+  markDirty(); render();
+}
+
+function agregarCostoFijo(){
+  const nombre = prompt('Nombre del costo fijo:');
+  if (!nombre) return;
+  state.fijos.push({id:'fijo_'+Date.now(), nombre, precio:0, cookiesPorTanda:12});
+  markDirty(); render();
+}
+
+/* ========== RECETAS - EDITOR ========== */
+function nuevaReceta(){
+  const nombre = prompt('Nombre de la receta:');
+  if (!nombre) return;
+  const nueva = {
+    id: 'rec_' + Date.now(),
+    nombre,
+    cookiesPorTanda: 12,
+    ingredientes: []
+  };
+  state.recetas.push(nueva);
+  markDirty();
+  editarReceta(nueva.id);
+}
+
+function duplicarReceta(id){
+  const r = state.recetas.find(x => x.id === id);
+  if (!r) return;
+  const copia = JSON.parse(JSON.stringify(r));
+  copia.id = 'rec_' + Date.now();
+  copia.nombre = r.nombre + ' (copia)';
+  state.recetas.push(copia);
+  markDirty(); render();
+}
+
+function borrarReceta(id){
+  if (!confirm('¿Borrar esta receta?')) return;
+  state.recetas = state.recetas.filter(r => r.id !== id);
+  markDirty(); render();
+}
+
+function verReceta(id){
+  editarReceta(id);
+}
+
+function editarReceta(id){
+  const r = state.recetas.find(x => x.id === id);
+  if (!r) return;
+  const c = costoReceta(r);
+
+  const secciones = ['masa', 'relleno', 'topping'];
+  const porSeccion = {};
+  secciones.forEach(s => porSeccion[s] = []);
+  r.ingredientes.forEach((item, idx) => {
+    const sec = item.seccion || 'masa';
+    if (!porSeccion[sec]) porSeccion[sec] = [];
+    porSeccion[sec].push({...item, _idx: idx});
+  });
+
+  let ingredientesHtml = '';
+  secciones.forEach(sec => {
+    const items = porSeccion[sec] || [];
+    if (!items.length) return;
+    ingredientesHtml += `<div class="section-header">${sec.toUpperCase()}</div>`;
+    items.forEach(item => {
+      const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
+      const costo = ing ? costoPorUnidad(item.ingredienteId) * item.cantidad : 0;
+      ingredientesHtml += `<div class="ingr-row">
+        <div class="ingr-name">${ing ? escape(ing.nombre) : '<span style="color:var(--danger)">⚠ Ingrediente inexistente</span>'}${item.nota ? `<br><span class="t-muted">${escape(item.nota)}</span>` : ''}</div>
+        <input class="inline-sm" type="number" value="${item.cantidad}" step="0.01" onchange="actRecIng('${r.id}',${item._idx},'cantidad',parseFloat(this.value)||0)">
+        <div class="t-muted">${ing ? ing.unidad : '?'}</div>
+        <div class="ingr-cost">${formatAR(costo)}</div>
+        <button class="btn btn-sm btn-ghost" onclick="quitarIngRec('${r.id}',${item._idx})">×</button>
+      </div>`;
+    });
+  });
+
+  // Selector para agregar
+  const optsIng = state.ingredientes.map(i => `<option value="${i.id}">${escape(i.nombre)}</option>`).join('');
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-title">Editar: ${escape(r.nombre)}</div>
+
+    <label>Nombre</label>
+    <input type="text" value="${escape(r.nombre)}" onchange="actReceta('${r.id}','nombre',this.value)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      <div>
+        <label>Cookies por tanda</label>
+        <input type="number" value="${r.cookiesPorTanda}" onchange="actReceta('${r.id}','cookiesPorTanda',parseInt(this.value)||12)">
+      </div>
+      <div>
+        <label>Costo por cookie</label>
+        <div style="padding:7px 10px;background:var(--teal-light);border-radius:var(--radius);font-weight:600;color:var(--teal);font-size:16px">${formatAR(c.costoTotalUnit)}</div>
+      </div>
+    </div>
+
+    <div class="recipe-editor">
+      ${ingredientesHtml || '<div class="t-muted">Sin ingredientes aún.</div>'}
+
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <label>Agregar ingrediente</label>
+        <div style="display:grid;grid-template-columns:2fr 80px 90px auto;gap:8px">
+          <select id="selIng"><option value="">Elegir...</option>${optsIng}</select>
+          <input id="selCant" type="number" placeholder="cant." step="0.01">
+          <select id="selSec">
+            <option value="masa">Masa</option>
+            <option value="relleno">Relleno</option>
+            <option value="topping">Topping</option>
+          </select>
+          <button class="btn btn-sm" onclick="agregarIngRec('${r.id}')">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function actReceta(id, key, val){
+  const r = state.recetas.find(x => x.id === id);
+  if (!r) return;
+  r[key] = val;
+  markDirty();
+  editarReceta(id);
+  renderResumen(); renderRecetas();
+}
+
+function actRecIng(recId, idx, key, val){
+  const r = state.recetas.find(x => x.id === recId);
+  if (!r) return;
+  r.ingredientes[idx][key] = val;
+  markDirty();
+  editarReceta(recId);
+  renderResumen(); renderRecetas();
+}
+
+function quitarIngRec(recId, idx){
+  const r = state.recetas.find(x => x.id === recId);
+  if (!r) return;
+  r.ingredientes.splice(idx, 1);
+  markDirty();
+  editarReceta(recId);
+  renderResumen(); renderRecetas();
+}
+
+function agregarIngRec(recId){
+  const r = state.recetas.find(x => x.id === recId);
+  if (!r) return;
+  const ingId = document.getElementById('selIng').value;
+  const cant = parseFloat(document.getElementById('selCant').value) || 0;
+  const sec = document.getElementById('selSec').value;
+  if (!ingId || !cant) { alert('Elegí un ingrediente y una cantidad.'); return; }
+  r.ingredientes.push({ingredienteId: ingId, cantidad: cant, seccion: sec});
+  markDirty();
+  editarReceta(recId);
+  renderResumen(); renderRecetas();
+}
+
+function cerrarModal(){
+  document.getElementById('modalBg').classList.remove('show');
+}
+
+document.getElementById('modalBg').addEventListener('click', (e) => {
+  if (e.target.id === 'modalBg') cerrarModal();
+});
+
+function recalcularTodo(){
+  render();
+  status('Recalculado', 'success');
+}
+
+function escape(s){
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+/* ========== GUARDAR ========== */
+async function guardarTodo(){
+  if (!accessToken) {
+    if (!tokenClient) { status('Esperá un segundo y probá de nuevo', 'error'); return; }
+    tokenClient.callback = async (resp) => {
+      if (resp.access_token) {
+        accessToken = resp.access_token;
+        document.getElementById('authStatus').textContent = 'Conectado ✓';
+        document.getElementById('btnLogin').textContent = 'Desconectar';
+        await guardarTodo();
+      }
+    };
+    tokenClient.requestAccessToken();
+    return;
+  }
+
+  status('Guardando en Google Sheets...');
+  try {
+    const updates = [];
+    Object.keys(CELLS).forEach(k => {
+      updates.push({
+        range: CELLS[k],
+        values: [[JSON.stringify(state[k])]]
+      });
+    });
+
+    const r = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values:batchUpdate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        valueInputOption: 'RAW',
+        data: updates
+      })
+    });
+
+    if (!r.ok) {
+      const err = await r.text();
+      throw new Error(err);
+    }
+
+    state.dirty = false;
+    document.getElementById('guardarWrap').classList.add('hidden');
+    status('Guardado correctamente ✓', 'success');
+  } catch(e) {
+    console.error(e);
+    if (String(e).includes('Unable to parse range') || String(e).includes('not found')) {
+      status('⚠ Faltan crear las pestañas en el Sheet: Ingredientes, Packaging, CostosFijos, Recetas. Ver instrucciones.', 'error');
+    } else {
+      status('Error al guardar: ' + e.message, 'error');
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>
