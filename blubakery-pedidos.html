@@ -216,11 +216,15 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
   </div>
   <div id="eibox" class="ib">
     <span class="ib-t">Envío a domicilio</span>
-    Elegí día y horario para recibir. <strong>Te contactamos por WhatsApp para confirmar.</strong>
+    <span id="msg-envio">Elegí día y horario para recibir.</span>
+    <div id="envio-info" style="margin-top:10px;padding:10px 12px;background:var(--cream);border-radius:8px;font-size:14px;display:none">
+      <strong>Costo del envío:</strong> <span id="envio-monto">$0</span>
+      <div style="margin-top:4px;color:var(--muted);font-size:13px">⚠ No se suma al total. Se abona a la mensajería al recibir.</div>
+    </div>
   </div>
   <div id="ribox" class="ib" style="display:none">
     <span class="ib-t">Retiro en domicilio</span>
-    Elegí día y horario para retirar. <strong>Te contactamos por WhatsApp para confirmar.</strong>
+    <span id="msg-retiro">Elegí día y horario para retirar.</span>
   </div>
 </div>
 
@@ -253,6 +257,10 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
     <div class="mpa" id="mp-alias">julieta.linn</div>
     <div class="mpb2" id="mp-banco">Modo / Transferencia bancaria</div>
     <div class="mpm" id="mpm"></div>
+    <div id="msg-transferencia" style="margin-top:10px;padding:10px 12px;background:#fff;border-radius:8px;font-size:13px;line-height:1.5"></div>
+  </div>
+  <div id="efbox" class="mpb" style="display:none">
+    <div id="msg-efectivo" style="padding:10px 12px;background:#fff;border-radius:8px;font-size:14px;line-height:1.5"></div>
   </div>
 </div>
 
@@ -298,6 +306,10 @@ var CFG = {
   banco: "Modo / Transferencia bancaria",
   wspComprobante: "",
   horasCorte: 24,
+  msgRetiro: "Se retira por Las Heras al 2900. Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
+  msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
+  msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
+  msgEfectivo: "Por favor abonar con el importe justo o con cambio.",
   franjasDefault: ["15:00 - 17:00", "17:00 - 19:00"],
   diasEntrega: [
     {id:"viernes", label:"Viernes", horario:"15:00 - 19:00 hs"},
@@ -343,6 +355,10 @@ var disp = [];
         if (data.banco)          CFG.banco          = data.banco;
         if (data.wspComprobante) CFG.wspComprobante = data.wspComprobante;
         if (data.horasCorte)     CFG.horasCorte     = data.horasCorte;
+        if (data.msgRetiro)        CFG.msgRetiro        = data.msgRetiro;
+        if (data.msgEnvio)         CFG.msgEnvio         = data.msgEnvio;
+        if (data.msgTransferencia) CFG.msgTransferencia = data.msgTransferencia;
+        if (data.msgEfectivo)      CFG.msgEfectivo      = data.msgEfectivo;
         if (data.franjasDefault && data.franjasDefault.length) CFG.franjasDefault = data.franjasDefault;
         if (data.diasEntrega && data.diasEntrega.length) CFG.diasEntrega = data.diasEntrega;
       }
@@ -358,6 +374,19 @@ function init() {
   document.getElementById("lbl-envio").textContent = "$" + CFG.costoEnvio.toLocaleString("es-AR");
   document.getElementById("mp-alias").textContent = CFG.alias;
   document.getElementById("mp-banco").textContent = CFG.banco;
+
+  // Mensajes editables
+  document.getElementById("msg-retiro").textContent = CFG.msgRetiro || "";
+  document.getElementById("msg-envio").textContent  = CFG.msgEnvio || "";
+  document.getElementById("envio-monto").textContent = "$" + CFG.costoEnvio.toLocaleString("es-AR");
+
+  // Mensaje de transferencia (con WhatsApp si está cargado)
+  var msgT = CFG.msgTransferencia || "";
+  if (CFG.wspComprobante) {
+    msgT += " (WhatsApp: " + CFG.wspComprobante + ")";
+  }
+  document.getElementById("msg-transferencia").textContent = msgT;
+  document.getElementById("msg-efectivo").textContent = CFG.msgEfectivo || "";
 
   // Render productos
   var grid = document.getElementById("pgrid");
@@ -483,6 +512,9 @@ function setE(t) {
   document.getElementById("eibox").style.display = t === "envio" ? "block" : "none";
   document.getElementById("ribox").style.display = t === "retiro" ? "block" : "none";
   document.getElementById("fdir").style.display = t === "envio" ? "block" : "none";
+  // Mostrar la caja de info del envío solo si corresponde
+  var envInfo = document.getElementById("envio-info");
+  if (envInfo) envInfo.style.display = (t === "envio") ? "block" : "none";
   updR();
 }
 function setDia(id) {
@@ -495,10 +527,13 @@ function setP(t) {
   document.getElementById("bmp").className = "pb" + (t === "mp" ? " act" : "");
   document.getElementById("bef").className = "pb" + (t === "ef" ? " act" : "");
   document.getElementById("mpbox").style.display = t === "mp" ? "block" : "none";
+  document.getElementById("efbox").style.display = t === "ef" ? "block" : "none";
   updR();
 }
 function updR() {
-  var sub = calcS(), env = ent === "envio" ? CFG.costoEnvio : 0, tot = sub + env;
+  var sub = calcS();
+  var env = ent === "envio" ? CFG.costoEnvio : 0;
+  var tot = sub; // El envío NO se suma al total
   var ep = CFG.pack.activo && totU() === CFG.pack.cant;
   var rows = "";
   CFG.productos.forEach(function(p) {
@@ -508,8 +543,12 @@ function updR() {
     var og = CFG.productos.reduce(function(s,p){ return s+p.precio*(qty[p.id]||0); },0);
     rows += '<div class="rr"><span class="rl" style="color:var(--teal)">Descuento pack x4</span><span class="rv" style="color:var(--teal)">-$' + (og-CFG.pack.precio).toLocaleString("es-AR") + '</span></div>';
   }
-  if (env > 0) rows += '<div class="rr"><span class="rl">Envío</span><span class="rv">$' + env.toLocaleString("es-AR") + '</span></div>';
-  if (totU() > 0) rows += '<div class="rr tot"><span class="rl">Total</span><span class="rv">$' + tot.toLocaleString("es-AR") + '</span></div>';
+  if (totU() > 0) rows += '<div class="rr tot"><span class="rl">Total productos</span><span class="rv">$' + tot.toLocaleString("es-AR") + '</span></div>';
+  // Info de envío (aparte, sin sumar al total)
+  if (env > 0 && totU() > 0) {
+    rows += '<div class="rr" style="color:var(--muted);font-size:13px;margin-top:6px"><span class="rl">+ Envío (aparte)</span><span class="rv">$' + env.toLocaleString("es-AR") + '</span></div>';
+    rows += '<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">El envío se abona a la mensajería al recibir.</div>';
+  }
   document.getElementById("rcard").innerHTML = rows || '<div class="rc-empty">Todavía no elegiste cookies</div>';
   document.getElementById("mpm").textContent = tot > 0 ? "Total a transferir: $" + tot.toLocaleString("es-AR") : "";
 }
@@ -542,7 +581,9 @@ async function confirmar() {
   if (!diaId)  { alert("Elegí un día"); return; }
   if (!franja) { alert("Elegí un horario"); return; }
 
-  var sub = calcS(), env = ent === "envio" ? CFG.costoEnvio : 0, tot = sub + env;
+  var sub = calcS();
+  var env = ent === "envio" ? CFG.costoEnvio : 0;
+  var tot = sub; // Total sin envío - se abona aparte al recibir
   var dia = CFG.diasEntrega.find(function(d){ return d.id === diaId; });
   var ep = CFG.pack.activo && totU() === CFG.pack.cant;
   var det = CFG.productos.filter(function(p){ return qty[p.id]>0; }).map(function(p){ return p.nombre+" x"+qty[p.id]; }).join(", ");
@@ -586,12 +627,17 @@ async function confirmar() {
   document.getElementById("ssub").textContent = "Hola " + nom.split(" ")[0] + ", recibimos tu pedido. Te vamos a contactar por WhatsApp para confirmar.";
 
   var diaTxt = dia ? (dia.label + " · " + franja) : franja;
+  var envioRow = '';
+  if (ent === "envio") {
+    envioRow = '<div class="ssr"><span class="sl2">Envío (aparte)</span><span class="sv2">$' + env.toLocaleString("es-AR") + ' · se abona al recibir</span></div>';
+  }
   document.getElementById("scard").innerHTML =
     '<div class="ssr"><span class="sl2">Cookies</span><span class="sv2">'+det+'</span></div>' +
     '<div class="ssr"><span class="sl2">Entrega</span><span class="sv2">'+ped.entrega+'</span></div>' +
     '<div class="ssr"><span class="sl2">Día y hora</span><span class="sv2">'+diaTxt+'</span></div>' +
     '<div class="ssr"><span class="sl2">Pago</span><span class="sv2">'+ped.pago+'</span></div>' +
-    '<div class="ssr st2"><span class="sl2">Total</span><span class="sv2">$'+tot.toLocaleString("es-AR")+'</span></div>';
+    '<div class="ssr st2"><span class="sl2">Total</span><span class="sv2">$'+tot.toLocaleString("es-AR")+'</span></div>' +
+    envioRow;
 
   // Bloque WhatsApp para comprobante (solo si pagó por transferencia)
   if (pago === "mp") {
