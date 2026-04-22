@@ -151,6 +151,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="resumen">Resumen</div>
   <div class="tab" data-tab="recetas">Recetas</div>
+  <div class="tab" data-tab="subrecetas">Sub-recetas</div>
   <div class="tab" data-tab="ingredientes">Ingredientes</div>
   <div class="tab" data-tab="packaging">Packaging</div>
   <div class="tab" data-tab="fijos">Costos fijos</div>
@@ -184,6 +185,20 @@
         <button class="btn" onclick="nuevaReceta()">+ Nueva receta</button>
       </div>
       <div id="recetasContent"></div>
+    </div>
+  </div>
+
+  <!-- SUB-RECETAS -->
+  <div class="view hidden" id="view-subrecetas">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Sub-recetas</div>
+          <div class="panel-subtitle">Preparaciones intermedias (toffee, ganache, curd). Cargás los ingredientes y el rendimiento total, y el sistema calcula el costo por gramo para usar en recetas.</div>
+        </div>
+        <button class="btn" onclick="nuevaSubreceta()">+ Nueva sub-receta</button>
+      </div>
+      <div id="subrecetasContent"></div>
     </div>
   </div>
 
@@ -253,7 +268,8 @@ const CELLS = {
   ingredientes: 'Ingredientes!A1',
   packaging:    'Packaging!A1',
   fijos:        'CostosFijos!A1',
-  recetas:      'Recetas!A1'
+  recetas:      'Recetas!A1',
+  subrecetas:   'SubRecetas!A1'
 };
 
 /* ========== ESTADO ========== */
@@ -262,6 +278,7 @@ let state = {
   packaging: [],
   fijos: [],
   recetas: [],
+  subrecetas: [],
   cookiesPorTanda: 12,  // default global
   dirty: false,
   loaded: false
@@ -352,6 +369,11 @@ async function cargarDatos(){
 
     // Si no hay datos, cargar datos iniciales de Blu Bakery
     if (!state.ingredientes.length) cargarDatosIniciales();
+
+    // Si el Sheet no tenía la pestaña SubRecetas todavía, cargamos sub-recetas iniciales
+    if (!state.subrecetas || !state.subrecetas.length) {
+      cargarSubrecetasIniciales();
+    }
 
     state.loaded = true;
     render();
@@ -503,6 +525,42 @@ function cargarDatosIniciales(){
       ]
     }
   ];
+
+  cargarSubrecetasIniciales();
+}
+
+function cargarSubrecetasIniciales(){
+  state.subrecetas = [
+    {
+      id:'toffee',
+      nombre:'Toffee',
+      rendimiento:275,
+      unidad:'g',
+      ingredientes:[
+        {ingredienteId:'manteca', cantidad:113},
+        {ingredienteId:'azucarBlanca', cantidad:200},
+      ]
+    },
+    {
+      id:'ganacheBariloche',
+      nombre:'Ganache Bariloche (con DDL)',
+      rendimiento:715,
+      unidad:'g',
+      ingredientes:[
+        {ingredienteId:'chocoSemi', cantidad:200},
+        {ingredienteId:'crema', cantidad:100},
+        {ingredienteId:'ddl', cantidad:400},
+        {ingredienteId:'licor', cantidad:15},
+      ]
+    },
+    {
+      id:'curdLimon',
+      nombre:'Curd de limón',
+      rendimiento:0,
+      unidad:'g',
+      ingredientes:[]
+    }
+  ];
 }
 
 /* ========== CÁLCULOS ========== */
@@ -512,10 +570,36 @@ function costoPorUnidad(ingId){
   return ing.precio / ing.presentacion;
 }
 
+/* Costo total de una sub-receta (suma de ingredientes) */
+function costoSubreceta(sub){
+  if (!sub) return {costoTotal:0, costoPorUnidad:0, advertencias:[]};
+  let total = 0;
+  let advertencias = [];
+  (sub.ingredientes || []).forEach(item => {
+    const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
+    if (!ing) { advertencias.push('Ingrediente no encontrado'); return; }
+    if (!ing.precio) advertencias.push(ing.nombre);
+    total += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
+  });
+  const rend = sub.rendimiento || 0;
+  const cpu = rend > 0 ? total / rend : 0;
+  return {costoTotal: total, costoPorUnidad: cpu, advertencias: [...new Set(advertencias)]};
+}
+
 function costoReceta(receta){
   let costoIng = 0;
   let advertencias = [];
   receta.ingredientes.forEach(item => {
+    // Si es sub-receta
+    if (item.tipo === 'subreceta') {
+      const sub = state.subrecetas.find(s => s.id === item.subrecetaId);
+      if (!sub) { advertencias.push('Sub-receta no encontrada'); return; }
+      const info = costoSubreceta(sub);
+      if (info.advertencias.length) advertencias.push(...info.advertencias);
+      costoIng += info.costoPorUnidad * (item.cantidad || 0);
+      return;
+    }
+    // Ingrediente normal
     const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
     if (!ing) {
       advertencias.push(`Ingrediente no encontrado`);
@@ -562,6 +646,7 @@ function formatARdec(n){
 function render(){
   renderResumen();
   renderRecetas();
+  renderSubrecetas();
   renderIngredientes();
   renderPackaging();
   renderFijos();
@@ -647,6 +732,43 @@ function renderRecetas(){
           <button class="btn btn-sm" onclick="editarReceta('${r.id}')">Editar</button>
           <button class="btn btn-sm btn-outline" onclick="duplicarReceta('${r.id}')">Duplicar</button>
           <button class="btn btn-sm btn-ghost" onclick="borrarReceta('${r.id}')">×</button>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function renderSubrecetas(){
+  const container = document.getElementById('subrecetasContent');
+  if (!state.subrecetas || !state.subrecetas.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay sub-recetas cargadas. Agregá una con el botón de arriba.</div>';
+    return;
+  }
+
+  let html = '<div class="cards">';
+  state.subrecetas.forEach(sub => {
+    const info = costoSubreceta(sub);
+    const warn = info.advertencias.length > 0;
+    const rendOk = sub.rendimiento > 0;
+    html += `
+      <div class="card">
+        <div class="card-title">${escape(sub.nombre)}</div>
+        <div class="card-meta">Rinde ${sub.rendimiento || '?'} ${sub.unidad || 'g'} · ${(sub.ingredientes||[]).length} ingredientes</div>
+        <div class="card-cost-label">Costo total preparación</div>
+        <div class="card-cost">${formatAR(info.costoTotal)}</div>
+        <div class="card-section">
+          <div style="display:flex;justify-content:space-between;font-size:13px">
+            <span class="t-muted">Costo por ${sub.unidad || 'g'}</span>
+            <span style="color:var(--teal);font-weight:600">${rendOk ? formatARdec(info.costoPorUnidad) : '—'}</span>
+          </div>
+          ${warn ? '<div style="font-size:11px;color:var(--warning);margin-top:6px">⚠ Falta precio: ' + info.advertencias.slice(0,2).join(', ') + '</div>' : ''}
+        </div>
+        <div class="card-actions">
+          <button class="btn btn-sm" onclick="editarSubreceta('${sub.id}')">Editar</button>
+          <button class="btn btn-sm btn-outline" onclick="duplicarSubreceta('${sub.id}')">Duplicar</button>
+          <button class="btn btn-sm btn-ghost" onclick="borrarSubreceta('${sub.id}')">×</button>
         </div>
       </div>
     `;
@@ -851,6 +973,21 @@ function editarReceta(id){
     if (!items.length) return;
     ingredientesHtml += `<div class="section-header">${sec.toUpperCase()}</div>`;
     items.forEach(item => {
+      // Caso sub-receta
+      if (item.tipo === 'subreceta') {
+        const sub = state.subrecetas.find(s => s.id === item.subrecetaId);
+        const info = sub ? costoSubreceta(sub) : null;
+        const costo = info ? info.costoPorUnidad * item.cantidad : 0;
+        ingredientesHtml += `<div class="ingr-row" style="background:#fff9e5">
+          <div class="ingr-name">↪ ${sub ? escape(sub.nombre) : '<span style="color:var(--danger)">⚠ Sub-receta inexistente</span>'}<br><span class="t-muted">sub-receta${item.nota ? ' · ' + escape(item.nota) : ''}</span></div>
+          <input class="inline-sm" type="number" value="${item.cantidad}" step="0.01" onchange="actRecIng('${r.id}',${item._idx},'cantidad',parseFloat(this.value)||0)">
+          <div class="t-muted">${sub ? sub.unidad : '?'}</div>
+          <div class="ingr-cost">${formatAR(costo)}</div>
+          <button class="btn btn-sm btn-ghost" onclick="quitarIngRec('${r.id}',${item._idx})">×</button>
+        </div>`;
+        return;
+      }
+      // Ingrediente normal
       const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
       const costo = ing ? costoPorUnidad(item.ingredienteId) * item.cantidad : 0;
       ingredientesHtml += `<div class="ingr-row">
@@ -863,8 +1000,14 @@ function editarReceta(id){
     });
   });
 
-  // Selector para agregar
-  const optsIng = state.ingredientes.map(i => `<option value="${i.id}">${escape(i.nombre)}</option>`).join('');
+  // Selector para agregar - con optgroups para ingredientes y sub-recetas
+  const optsIng = state.ingredientes.map(i => `<option value="ing:${i.id}">${escape(i.nombre)}</option>`).join('');
+  const optsSub = (state.subrecetas||[]).map(s => `<option value="sub:${s.id}">↪ ${escape(s.nombre)}</option>`).join('');
+  const selectorOpts = `
+    <option value="">Elegir...</option>
+    ${optsSub ? `<optgroup label="Sub-recetas">${optsSub}</optgroup>` : ''}
+    <optgroup label="Ingredientes">${optsIng}</optgroup>
+  `;
 
   document.getElementById('modal').innerHTML = `
     <div class="modal-title">Editar: ${escape(r.nombre)}</div>
@@ -887,9 +1030,9 @@ function editarReceta(id){
       ${ingredientesHtml || '<div class="t-muted">Sin ingredientes aún.</div>'}
 
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
-        <label>Agregar ingrediente</label>
+        <label>Agregar ingrediente o sub-receta</label>
         <div style="display:grid;grid-template-columns:2fr 80px 90px auto;gap:8px">
-          <select id="selIng"><option value="">Elegir...</option>${optsIng}</select>
+          <select id="selIng">${selectorOpts}</select>
           <input id="selCant" type="number" placeholder="cant." step="0.01">
           <select id="selSec">
             <option value="masa">Masa</option>
@@ -938,14 +1081,170 @@ function quitarIngRec(recId, idx){
 function agregarIngRec(recId){
   const r = state.recetas.find(x => x.id === recId);
   if (!r) return;
-  const ingId = document.getElementById('selIng').value;
+  const val = document.getElementById('selIng').value;
   const cant = parseFloat(document.getElementById('selCant').value) || 0;
   const sec = document.getElementById('selSec').value;
-  if (!ingId || !cant) { alert('Elegí un ingrediente y una cantidad.'); return; }
-  r.ingredientes.push({ingredienteId: ingId, cantidad: cant, seccion: sec});
+  if (!val || !cant) { alert('Elegí un ingrediente o sub-receta y una cantidad.'); return; }
+
+  // Formato del value: "ing:xxx" o "sub:xxx"
+  const [tipo, id] = val.split(':');
+  if (tipo === 'sub') {
+    r.ingredientes.push({tipo:'subreceta', subrecetaId: id, cantidad: cant, seccion: sec});
+  } else {
+    r.ingredientes.push({ingredienteId: id, cantidad: cant, seccion: sec});
+  }
   markDirty();
   editarReceta(recId);
   renderResumen(); renderRecetas();
+}
+
+/* ========== SUB-RECETAS - EDITOR ========== */
+function nuevaSubreceta(){
+  const nombre = prompt('Nombre de la sub-receta (ej: Toffee, Ganache, Curd):');
+  if (!nombre) return;
+  const nueva = {
+    id: 'sub_' + Date.now(),
+    nombre,
+    rendimiento: 0,
+    unidad: 'g',
+    ingredientes: []
+  };
+  if (!state.subrecetas) state.subrecetas = [];
+  state.subrecetas.push(nueva);
+  markDirty();
+  editarSubreceta(nueva.id);
+}
+
+function duplicarSubreceta(id){
+  const s = state.subrecetas.find(x => x.id === id);
+  if (!s) return;
+  const copia = JSON.parse(JSON.stringify(s));
+  copia.id = 'sub_' + Date.now();
+  copia.nombre = s.nombre + ' (copia)';
+  state.subrecetas.push(copia);
+  markDirty(); render();
+}
+
+function borrarSubreceta(id){
+  if (!confirm('¿Borrar esta sub-receta? Las recetas que la usen van a perder la referencia.')) return;
+  state.subrecetas = state.subrecetas.filter(s => s.id !== id);
+  markDirty(); render();
+}
+
+function editarSubreceta(id){
+  const s = state.subrecetas.find(x => x.id === id);
+  if (!s) return;
+  const info = costoSubreceta(s);
+
+  let ingredientesHtml = '';
+  if (!s.ingredientes || !s.ingredientes.length) {
+    ingredientesHtml = '<div class="t-muted" style="padding:8px 0">Sin ingredientes aún. Agregá abajo.</div>';
+  } else {
+    s.ingredientes.forEach((item, idx) => {
+      const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
+      const costo = ing ? costoPorUnidad(item.ingredienteId) * item.cantidad : 0;
+      ingredientesHtml += `<div class="ingr-row">
+        <div class="ingr-name">${ing ? escape(ing.nombre) : '<span style="color:var(--danger)">⚠ Ingrediente inexistente</span>'}</div>
+        <input class="inline-sm" type="number" value="${item.cantidad}" step="0.01" onchange="actSubIng('${s.id}',${idx},'cantidad',parseFloat(this.value)||0)">
+        <div class="t-muted">${ing ? ing.unidad : '?'}</div>
+        <div class="ingr-cost">${formatAR(costo)}</div>
+        <button class="btn btn-sm btn-ghost" onclick="quitarIngSub('${s.id}',${idx})">×</button>
+      </div>`;
+    });
+  }
+
+  const optsIng = state.ingredientes.map(i => `<option value="${i.id}">${escape(i.nombre)}</option>`).join('');
+  const rendOk = s.rendimiento > 0;
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-title">Editar sub-receta: ${escape(s.nombre)}</div>
+
+    <label>Nombre</label>
+    <input type="text" value="${escape(s.nombre)}" onchange="actSubreceta('${s.id}','nombre',this.value)">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      <div>
+        <label>Rendimiento total</label>
+        <div style="display:flex;gap:6px">
+          <input type="number" value="${s.rendimiento || ''}" placeholder="Ej: 275" onchange="actSubreceta('${s.id}','rendimiento',parseFloat(this.value)||0)" step="0.01">
+          <select onchange="actSubreceta('${s.id}','unidad',this.value)" style="width:70px">
+            <option value="g" ${s.unidad==='g'?'selected':''}>g</option>
+            <option value="ml" ${s.unidad==='ml'?'selected':''}>ml</option>
+            <option value="u" ${s.unidad==='u'?'selected':''}>u</option>
+          </select>
+        </div>
+        <div class="t-muted" style="font-size:11px;margin-top:4px">Cuánto sale en total de esta preparación</div>
+      </div>
+      <div>
+        <label>Costo por ${s.unidad || 'g'}</label>
+        <div style="padding:7px 10px;background:var(--teal-light);border-radius:var(--radius);font-weight:600;color:var(--teal);font-size:16px">
+          ${rendOk ? formatARdec(info.costoPorUnidad) : '—'}
+        </div>
+        <div class="t-muted" style="font-size:11px;margin-top:4px">Total: ${formatAR(info.costoTotal)}</div>
+      </div>
+    </div>
+
+    <div class="recipe-editor">
+      <div class="section-header">INGREDIENTES</div>
+      ${ingredientesHtml}
+
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <label>Agregar ingrediente</label>
+        <div style="display:grid;grid-template-columns:2fr 80px auto;gap:8px">
+          <select id="selIngSub"><option value="">Elegir...</option>${optsIng}</select>
+          <input id="selCantSub" type="number" placeholder="cant." step="0.01">
+          <button class="btn btn-sm" onclick="agregarIngSub('${s.id}')">+</button>
+        </div>
+      </div>
+    </div>
+
+    ${info.advertencias.length ? `<div style="margin-top:12px;padding:10px;background:#fff4d6;border-radius:var(--radius);font-size:12px;color:#8a6608">⚠ Falta precio de: ${info.advertencias.join(', ')}</div>` : ''}
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:20px">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function actSubreceta(id, key, val){
+  const s = state.subrecetas.find(x => x.id === id);
+  if (!s) return;
+  s[key] = val;
+  markDirty();
+  editarSubreceta(id);
+  renderResumen(); renderRecetas(); renderSubrecetas();
+}
+
+function actSubIng(subId, idx, key, val){
+  const s = state.subrecetas.find(x => x.id === subId);
+  if (!s) return;
+  s.ingredientes[idx][key] = val;
+  markDirty();
+  editarSubreceta(subId);
+  renderResumen(); renderRecetas(); renderSubrecetas();
+}
+
+function quitarIngSub(subId, idx){
+  const s = state.subrecetas.find(x => x.id === subId);
+  if (!s) return;
+  s.ingredientes.splice(idx, 1);
+  markDirty();
+  editarSubreceta(subId);
+  renderResumen(); renderRecetas(); renderSubrecetas();
+}
+
+function agregarIngSub(subId){
+  const s = state.subrecetas.find(x => x.id === subId);
+  if (!s) return;
+  const ingId = document.getElementById('selIngSub').value;
+  const cant = parseFloat(document.getElementById('selCantSub').value) || 0;
+  if (!ingId || !cant) { alert('Elegí un ingrediente y una cantidad.'); return; }
+  if (!s.ingredientes) s.ingredientes = [];
+  s.ingredientes.push({ingredienteId: ingId, cantidad: cant});
+  markDirty();
+  editarSubreceta(subId);
+  renderResumen(); renderRecetas(); renderSubrecetas();
 }
 
 function cerrarModal(){
@@ -1015,7 +1314,7 @@ async function guardarTodo(){
   } catch(e) {
     console.error(e);
     if (String(e).includes('Unable to parse range') || String(e).includes('not found')) {
-      status('⚠ Faltan crear las pestañas en el Sheet: Ingredientes, Packaging, CostosFijos, Recetas. Ver instrucciones.', 'error');
+      status('⚠ Faltan crear pestañas en el Sheet: Ingredientes, Packaging, CostosFijos, Recetas, SubRecetas. Ver instrucciones.', 'error');
     } else {
       status('Error al guardar: ' + e.message, 'error');
     }
