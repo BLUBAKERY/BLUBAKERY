@@ -137,8 +137,12 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
   <!-- ENVÍO -->
   <div class="section-card">
     <div class="section-title">Envío y retiro</div>
-    <div class="field"><label>Costo de envío ($)</label><input type="number" id="envio-precio" value="4000" min="0"/></div>
-    <div class="field"><label>Punto de retiro</label><input type="text" id="retiro-dir" value="Coordinar por WhatsApp"/></div>
+    <div class="field"><label>Costo de envío ($) — informativo, NO se suma al total</label><input type="number" id="envio-precio" value="4000" min="0"/></div>
+    <div class="hint">Este valor aparece en la página pero el cliente lo paga directo a la mensajería al recibir. Modificalo cada vez que cambie.</div>
+
+    <div class="field" style="margin-top:16px"><label>Mensaje al elegir RETIRO</label><textarea id="msg-retiro" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical">Se retira por Las Heras al 2900. Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.</textarea></div>
+
+    <div class="field"><label>Mensaje al elegir ENVÍO</label><textarea id="msg-envio" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical">Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.</textarea></div>
   </div>
 
   <!-- PAGO -->
@@ -148,6 +152,10 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
     <div class="field"><label>Banco / descripción</label><input type="text" id="pago-banco" value="Modo / Transferencia bancaria"/></div>
     <div class="field"><label>WhatsApp para comprobante</label><input type="tel" id="pago-wsp" placeholder="Ej: 2284 000000 (cuando lo tengas)"/></div>
     <div class="hint">El cliente ve este número para enviarte el comprobante de pago.</div>
+
+    <div class="field" style="margin-top:16px"><label>Mensaje al elegir TRANSFERENCIA</label><textarea id="msg-transferencia" rows="2" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical">Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.</textarea></div>
+
+    <div class="field"><label>Mensaje al elegir EFECTIVO</label><textarea id="msg-efectivo" rows="2" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical">Por favor abonar con el importe justo o con cambio.</textarea></div>
   </div>
 
   <!-- CLIENTES -->
@@ -362,10 +370,13 @@ function getConfig() {
     descuentos:CONFIG.descuentos,
     horasCorte:parseInt(document.getElementById("horas-corte").value)||24,
     costoEnvio:parseInt(document.getElementById("envio-precio").value)||4000,
-    retiroDir:document.getElementById("retiro-dir").value.trim(),
     alias:document.getElementById("pago-alias").value.trim(),
     banco:document.getElementById("pago-banco").value.trim(),
     wspComprobante:document.getElementById("pago-wsp").value.trim(),
+    msgRetiro:document.getElementById("msg-retiro").value.trim(),
+    msgEnvio:document.getElementById("msg-envio").value.trim(),
+    msgTransferencia:document.getElementById("msg-transferencia").value.trim(),
+    msgEfectivo:document.getElementById("msg-efectivo").value.trim(),
     diasEntrega:CONFIG.diasEntrega
   };
 }
@@ -440,30 +451,89 @@ function showToast(msg,type){
   setTimeout(()=>t.className="toast",2800);
 }
 
-// Cargar config guardada desde localStorage
+// Aplicar los valores de config a los inputs del formulario
+function aplicarConfigAlFormulario(data){
+  if (!data) return;
+  if (data.productos)  CONFIG.productos  = data.productos;
+  if (data.pack)       CONFIG.pack       = data.pack;
+  if (data.descuentos) CONFIG.descuentos = data.descuentos;
+  if (data.horasCorte) CONFIG.horasCorte = data.horasCorte;
+  if (data.diasEntrega) CONFIG.diasEntrega = data.diasEntrega;
+
+  // Inputs de pack
+  if (data.pack) {
+    var pa = document.getElementById("pack-activo");   if (pa) pa.checked = data.pack.activo !== false;
+    var pc = document.getElementById("pack-cantidad"); if (pc) pc.value = data.pack.cantidad || data.pack.cant || 4;
+    var pp = document.getElementById("pack-precio");   if (pp) pp.value = data.pack.precio || 17500;
+  }
+  // Horas de corte
+  if (data.horasCorte) {
+    var hc = document.getElementById("horas-corte");
+    if (hc) hc.value = data.horasCorte;
+  }
+  // Envío y mensajes
+  if (data.costoEnvio !== undefined) {
+    var ep = document.getElementById("envio-precio"); if (ep) ep.value = data.costoEnvio;
+  }
+  if (data.msgRetiro !== undefined) {
+    var mr = document.getElementById("msg-retiro"); if (mr) mr.value = data.msgRetiro;
+  }
+  if (data.msgEnvio !== undefined) {
+    var me = document.getElementById("msg-envio"); if (me) me.value = data.msgEnvio;
+  }
+  // Pago
+  if (data.alias !== undefined) {
+    var pal = document.getElementById("pago-alias"); if (pal) pal.value = data.alias;
+  }
+  if (data.banco !== undefined) {
+    var pb = document.getElementById("pago-banco"); if (pb) pb.value = data.banco;
+  }
+  if (data.wspComprobante !== undefined) {
+    var pw = document.getElementById("pago-wsp"); if (pw) pw.value = data.wspComprobante;
+  }
+  if (data.msgTransferencia !== undefined) {
+    var mt = document.getElementById("msg-transferencia"); if (mt) mt.value = data.msgTransferencia;
+  }
+  if (data.msgEfectivo !== undefined) {
+    var mef = document.getElementById("msg-efectivo"); if (mef) mef.value = data.msgEfectivo;
+  }
+}
+
+// Cargar config desde Google Sheets (primario) con fallback a localStorage
 (function(){
-  try {
-    var saved = localStorage.getItem("blubakery_config");
-    if (saved) {
-      var data = JSON.parse(saved);
-      if (data.productos) CONFIG.productos = data.productos;
-      if (data.pack) CONFIG.pack = data.pack;
-      if (data.descuentos) CONFIG.descuentos = data.descuentos;
-      if (data.horasCorte) CONFIG.horasCorte = data.horasCorte;
-      if (data.costoEnvio) CONFIG.costoEnvio = data.costoEnvio;
-      if (data.retiroDir) CONFIG.retiroDir = data.retiroDir;
-      if (data.alias) CONFIG.alias = data.alias;
-      if (data.banco) CONFIG.banco = data.banco;
-      if (data.wspComprobante) CONFIG.wspComprobante = data.wspComprobante;
-      if (data.diasEntrega) CONFIG.diasEntrega = data.diasEntrega;
-    }
-  } catch(e) { console.error("Error cargando config:", e); }
+  // 1) Intentar cargar desde el Sheet (fuente de verdad)
+  var sheetUrl = "https://docs.google.com/spreadsheets/d/" + SPREADSHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config&range=A1";
+  fetch(sheetUrl)
+    .then(function(r){ return r.text(); })
+    .then(function(text){
+      try {
+        var json = JSON.parse(text.match(/setResponse\(([\s\S]*)\)/)[1]);
+        var val = json.table.rows[0].c[0].v;
+        var data = JSON.parse(val);
+        aplicarConfigAlFormulario(data);
+        // Guardar también en localStorage como caché
+        try { localStorage.setItem("blubakery_config", val); } catch(e){}
+      } catch(e){ throw e; }
+    })
+    .catch(function(e){
+      console.warn("No se pudo cargar del Sheet, usando localStorage", e);
+      // 2) Fallback a localStorage
+      try {
+        var saved = localStorage.getItem("blubakery_config");
+        if (saved) {
+          var data = JSON.parse(saved);
+          aplicarConfigAlFormulario(data);
+        }
+      } catch(e2) { console.error("Error cargando config:", e2); }
+    })
+    .finally(function(){
+      renderProductos();
+      renderDescuentos();
+      renderDias();
+      actualizarCortePreview();
+      cargarClientes();
+    });
 })();
-renderProductos();
-renderDescuentos();
-renderDias();
-actualizarCortePreview();
-cargarClientes();
 </script>
 </body>
 </html>
