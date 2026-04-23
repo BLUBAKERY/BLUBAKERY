@@ -42,7 +42,16 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .pc{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;align-items:center;gap:14px;transition:border-color .2s}
 .pc.sel{border-color:var(--teal)}
 .pc.out{opacity:.5}
-.pi{width:60px;height:60px;border-radius:10px;background:var(--cream-2);flex-shrink:0;overflow:hidden}
+/* Box product: distinct card to signal it's special */
+.pc.box{background:linear-gradient(135deg, var(--teal) 0%, #006680 100%);border-color:var(--teal);color:white}
+.pc.box .pnm{color:white}
+.pc.box .ppr{color:rgba(255,255,255,.8)}
+.pc.box .pi{background:rgba(255,255,255,.15)}
+.pc.box .cb{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:white}
+.pc.box .cb:active{background:rgba(255,255,255,.3)}
+.pc.box .cn{color:white}
+.pc.box .box-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:4px;letter-spacing:.03em;background:rgba(255,255,255,.2);color:white}
+.pi{width:60px;height:60px;border-radius:10px;background:var(--cream-2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px}
 .pi img{width:100%;height:100%;object-fit:cover}
 .pn{flex:1;min-width:0}
 .pnm{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--ink);line-height:1.15;margin-bottom:2px}
@@ -55,8 +64,24 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .cb:active{background:var(--teal-soft);transform:scale(.92)}
 .cn{font-size:17px;font-weight:600;min-width:22px;text-align:center;font-family:'Cormorant Garamond',serif}
 
-/* PACK BANNER */
-.pk{background:var(--teal);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+/* BOX FILL SECTION */
+.bxf{background:var(--teal-soft);border:1px solid var(--teal);border-radius:14px;padding:16px;margin-top:12px}
+.bxf-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--teal);margin-bottom:4px;line-height:1.2}
+.bxf-sub{font-size:12px;color:var(--ink);margin-bottom:12px}
+.bxf-counter{font-size:13px;color:var(--teal);font-weight:600;margin-bottom:12px;padding:6px 10px;background:var(--white);border-radius:8px;display:inline-block}
+.bxf-counter.done{background:var(--teal);color:white}
+.bxf-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line)}
+.bxf-row:last-child{border-bottom:none}
+.bxf-row.disabled{opacity:.4}
+.bxf-name{flex:1;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--ink)}
+.bxf-left{font-size:11px;color:var(--muted);margin-left:6px}
+.bxf-ctr{display:flex;align-items:center;gap:8px}
+.bxf-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--teal);background:var(--white);font-size:14px;cursor:pointer;color:var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
+.bxf-btn:disabled{opacity:.3;cursor:not-allowed}
+.bxf-qty{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;min-width:18px;text-align:center;color:var(--ink)}
+
+/* PACK BANNER (legacy, oculto) */
+.pk{display:none}
 .pkn{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:white;line-height:1.1}
 .pks{font-size:11px;color:rgba(255,255,255,.7);font-weight:400;margin-top:2px;letter-spacing:.03em}
 .pkp{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:white}
@@ -190,14 +215,9 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 
 <div class="sec">
   <div class="sec-title">Elegí tus cookies</div>
-  <div id="pk" style="display:none" class="pk">
-    <div>
-      <div class="pkn" id="pkn">Box de 4 activado</div>
-      <div class="pks" id="pks">10% de descuento aplicado</div>
-    </div>
-    <div class="pkp" id="pkp">-10%</div>
-  </div>
   <div class="pg" id="pgrid"></div>
+  <!-- Sección dinámica para armar el contenido del/los Box(es) -->
+  <div id="boxfill" style="display:none"></div>
 </div>
 
 <div class="sec">
@@ -294,13 +314,11 @@ var WSP_NUMBER = "5492284353970";
 var WSP_DISPLAY = "2284 35-3970";
 var ORDER_START = 110;
 
-// Convierte cualquier link de Google Drive al formato que sí se muestra en páginas web.
-// Así funcionan tanto las fotos viejas (guardadas como /file/d/.../view) como las nuevas.
+// Convierte cualquier link de Drive al formato visible en páginas web
 function convertirLinkDrive(url){
   if(!url) return url;
   url = (""+url).trim();
   if(!url) return url;
-  // Si ya es formato thumbnail o no es Drive, dejarla como está
   if(url.indexOf("drive.google.com/thumbnail") !== -1) return url;
   if(url.indexOf("drive.google.com") === -1 && url.indexOf("googleusercontent.com") === -1) return url;
   var id = null;
@@ -318,8 +336,17 @@ document.getElementById("ss-logo").src = document.getElementById("foto-logo").sr
 
 // CONFIG por defecto (se sobreescribe con lo que viene del Sheet)
 var CFG = {
-  // Box = descuento por cantidad. Si total de cookies >= cant, aplica pct% a TODAS.
-  box: {activo:true, cant:4, pct:10},
+  // Box = producto especial que contiene N cookies elegidas por el cliente
+  box: {
+    activo: true,
+    nombre: "Box x 4 cookies a elección",
+    descripcion: "Elegí 4 sabores a gusto",
+    cant: 4,
+    precio: 16200,
+    pctSueltas: 10,  // % de descuento que se aplica a cookies sueltas cuando hay Box en el pedido
+    emoji: "🎁",
+    foto: ""
+  },
   costoEnvio: 4000,
   alias: "julieta.linn",
   banco: "Modo / Transferencia bancaria",
@@ -356,10 +383,8 @@ var disp = [];
       var val = json.table.rows[0].c[0].v;
       var data = JSON.parse(val);
       if (data && data.productos && data.productos.length) {
-        // Reemplazar la lista entera con la del Sheet — así aparecen las cookies nuevas
-        // agregadas desde el admin. Los valores que falten en la Sheet se toman del default.
+        // Reemplazar la lista entera con la del Sheet — así aparecen cookies nuevas del admin
         CFG.productos = data.productos.map(function(p){
-          // Buscar si había un default para esa cookie (para tener fallback de foto embebida)
           var def = (CFG.productos || []).find(function(x){ return x.id === p.id; }) || {};
           return {
             id:          p.id || def.id,
@@ -372,19 +397,18 @@ var disp = [];
             emoji:       p.emoji || def.emoji || "🍪"
           };
         });
+        // Box (producto especial)
         if (data.box) {
           CFG.box = {
-            activo: data.box.activo !== false,
-            cant:   parseInt(data.box.cant) || 4,
-            pct:    parseFloat(data.box.pct) || 0
+            activo:      data.box.activo !== false,
+            nombre:      data.box.nombre || "Box x 4 cookies a elección",
+            descripcion: data.box.descripcion || "Elegí 4 sabores a gusto",
+            cant:        parseInt(data.box.cant) || 4,
+            precio:      parseInt(data.box.precio) || 16200,
+            pctSueltas:  parseFloat(data.box.pctSueltas) || 0,
+            emoji:       data.box.emoji || "🎁",
+            foto:        data.box.foto || ""
           };
-        } else if (data.pack) {
-          // Compatibilidad con el formato viejo: si solo hay "pack", lo interpretamos como box.
-          // El % se calcula a partir del precio viejo vs el promedio actual, pero como es
-          // configurable, dejamos los defaults y avisamos por consola.
-          console.info("Config vieja detectada (pack). Configurá el Box nuevo desde admin.");
-          CFG.box.activo = data.pack.activo !== false;
-          CFG.box.cant   = data.pack.cant || data.pack.cantidad || 4;
         }
         if (data.costoEnvio)     CFG.costoEnvio     = data.costoEnvio;
         if (data.alias)          CFG.alias          = data.alias;
@@ -403,8 +427,12 @@ var disp = [];
     .finally(function(){ init(); });
 })();
 
+// Estado: qty = cookies sueltas compradas. boxQty = cantidad de Boxes. boxFill[sabor] = cookies dentro del Box
+var boxQty = 0;
+var boxFill = {};
+
 function init() {
-  CFG.productos.forEach(function(p){ qty[p.id] = 0; });
+  CFG.productos.forEach(function(p){ qty[p.id] = 0; boxFill[p.id] = 0; });
 
   document.getElementById("lbl-envio").textContent = "$" + CFG.costoEnvio.toLocaleString("es-AR");
   document.getElementById("mp-alias").textContent = CFG.alias;
@@ -426,63 +454,18 @@ function init() {
   // Render productos
   var grid = document.getElementById("pgrid");
   grid.innerHTML = "";
+
+  // PRIMERO: la Box como primer producto (si está activa)
+  if (CFG.box && CFG.box.activo) {
+    grid.appendChild(renderBoxCard());
+  }
+
+  // DESPUÉS: las cookies sueltas activas
   CFG.productos.filter(function(p){ return p.activo !== false; }).forEach(function(p) {
-    var ag = p.stock === 0;
-    var el = document.createElement("div");
-    el.className = "pc" + (ag ? " out" : "");
-    el.id = "c-" + p.id;
-
-    var piDiv = document.createElement("div");
-    piDiv.className = "pi";
-    // 1ra opción: foto como URL guardada en la Sheet (desde el admin)
-    // Pasa por el conversor para que funcionen también los links viejos de Drive
-    var fotoURL = convertirLinkDrive(p.foto);
-    if (fotoURL && /^https?:\/\//.test(fotoURL)) {
-      var img = document.createElement("img");
-      img.src = fotoURL;
-      img.loading = "lazy";
-      img.onerror = function(){
-        // Si la URL falla, intentar fallback hardcodeado
-        var fb = document.getElementById("foto-" + p.id);
-        if (fb && fb.src && fb.src.length > 100) { this.src = fb.src; this.onerror = null; }
-        else { this.style.display = "none"; }
-      };
-      piDiv.appendChild(img);
-    } else {
-      // 2da opción: foto embebida hardcodeada (las 5 cookies originales)
-      var fotoEl = document.getElementById("foto-" + p.id);
-      if (fotoEl && fotoEl.src && fotoEl.src.length > 100) {
-        var img2 = document.createElement("img");
-        img2.src = fotoEl.src;
-        piDiv.appendChild(img2);
-      }
-    }
-
-    var infoDiv = document.createElement("div");
-    infoDiv.className = "pn";
-    var tagHtml = ag
-      ? '<span class="stg so">AGOTADA</span>'
-      : (p.stock <= 5 ? '<span class="stg sw">Últimas ' + p.stock + '</span>' : "");
-    infoDiv.innerHTML = '<div class="pnm">' + p.nombre + '</div><div class="ppr">$' + p.precio.toLocaleString("es-AR") + ' c/u</div>' + tagHtml;
-
-    var ctrDiv = document.createElement("div");
-    if (ag) {
-      ctrDiv.innerHTML = '<span style="font-size:12px;font-weight:600;color:#a32d2d">Agotada</span>';
-    } else {
-      ctrDiv.className = "ctr";
-      var bM = document.createElement("button");
-      bM.className = "cb"; bM.innerHTML = "&#8722;";
-      bM.onclick = (function(id){ return function(){ chg(id,-1); }; })(p.id);
-      var sp = document.createElement("span");
-      sp.className = "cn"; sp.id = "q-" + p.id; sp.textContent = "0";
-      var bP = document.createElement("button");
-      bP.className = "cb"; bP.textContent = "+";
-      bP.onclick = (function(id){ return function(){ chg(id,1); }; })(p.id);
-      ctrDiv.appendChild(bM); ctrDiv.appendChild(sp); ctrDiv.appendChild(bP);
-    }
-    el.appendChild(piDiv); el.appendChild(infoDiv); el.appendChild(ctrDiv);
-    grid.appendChild(el);
+    grid.appendChild(renderCookieCard(p));
   });
+
+  renderBoxFill();
 
   // Render dias con corte
   var dw = document.getElementById("dwrap");
@@ -514,6 +497,163 @@ function init() {
     renderFranjas();
   }
   updR();
+}
+
+// Render de una card de cookie suelta (con precio unitario y foto desde la Sheet)
+function renderCookieCard(p) {
+  var ag = stockRestante(p.id) === 0;
+  var el = document.createElement("div");
+  el.className = "pc" + (ag ? " out" : "");
+  el.id = "c-" + p.id;
+
+  var piDiv = document.createElement("div");
+  piDiv.className = "pi";
+  var fotoURL = convertirLinkDrive(p.foto);
+  if (fotoURL && /^https?:\/\//.test(fotoURL)) {
+    var img = document.createElement("img");
+    img.src = fotoURL;
+    img.loading = "lazy";
+    img.onerror = function(){
+      // Fallback al hardcodeado si existe
+      var fb = document.getElementById("foto-" + p.id);
+      if (fb && fb.src && fb.src.length > 100) { this.src = fb.src; this.onerror = null; }
+      else { this.style.display = "none"; piDiv.textContent = p.emoji || "🍪"; }
+    };
+    piDiv.appendChild(img);
+  } else {
+    var fotoEl = document.getElementById("foto-" + p.id);
+    if (fotoEl && fotoEl.src && fotoEl.src.length > 100) {
+      var img2 = document.createElement("img");
+      img2.src = fotoEl.src;
+      piDiv.appendChild(img2);
+    } else {
+      piDiv.textContent = p.emoji || "🍪";
+    }
+  }
+
+  var infoDiv = document.createElement("div");
+  infoDiv.className = "pn";
+  var restante = stockRestante(p.id);
+  var tagHtml = ag
+    ? '<span class="stg so">AGOTADA</span>'
+    : (restante <= 5 ? '<span class="stg sw">Solo quedan ' + restante + '</span>' : "");
+  infoDiv.innerHTML = '<div class="pnm">' + p.nombre + '</div><div class="ppr">$' + p.precio.toLocaleString("es-AR") + ' c/u</div>' + tagHtml;
+
+  var ctrDiv = document.createElement("div");
+  if (ag) {
+    ctrDiv.innerHTML = '<span style="font-size:12px;font-weight:600;color:#a32d2d">Agotada</span>';
+  } else {
+    ctrDiv.className = "ctr";
+    var bM = document.createElement("button");
+    bM.className = "cb"; bM.innerHTML = "&#8722;";
+    bM.onclick = (function(id){ return function(){ chg(id,-1); }; })(p.id);
+    var sp = document.createElement("span");
+    sp.className = "cn"; sp.id = "q-" + p.id; sp.textContent = "0";
+    var bP = document.createElement("button");
+    bP.className = "cb"; bP.textContent = "+";
+    bP.onclick = (function(id){ return function(){ chg(id,1); }; })(p.id);
+    ctrDiv.appendChild(bM); ctrDiv.appendChild(sp); ctrDiv.appendChild(bP);
+  }
+  el.appendChild(piDiv); el.appendChild(infoDiv); el.appendChild(ctrDiv);
+  return el;
+}
+
+// Render de la card del Box (producto especial)
+function renderBoxCard() {
+  var el = document.createElement("div");
+  el.className = "pc box" + (boxQty > 0 ? " sel" : "");
+  el.id = "c-box";
+
+  var piDiv = document.createElement("div");
+  piDiv.className = "pi";
+  var fotoURL = convertirLinkDrive(CFG.box.foto);
+  if (fotoURL && /^https?:\/\//.test(fotoURL)) {
+    var img = document.createElement("img");
+    img.src = fotoURL;
+    img.loading = "lazy";
+    img.onerror = function(){ this.style.display = "none"; piDiv.textContent = CFG.box.emoji || "🎁"; };
+    piDiv.appendChild(img);
+  } else {
+    piDiv.textContent = CFG.box.emoji || "🎁";
+  }
+
+  var infoDiv = document.createElement("div");
+  infoDiv.className = "pn";
+  infoDiv.innerHTML = '<div class="pnm">' + CFG.box.nombre + '</div>'
+    + '<div class="ppr">$' + CFG.box.precio.toLocaleString("es-AR") + ' · ' + CFG.box.descripcion + '</div>'
+    + '<span class="box-badge">PRECIO ESPECIAL</span>';
+
+  var ctrDiv = document.createElement("div");
+  ctrDiv.className = "ctr";
+  var bM = document.createElement("button");
+  bM.className = "cb"; bM.innerHTML = "&#8722;";
+  bM.onclick = function(){ chgBox(-1); };
+  var sp = document.createElement("span");
+  sp.className = "cn"; sp.id = "q-box"; sp.textContent = boxQty;
+  var bP = document.createElement("button");
+  bP.className = "cb"; bP.textContent = "+";
+  bP.onclick = function(){ chgBox(1); };
+  ctrDiv.appendChild(bM); ctrDiv.appendChild(sp); ctrDiv.appendChild(bP);
+
+  el.appendChild(piDiv); el.appendChild(infoDiv); el.appendChild(ctrDiv);
+  return el;
+}
+
+// Render de la sección "Armá tu Box" (debajo del grid)
+function renderBoxFill() {
+  var cont = document.getElementById("boxfill");
+  if (!cont) return;
+  if (boxQty === 0) {
+    cont.style.display = "none";
+    cont.innerHTML = "";
+    return;
+  }
+  cont.style.display = "block";
+  var totalRequerido = boxQty * CFG.box.cant;
+  var totalElegido = totU("box");
+  var faltan = totalRequerido - totalElegido;
+  var done = faltan === 0;
+
+  var subtitulo = boxQty === 1
+    ? "Elegí " + CFG.box.cant + " cookies a gusto"
+    : "Elegí " + totalRequerido + " cookies a gusto (" + boxQty + " boxes × " + CFG.box.cant + ")";
+  var contadorTxt = done
+    ? "✓ Box completo: " + totalElegido + "/" + totalRequerido
+    : "Elegiste " + totalElegido + " de " + totalRequerido + (faltan > 0 ? " — te faltan " + faltan : "");
+
+  var html = '<div class="bxf">'
+    + '<div class="bxf-title">Armá tu ' + (boxQty > 1 ? "Box (x" + boxQty + ")" : "Box") + '</div>'
+    + '<div class="bxf-sub">' + subtitulo + '</div>'
+    + '<div class="bxf-counter' + (done ? ' done' : '') + '">' + contadorTxt + '</div>';
+
+  CFG.productos.filter(function(p){ return p.activo !== false; }).forEach(function(p){
+    var enBox = boxFill[p.id] || 0;
+    var rest = stockRestante(p.id);
+    var noPuedeMas = rest <= 0 && enBox === 0;
+    var cls = "bxf-row" + (noPuedeMas ? " disabled" : "");
+    var leftTxt;
+    if (rest > 0) leftTxt = rest + " disponible" + (rest === 1 ? "" : "s");
+    else if (enBox > 0) leftTxt = "ya en box";
+    else leftTxt = "agotada";
+    html += '<div class="' + cls + '">'
+      + '<div class="bxf-name">' + p.emoji + ' ' + p.nombre + '</div>'
+      + '<span class="bxf-left">' + leftTxt + '</span>'
+      + '<div class="bxf-ctr">'
+        + '<button class="bxf-btn" onclick="chgBoxFill(\'' + p.id + '\',-1)"' + (enBox === 0 ? ' disabled' : '') + '>−</button>'
+        + '<span class="bxf-qty">' + enBox + '</span>'
+        + '<button class="bxf-btn" onclick="chgBoxFill(\'' + p.id + '\',1)"' + ((faltan === 0 || rest === 0) ? ' disabled' : '') + '>+</button>'
+      + '</div>'
+      + '</div>';
+  });
+  html += '</div>';
+  cont.innerHTML = html;
+}
+
+// Stock restante = stock - (sueltas en carrito) - (cookies de ese sabor dentro de los Boxes)
+function stockRestante(id) {
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  if (!p) return 0;
+  return Math.max(0, (p.stock || 0) - (qty[id] || 0) - (boxFill[id] || 0));
 }
 
 function renderFranjas() {
@@ -552,44 +692,139 @@ function setFranja(val) {
   btns.forEach(function(b){ b.className = "fb" + (b.textContent === val ? " act" : ""); });
 }
 
+// +/- de cookies sueltas (fuera del Box). Valida contra stock restante.
 function chg(id, delta) {
   var p = CFG.productos.find(function(x){ return x.id === id; });
-  if (!p || p.stock === 0) return;
-  if (delta > 0 && qty[id] >= p.stock) return;
-  qty[id] = Math.max(0, qty[id] + delta);
-  var q = document.getElementById("q-" + id); if (q) q.textContent = qty[id];
-  var c = document.getElementById("c-" + id); if (c) c.className = "pc" + (qty[id] > 0 ? " sel" : "");
-
-  // Banner del Box: solo visible cuando el descuento YA se activó
-  var activo = boxAplica();
-  var pk = document.getElementById("pk");
-  if (pk) {
-    pk.style.display = activo ? "flex" : "none";
-    if (activo) {
-      document.getElementById("pkn").textContent = "Box de " + CFG.box.cant + " activado";
-      document.getElementById("pks").textContent = CFG.box.pct + "% de descuento aplicado a todas las cookies";
-      document.getElementById("pkp").textContent = "-" + CFG.box.pct + "%";
-    }
-  }
+  if (!p || p.activo === false) return;
+  if (delta > 0 && stockRestante(id) <= 0) return;
+  qty[id] = Math.max(0, (qty[id] || 0) + delta);
+  actualizarCardCookie(id);
+  // Re-renderizar box fill porque cambió el stock disponible
+  if (boxQty > 0) renderBoxFill();
   updR();
 }
 
-function totU() { return CFG.productos.reduce(function(s,p){ return s + (qty[p.id]||0); }, 0); }
-
-// Subtotal sin descuento (precio base × cantidad)
-function subU() { return CFG.productos.reduce(function(s,p){ return s + p.precio * (qty[p.id]||0); }, 0); }
-
-// ¿Se aplica el descuento Box?
-function boxAplica() {
-  return CFG.box && CFG.box.activo && CFG.box.pct > 0 && totU() >= (CFG.box.cant || 4);
+// +/- de la cantidad de Boxes
+function chgBox(delta) {
+  var nuevo = Math.max(0, boxQty + delta);
+  if (nuevo < boxQty) {
+    // Reducir cantidad de Boxes: si hay más cookies elegidas de las que caben, recortar
+    var maxCookies = nuevo * CFG.box.cant;
+    var elegido = totU("box");
+    if (elegido > maxCookies) {
+      // Quitar las últimas cookies metidas en el box (ordenamos arbitrariamente por id)
+      var porQuitar = elegido - maxCookies;
+      CFG.productos.forEach(function(p){
+        if (porQuitar <= 0) return;
+        var enBox = boxFill[p.id] || 0;
+        if (enBox > 0) {
+          var quitar = Math.min(enBox, porQuitar);
+          boxFill[p.id] = enBox - quitar;
+          porQuitar -= quitar;
+        }
+      });
+    }
+  }
+  boxQty = nuevo;
+  document.getElementById("q-box").textContent = boxQty;
+  var boxCard = document.getElementById("c-box");
+  if (boxCard) boxCard.className = "pc box" + (boxQty > 0 ? " sel" : "");
+  // Re-render cookies (cambió la disponibilidad de stock)
+  CFG.productos.forEach(function(p){ actualizarCardCookie(p.id); });
+  renderBoxFill();
+  updR();
 }
 
-// Total final aplicando Box si corresponde
+// +/- de cookies dentro del Box
+function chgBoxFill(id, delta) {
+  if (boxQty === 0) return;
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  if (!p || p.activo === false) return;
+  var enBox = boxFill[id] || 0;
+  if (delta > 0) {
+    // No pasarse del total requerido
+    var totalRequerido = boxQty * CFG.box.cant;
+    if (totU("box") >= totalRequerido) return;
+    // No pasarse del stock disponible
+    if (stockRestante(id) <= 0) return;
+    boxFill[id] = enBox + 1;
+  } else {
+    if (enBox <= 0) return;
+    boxFill[id] = enBox - 1;
+  }
+  actualizarCardCookie(id);  // porque cambió el stock disponible
+  renderBoxFill();
+  updR();
+}
+
+// Actualiza el contador y clases de una cookie suelta (stock, agotada, etc)
+function actualizarCardCookie(id) {
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  if (!p) return;
+  var q = document.getElementById("q-" + id);
+  if (q) q.textContent = qty[id] || 0;
+  var card = document.getElementById("c-" + id);
+  if (!card) return;
+  var rest = stockRestante(id);
+  var sueltas = qty[id] || 0;
+  card.className = "pc" + (sueltas > 0 ? " sel" : "") + (rest === 0 && sueltas === 0 ? " out" : "");
+  // Si llega a 0 stock: deshabilitar el botón +
+  var ctrDiv = card.querySelector(".ctr");
+  if (ctrDiv) {
+    var btnPlus = ctrDiv.querySelectorAll(".cb")[1];  // segundo botón = +
+    if (btnPlus) btnPlus.disabled = rest === 0;
+  }
+  // Actualizar el tag de "solo quedan X" / "agotada"
+  var nm = card.querySelector(".pn");
+  if (nm) {
+    var tagHtml = "";
+    if (rest === 0 && sueltas === 0) tagHtml = '<span class="stg so">AGOTADA</span>';
+    else if (rest > 0 && rest <= 5) tagHtml = '<span class="stg sw">Solo quedan ' + rest + '</span>';
+    // Actualizar solo el tag, no todo el nombre
+    var existingTag = nm.querySelector(".stg");
+    if (existingTag) existingTag.remove();
+    if (tagHtml) nm.insertAdjacentHTML("beforeend", tagHtml);
+  }
+}
+
+// Total de unidades.
+// scope="all" (default): todas las cookies (sueltas + dentro de boxes)
+// scope="sueltas": solo las de fuera de boxes
+// scope="box": solo las de dentro de boxes (todos los boxes)
+function totU(scope) {
+  scope = scope || "all";
+  var total = 0;
+  CFG.productos.forEach(function(p){
+    if (scope === "all" || scope === "sueltas") total += (qty[p.id] || 0);
+    if (scope === "all" || scope === "box")     total += (boxFill[p.id] || 0);
+  });
+  return total;
+}
+
+// Subtotal de cookies sueltas SIN descuento
+function subtotalSueltas() {
+  return CFG.productos.reduce(function(s,p){ return s + p.precio * (qty[p.id]||0); }, 0);
+}
+
+// ¿Se aplica descuento a las sueltas? Sí, si hay al menos 1 Box y pctSueltas > 0
+function descuentoSueltasAplica() {
+  return boxQty > 0 && CFG.box && CFG.box.pctSueltas > 0;
+}
+
+// Total = (boxQty × precio box) + (subtotal sueltas - descuento si aplica)
 function calcS() {
-  var sub = subU();
-  if (boxAplica()) return Math.round(sub * (1 - CFG.box.pct / 100));
-  return sub;
+  var totalBox = boxQty * (CFG.box.precio || 0);
+  var subSueltas = subtotalSueltas();
+  var descSueltas = descuentoSueltasAplica() ? Math.round(subSueltas * (CFG.box.pctSueltas / 100)) : 0;
+  return totalBox + subSueltas - descSueltas;
 }
+
+// ¿El box está completo? (requerido para confirmar pedido)
+function boxCompleto() {
+  if (boxQty === 0) return true;
+  return totU("box") === boxQty * CFG.box.cant;
+}
+
 function setE(t) {
   ent = t;
   document.getElementById("be").className = "eb" + (t === "envio" ? " act" : "");
@@ -597,7 +832,6 @@ function setE(t) {
   document.getElementById("eibox").style.display = t === "envio" ? "block" : "none";
   document.getElementById("ribox").style.display = t === "retiro" ? "block" : "none";
   document.getElementById("fdir").style.display = t === "envio" ? "block" : "none";
-  // Mostrar la caja de info del envío solo si corresponde
   var envInfo = document.getElementById("envio-info");
   if (envInfo) envInfo.style.display = (t === "envio") ? "block" : "none";
   updR();
@@ -615,23 +849,45 @@ function setP(t) {
   document.getElementById("efbox").style.display = t === "ef" ? "block" : "none";
   updR();
 }
+
 function updR() {
-  var sub = calcS();
+  var tot = calcS();
   var env = ent === "envio" ? CFG.costoEnvio : 0;
-  var tot = sub; // El envío NO se suma al total
-  var descActivo = boxAplica();
+  var hayAlgo = boxQty > 0 || totU("sueltas") > 0;
   var rows = "";
-  CFG.productos.forEach(function(p) {
-    if (qty[p.id] > 0) rows += '<div class="rr"><span class="rl">' + p.nombre + ' x' + qty[p.id] + '</span><span class="rv">$' + (p.precio*qty[p.id]).toLocaleString("es-AR") + '</span></div>';
-  });
-  if (descActivo) {
-    var subSinDesc = subU();
-    var montoDesc = subSinDesc - sub;
-    rows += '<div class="rr"><span class="rl" style="color:var(--teal)">Descuento Box ' + CFG.box.cant + '+ (' + CFG.box.pct + '%)</span><span class="rv" style="color:var(--teal)">-$' + montoDesc.toLocaleString("es-AR") + '</span></div>';
+
+  // Boxes
+  if (boxQty > 0) {
+    var precioTotalBoxes = boxQty * CFG.box.precio;
+    var detalleSabores = CFG.productos
+      .filter(function(p){ return (boxFill[p.id]||0) > 0; })
+      .map(function(p){ return boxFill[p.id] + " " + p.nombre; })
+      .join(", ");
+    rows += '<div class="rr"><span class="rl">' + CFG.box.nombre + ' x' + boxQty + '</span><span class="rv">$' + precioTotalBoxes.toLocaleString("es-AR") + '</span></div>';
+    if (detalleSabores) {
+      rows += '<div style="font-size:11px;color:var(--muted);margin-top:-4px;margin-bottom:6px;padding-left:4px">↳ ' + detalleSabores + '</div>';
+    } else {
+      rows += '<div style="font-size:11px;color:#a32d2d;margin-top:-4px;margin-bottom:6px;padding-left:4px">↳ Te faltan ' + (boxQty * CFG.box.cant) + ' sabores por elegir</div>';
+    }
   }
-  if (totU() > 0) rows += '<div class="rr tot"><span class="rl">Total productos</span><span class="rv">$' + tot.toLocaleString("es-AR") + '</span></div>';
-  // Info de envío (aparte, sin sumar al total)
-  if (env > 0 && totU() > 0) {
+
+  // Sueltas
+  CFG.productos.forEach(function(p) {
+    if ((qty[p.id] || 0) > 0) {
+      rows += '<div class="rr"><span class="rl">' + p.nombre + ' x' + qty[p.id] + '</span><span class="rv">$' + (p.precio*qty[p.id]).toLocaleString("es-AR") + '</span></div>';
+    }
+  });
+
+  // Descuento sobre sueltas si hay Box
+  if (descuentoSueltasAplica() && totU("sueltas") > 0) {
+    var descSueltas = Math.round(subtotalSueltas() * (CFG.box.pctSueltas / 100));
+    if (descSueltas > 0) {
+      rows += '<div class="rr"><span class="rl" style="color:var(--teal)">Descuento sobre sueltas (' + CFG.box.pctSueltas + '%)</span><span class="rv" style="color:var(--teal)">-$' + descSueltas.toLocaleString("es-AR") + '</span></div>';
+    }
+  }
+
+  if (hayAlgo) rows += '<div class="rr tot"><span class="rl">Total productos</span><span class="rv">$' + tot.toLocaleString("es-AR") + '</span></div>';
+  if (env > 0 && hayAlgo) {
     rows += '<div class="rr" style="color:var(--muted);font-size:13px;margin-top:6px"><span class="rl">+ Envío (aparte)</span><span class="rv">$' + env.toLocaleString("es-AR") + '</span></div>';
     rows += '<div style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4">El envío se abona a la mensajería al recibir.</div>';
   }
@@ -660,7 +916,13 @@ async function confirmar() {
   var tel = document.getElementById("ft").value.trim();
   var dir = ent === "envio" ? document.getElementById("fd").value.trim() : "";
   var nota = document.getElementById("fo").value.trim();
-  if (!totU()) { alert("Elegí al menos una cookie"); return; }
+  var hayAlgo = boxQty > 0 || totU("sueltas") > 0;
+  if (!hayAlgo) { alert("Elegí al menos una cookie"); return; }
+  if (boxQty > 0 && !boxCompleto()) {
+    var faltan = boxQty * CFG.box.cant - totU("box");
+    alert("Te faltan " + faltan + " sabores para completar tu Box. Elegílos antes de confirmar el pedido.");
+    return;
+  }
   if (!nom)    { alert("Ingresá tu nombre"); return; }
   if (!tel)    { alert("Ingresá tu teléfono"); return; }
   if (ent === "envio" && !dir) { alert("Ingresá tu dirección"); return; }
@@ -669,16 +931,27 @@ async function confirmar() {
 
   var sub = calcS();
   var env = ent === "envio" ? CFG.costoEnvio : 0;
-  var tot = sub; // Total sin envío - se abona aparte al recibir
+  var tot = sub;
   var dia = CFG.diasEntrega.find(function(d){ return d.id === diaId; });
-  var descActivo = boxAplica();
-  var descTxt = descActivo ? ("Si (Box " + CFG.box.cant + "+, " + CFG.box.pct + "%)") : "No";
-  var det = CFG.productos.filter(function(p){ return qty[p.id]>0; }).map(function(p){ return p.nombre+" x"+qty[p.id]; }).join(", ");
+
+  // Detalle del pedido: box(es) con sabores + sueltas
+  var partes = [];
+  if (boxQty > 0) {
+    var detalleSab = CFG.productos
+      .filter(function(p){ return (boxFill[p.id]||0) > 0; })
+      .map(function(p){ return boxFill[p.id] + " " + p.nombre; })
+      .join(" + ");
+    partes.push(CFG.box.nombre + " x" + boxQty + " (" + detalleSab + ")");
+  }
+  CFG.productos.forEach(function(p){
+    if ((qty[p.id]||0) > 0) partes.push(p.nombre + " x" + qty[p.id]);
+  });
+  var det = partes.join(" | ");
+  var descTxt = boxQty > 0 ? "Si (Box x" + boxQty + (descuentoSueltasAplica() && totU("sueltas") > 0 ? ", " + CFG.box.pctSueltas + "% sueltas" : "") + ")" : "No";
 
   document.getElementById("ctab").disabled = true;
   document.getElementById("sbar").style.display = "flex";
 
-  // Generar número de orden antes de enviar
   var nroOrden = await generarNroOrden();
 
   var ped = {
@@ -689,7 +962,7 @@ async function confirmar() {
     nombre:nom,
     telefono:tel,
     cookies:det,
-    unidades:totU(),
+    unidades:totU("all"),
     pack:descTxt,
     subtotal:sub,
     entrega:ent==="envio"?"Envio":"Retiro",
