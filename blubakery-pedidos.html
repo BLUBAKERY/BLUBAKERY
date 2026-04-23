@@ -53,10 +53,13 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .pc.box .cn{color:white}
 .pc.box .box-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:4px;letter-spacing:.03em;background:rgba(255,255,255,.2);color:white}
 .pi{width:60px;height:60px;border-radius:10px;background:var(--cream-2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px}
+.pi.clickable{cursor:zoom-in;transition:transform .15s}
+.pi.clickable:active{transform:scale(.94)}
 .pi img{width:100%;height:100%;object-fit:cover}
 .pn{flex:1;min-width:0}
 .pnm{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--ink);line-height:1.15;margin-bottom:2px}
 .ppr{font-size:13px;color:var(--muted);font-weight:400}
+.pdesc{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;font-weight:400}
 .stg{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;margin-top:4px;letter-spacing:.03em}
 .so{background:#fceaea;color:#a32d2d}
 .sw{background:#fff3cd;color:#856404}
@@ -173,6 +176,15 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .wsp-btn:active{opacity:.8}
 .wsp-btn svg{width:18px;height:18px}
 .wsp-hint{font-size:12px;opacity:.75;margin-top:.75rem;font-weight:400;line-height:1.5}
+
+/* LIGHTBOX (zoom de fotos) */
+.lbox{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.92);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .2s;cursor:zoom-out}
+.lbox.open{display:flex;opacity:1}
+.lbox-wrap{max-width:100%;max-height:100%;display:flex;flex-direction:column;align-items:center;gap:12px}
+.lbox img{max-width:100%;max-height:85vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.4);object-fit:contain}
+.lbox-cap{color:white;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;text-align:center;padding:0 10px}
+.lbox-close{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:white;font-size:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:'Inter',sans-serif}
+.lbox-close:active{background:rgba(255,255,255,.25)}
 
 /* SAVING */
 .sb{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;font-size:13px;color:var(--muted);font-weight:400}
@@ -518,18 +530,21 @@ function renderCookieCard(p) {
     img.src = fotoURL;
     img.loading = "lazy";
     img.onerror = function(){
-      // Fallback al hardcodeado si existe
       var fb = document.getElementById("foto-" + p.id);
       if (fb && fb.src && fb.src.length > 100) { this.src = fb.src; this.onerror = null; }
-      else { this.style.display = "none"; piDiv.textContent = p.emoji || "🍪"; }
+      else { this.style.display = "none"; piDiv.textContent = p.emoji || "🍪"; piDiv.classList.remove("clickable"); }
     };
     piDiv.appendChild(img);
+    piDiv.classList.add("clickable");
+    piDiv.onclick = function(){ abrirZoom(img.src, p.nombre); };
   } else {
     var fotoEl = document.getElementById("foto-" + p.id);
     if (fotoEl && fotoEl.src && fotoEl.src.length > 100) {
       var img2 = document.createElement("img");
       img2.src = fotoEl.src;
       piDiv.appendChild(img2);
+      piDiv.classList.add("clickable");
+      piDiv.onclick = function(){ abrirZoom(img2.src, p.nombre); };
     } else {
       piDiv.textContent = p.emoji || "🍪";
     }
@@ -541,7 +556,11 @@ function renderCookieCard(p) {
   var tagHtml = ag
     ? '<span class="stg so">AGOTADA</span>'
     : (restante <= 5 ? '<span class="stg sw">Solo quedan ' + restante + '</span>' : "");
-  infoDiv.innerHTML = '<div class="pnm">' + p.nombre + '</div><div class="ppr">$' + p.precio.toLocaleString("es-AR") + ' c/u</div>' + tagHtml;
+  var descHtml = p.descripcion ? '<div class="pdesc">' + p.descripcion + '</div>' : '';
+  infoDiv.innerHTML = '<div class="pnm">' + p.nombre + '</div>'
+    + '<div class="ppr">$' + p.precio.toLocaleString("es-AR") + ' c/u</div>'
+    + descHtml
+    + tagHtml;
 
   var ctrDiv = document.createElement("div");
   if (ag) {
@@ -575,8 +594,10 @@ function renderBoxCard() {
     var img = document.createElement("img");
     img.src = fotoURL;
     img.loading = "lazy";
-    img.onerror = function(){ this.style.display = "none"; piDiv.textContent = CFG.box.emoji || "🎁"; };
+    img.onerror = function(){ this.style.display = "none"; piDiv.textContent = CFG.box.emoji || "🎁"; piDiv.classList.remove("clickable"); piDiv.onclick = null; };
     piDiv.appendChild(img);
+    piDiv.classList.add("clickable");
+    piDiv.onclick = function(e){ e.stopPropagation(); abrirZoom(img.src, CFG.box.nombre); };
   } else {
     piDiv.textContent = CFG.box.emoji || "🎁";
   }
@@ -1019,6 +1040,36 @@ async function confirmar() {
       '</div>';
   }
 }
+
+// Lightbox para ver fotos en grande
+function abrirZoom(src, titulo) {
+  if (!src) return;
+  var lb = document.getElementById("lbox");
+  if (!lb) {
+    lb = document.createElement("div");
+    lb.id = "lbox";
+    lb.className = "lbox";
+    lb.innerHTML = '<button class="lbox-close" aria-label="Cerrar">&times;</button>'
+      + '<div class="lbox-wrap"><img id="lbox-img" alt=""/><div class="lbox-cap" id="lbox-cap"></div></div>';
+    document.body.appendChild(lb);
+    lb.onclick = function(e){ if (e.target === lb || e.target.classList.contains("lbox-close")) cerrarZoom(); };
+  }
+  document.getElementById("lbox-img").src = src;
+  document.getElementById("lbox-cap").textContent = titulo || "";
+  lb.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarZoom(){
+  var lb = document.getElementById("lbox");
+  if (lb) lb.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+// Cerrar con tecla Esc
+document.addEventListener("keydown", function(e){
+  if (e.key === "Escape") cerrarZoom();
+});
 </script>
 </body>
 </html>
