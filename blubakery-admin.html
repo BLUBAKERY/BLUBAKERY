@@ -89,16 +89,23 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
     <div id="productos-admin"></div>
   </div>
 
-  <!-- PACK -->
+  <!-- BOX DESCUENTO -->
   <div class="section-card">
-    <div class="section-title">Pack especial</div>
+    <div class="section-title">Box — descuento por cantidad</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+      Cuando el cliente llega a la cantidad mínima, se aplica el descuento a <strong>todas</strong> las cookies del pedido (las del box y las que haya pedido extra).
+    </div>
     <div class="field-row">
-      <div class="field"><label>Cookies en el pack</label><input type="number" id="pack-cantidad" value="4" min="1"/></div>
-      <div class="field"><label>Precio del pack ($)</label><input type="number" id="pack-precio" value="17500" min="0"/></div>
+      <div class="field"><label>Cantidad mínima (cookies en el box)</label><input type="number" id="box-cant" value="4" min="1"/></div>
+      <div class="field"><label>Descuento (%)</label><input type="number" id="box-pct" value="10" min="0" max="100" step="0.5"/></div>
     </div>
     <div class="toggle" style="margin-top:4px">
-      <input type="checkbox" id="pack-activo" checked/>
-      <span style="font-size:13px;color:var(--ink)">Pack activo</span>
+      <input type="checkbox" id="box-activo" checked/>
+      <span style="font-size:13px;color:var(--ink)">Box activo</span>
+    </div>
+    <div class="hint" style="margin-top:10px">
+      Ej: con 4 y 10% — si el cliente lleva 4 cookies o más, todas llevan 10% off. <br>
+      4 × $4.500 = $18.000 → con descuento queda <strong>$16.200</strong>. Si suma 2 cookies más, las 6 llevan el 10%.
     </div>
   </div>
 
@@ -395,7 +402,7 @@ function getConfig() {
   });
   return {
     productos:CONFIG.productos,
-    pack:{activo:document.getElementById("pack-activo").checked,cantidad:parseInt(document.getElementById("pack-cantidad").value)||4,precio:parseInt(document.getElementById("pack-precio").value)||17500},
+    box:{activo:document.getElementById("box-activo").checked,cant:parseInt(document.getElementById("box-cant").value)||4,pct:parseFloat(document.getElementById("box-pct").value)||0},
     descuentos:CONFIG.descuentos,
     horasCorte:parseInt(document.getElementById("horas-corte").value)||24,
     costoEnvio:parseInt(document.getElementById("envio-precio").value)||4000,
@@ -484,16 +491,20 @@ function showToast(msg,type){
 function aplicarConfigAlFormulario(data){
   if (!data) return;
   if (data.productos)  CONFIG.productos  = data.productos;
-  if (data.pack)       CONFIG.pack       = data.pack;
+  if (data.box)        CONFIG.box        = data.box;
   if (data.descuentos) CONFIG.descuentos = data.descuentos;
   if (data.horasCorte) CONFIG.horasCorte = data.horasCorte;
   if (data.diasEntrega) CONFIG.diasEntrega = data.diasEntrega;
 
-  // Inputs de pack
-  if (data.pack) {
-    var pa = document.getElementById("pack-activo");   if (pa) pa.checked = data.pack.activo !== false;
-    var pc = document.getElementById("pack-cantidad"); if (pc) pc.value = data.pack.cantidad || data.pack.cant || 4;
-    var pp = document.getElementById("pack-precio");   if (pp) pp.value = data.pack.precio || 17500;
+  // Inputs del Box (con compat: si solo hay "pack" viejo, lo convertimos a box)
+  var fuente = data.box;
+  if (!fuente && data.pack) {
+    fuente = { activo: data.pack.activo, cant: data.pack.cantidad || data.pack.cant || 4, pct: 10 };
+  }
+  if (fuente) {
+    var ba = document.getElementById("box-activo"); if (ba) ba.checked = fuente.activo !== false;
+    var bc = document.getElementById("box-cant");   if (bc) bc.value = fuente.cant || 4;
+    var bp = document.getElementById("box-pct");    if (bp) bp.value = (fuente.pct !== undefined) ? fuente.pct : 10;
   }
   // Horas de corte
   if (data.horasCorte) {
