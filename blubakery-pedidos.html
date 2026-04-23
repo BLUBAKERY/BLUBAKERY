@@ -44,6 +44,7 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .pc.out{opacity:.5}
 /* Box product: distinct card to signal it's special */
 .pc.box{background:linear-gradient(135deg, var(--teal) 0%, #006680 100%);border-color:var(--teal);color:white}
+.pc.box.sel{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
 .pc.box .pnm{color:white}
 .pc.box .ppr{color:rgba(255,255,255,.8)}
 .pc.box .pi{background:rgba(255,255,255,.15)}
@@ -64,18 +65,18 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 .cb:active{background:var(--teal-soft);transform:scale(.92)}
 .cn{font-size:17px;font-weight:600;min-width:22px;text-align:center;font-family:'Cormorant Garamond',serif}
 
-/* BOX FILL SECTION */
-.bxf{background:var(--teal-soft);border:1px solid var(--teal);border-radius:14px;padding:16px;margin-top:12px}
-.bxf-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--teal);margin-bottom:4px;line-height:1.2}
-.bxf-sub{font-size:12px;color:var(--ink);margin-bottom:12px}
+/* BOX FILL SECTION — visually attached to the Box card above */
+.bxf{background:var(--teal-soft);border:1px solid var(--teal);border-top:none;border-radius:0 0 14px 14px;padding:16px;margin-top:-10px;position:relative;z-index:1}
+.bxf-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--teal);margin-bottom:4px;line-height:1.2}
+.bxf-sub{font-size:13px;color:var(--ink);margin-bottom:12px;font-weight:500}
 .bxf-counter{font-size:13px;color:var(--teal);font-weight:600;margin-bottom:12px;padding:6px 10px;background:var(--white);border-radius:8px;display:inline-block}
 .bxf-counter.done{background:var(--teal);color:white}
-.bxf-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line)}
+.bxf-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line);gap:10px}
 .bxf-row:last-child{border-bottom:none}
 .bxf-row.disabled{opacity:.4}
-.bxf-name{flex:1;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--ink)}
-.bxf-left{font-size:11px;color:var(--muted);margin-left:6px}
-.bxf-ctr{display:flex;align-items:center;gap:8px}
+.bxf-name{flex:1;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;color:var(--ink);min-width:0}
+.bxf-left{font-size:11px;color:var(--muted);white-space:nowrap}
+.bxf-ctr{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .bxf-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--teal);background:var(--white);font-size:14px;cursor:pointer;color:var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif}
 .bxf-btn:disabled{opacity:.3;cursor:not-allowed}
 .bxf-qty{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;min-width:18px;text-align:center;color:var(--ink)}
@@ -216,8 +217,6 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
 <div class="sec">
   <div class="sec-title">Elegí tus cookies</div>
   <div class="pg" id="pgrid"></div>
-  <!-- Sección dinámica para armar el contenido del/los Box(es) -->
-  <div id="boxfill" style="display:none"></div>
 </div>
 
 <div class="sec">
@@ -458,6 +457,11 @@ function init() {
   // PRIMERO: la Box como primer producto (si está activa)
   if (CFG.box && CFG.box.activo) {
     grid.appendChild(renderBoxCard());
+    // Contenedor para "Armá tu Box" - INMEDIATAMENTE después de la card del Box
+    var bxfContainer = document.createElement("div");
+    bxfContainer.id = "boxfill";
+    bxfContainer.style.display = "none";
+    grid.appendChild(bxfContainer);
   }
 
   // DESPUÉS: las cookies sueltas activas
