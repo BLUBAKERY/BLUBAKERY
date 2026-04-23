@@ -192,10 +192,10 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
   <div class="sec-title">Elegí tus cookies</div>
   <div id="pk" style="display:none" class="pk">
     <div>
-      <div class="pkn">Pack de 4</div>
-      <div class="pks">Precio especial</div>
+      <div class="pkn" id="pkn">Box de 4 activado</div>
+      <div class="pks" id="pks">10% de descuento aplicado</div>
     </div>
-    <div class="pkp" id="pkp"></div>
+    <div class="pkp" id="pkp">-10%</div>
   </div>
   <div class="pg" id="pgrid"></div>
 </div>
@@ -318,7 +318,8 @@ document.getElementById("ss-logo").src = document.getElementById("foto-logo").sr
 
 // CONFIG por defecto (se sobreescribe con lo que viene del Sheet)
 var CFG = {
-  pack: {activo:true, cant:4, precio:17500},
+  // Box = descuento por cantidad. Si total de cookies >= cant, aplica pct% a TODAS.
+  box: {activo:true, cant:4, pct:10},
   costoEnvio: 4000,
   alias: "julieta.linn",
   banco: "Modo / Transferencia bancaria",
@@ -371,7 +372,20 @@ var disp = [];
             emoji:       p.emoji || def.emoji || "🍪"
           };
         });
-        if (data.pack)           CFG.pack           = data.pack;
+        if (data.box) {
+          CFG.box = {
+            activo: data.box.activo !== false,
+            cant:   parseInt(data.box.cant) || 4,
+            pct:    parseFloat(data.box.pct) || 0
+          };
+        } else if (data.pack) {
+          // Compatibilidad con el formato viejo: si solo hay "pack", lo interpretamos como box.
+          // El % se calcula a partir del precio viejo vs el promedio actual, pero como es
+          // configurable, dejamos los defaults y avisamos por consola.
+          console.info("Config vieja detectada (pack). Configurá el Box nuevo desde admin.");
+          CFG.box.activo = data.pack.activo !== false;
+          CFG.box.cant   = data.pack.cant || data.pack.cantidad || 4;
+        }
         if (data.costoEnvio)     CFG.costoEnvio     = data.costoEnvio;
         if (data.alias)          CFG.alias          = data.alias;
         if (data.banco)          CFG.banco          = data.banco;
@@ -392,7 +406,6 @@ var disp = [];
 function init() {
   CFG.productos.forEach(function(p){ qty[p.id] = 0; });
 
-  document.getElementById("pkp").textContent = "$" + CFG.pack.precio.toLocaleString("es-AR");
   document.getElementById("lbl-envio").textContent = "$" + CFG.costoEnvio.toLocaleString("es-AR");
   document.getElementById("mp-alias").textContent = CFG.alias;
   document.getElementById("mp-banco").textContent = CFG.banco;
@@ -546,13 +559,36 @@ function chg(id, delta) {
   qty[id] = Math.max(0, qty[id] + delta);
   var q = document.getElementById("q-" + id); if (q) q.textContent = qty[id];
   var c = document.getElementById("c-" + id); if (c) c.className = "pc" + (qty[id] > 0 ? " sel" : "");
-  document.getElementById("pk").style.display = (CFG.pack.activo && totU() === CFG.pack.cant) ? "flex" : "none";
+
+  // Banner del Box: solo visible cuando el descuento YA se activó
+  var activo = boxAplica();
+  var pk = document.getElementById("pk");
+  if (pk) {
+    pk.style.display = activo ? "flex" : "none";
+    if (activo) {
+      document.getElementById("pkn").textContent = "Box de " + CFG.box.cant + " activado";
+      document.getElementById("pks").textContent = CFG.box.pct + "% de descuento aplicado a todas las cookies";
+      document.getElementById("pkp").textContent = "-" + CFG.box.pct + "%";
+    }
+  }
   updR();
 }
+
 function totU() { return CFG.productos.reduce(function(s,p){ return s + (qty[p.id]||0); }, 0); }
+
+// Subtotal sin descuento (precio base × cantidad)
+function subU() { return CFG.productos.reduce(function(s,p){ return s + p.precio * (qty[p.id]||0); }, 0); }
+
+// ¿Se aplica el descuento Box?
+function boxAplica() {
+  return CFG.box && CFG.box.activo && CFG.box.pct > 0 && totU() >= (CFG.box.cant || 4);
+}
+
+// Total final aplicando Box si corresponde
 function calcS() {
-  if (CFG.pack.activo && totU() === CFG.pack.cant) return CFG.pack.precio;
-  return CFG.productos.reduce(function(s,p){ return s + p.precio * (qty[p.id]||0); }, 0);
+  var sub = subU();
+  if (boxAplica()) return Math.round(sub * (1 - CFG.box.pct / 100));
+  return sub;
 }
 function setE(t) {
   ent = t;
@@ -583,14 +619,15 @@ function updR() {
   var sub = calcS();
   var env = ent === "envio" ? CFG.costoEnvio : 0;
   var tot = sub; // El envío NO se suma al total
-  var ep = CFG.pack.activo && totU() === CFG.pack.cant;
+  var descActivo = boxAplica();
   var rows = "";
   CFG.productos.forEach(function(p) {
     if (qty[p.id] > 0) rows += '<div class="rr"><span class="rl">' + p.nombre + ' x' + qty[p.id] + '</span><span class="rv">$' + (p.precio*qty[p.id]).toLocaleString("es-AR") + '</span></div>';
   });
-  if (ep) {
-    var og = CFG.productos.reduce(function(s,p){ return s+p.precio*(qty[p.id]||0); },0);
-    rows += '<div class="rr"><span class="rl" style="color:var(--teal)">Descuento pack x4</span><span class="rv" style="color:var(--teal)">-$' + (og-CFG.pack.precio).toLocaleString("es-AR") + '</span></div>';
+  if (descActivo) {
+    var subSinDesc = subU();
+    var montoDesc = subSinDesc - sub;
+    rows += '<div class="rr"><span class="rl" style="color:var(--teal)">Descuento Box ' + CFG.box.cant + '+ (' + CFG.box.pct + '%)</span><span class="rv" style="color:var(--teal)">-$' + montoDesc.toLocaleString("es-AR") + '</span></div>';
   }
   if (totU() > 0) rows += '<div class="rr tot"><span class="rl">Total productos</span><span class="rv">$' + tot.toLocaleString("es-AR") + '</span></div>';
   // Info de envío (aparte, sin sumar al total)
@@ -634,7 +671,8 @@ async function confirmar() {
   var env = ent === "envio" ? CFG.costoEnvio : 0;
   var tot = sub; // Total sin envío - se abona aparte al recibir
   var dia = CFG.diasEntrega.find(function(d){ return d.id === diaId; });
-  var ep = CFG.pack.activo && totU() === CFG.pack.cant;
+  var descActivo = boxAplica();
+  var descTxt = descActivo ? ("Si (Box " + CFG.box.cant + "+, " + CFG.box.pct + "%)") : "No";
   var det = CFG.productos.filter(function(p){ return qty[p.id]>0; }).map(function(p){ return p.nombre+" x"+qty[p.id]; }).join(", ");
 
   document.getElementById("ctab").disabled = true;
@@ -652,7 +690,7 @@ async function confirmar() {
     telefono:tel,
     cookies:det,
     unidades:totU(),
-    pack:ep?"Si":"No",
+    pack:descTxt,
     subtotal:sub,
     entrega:ent==="envio"?"Envio":"Retiro",
     direccion:ent==="envio"?dir:"Retiro en domicilio",
