@@ -974,6 +974,13 @@ async function confirmar() {
   var det = partes.join(" | ");
   var descTxt = boxQty > 0 ? "Si (Box x" + boxQty + (descuentoSueltasAplica() && totU("sueltas") > 0 ? ", " + CFG.box.pctSueltas + "% sueltas" : "") + ")" : "No";
 
+  // Calcular cuánto se vendió de cada cookie (sueltas + dentro de boxes)
+  var stockChanges = {};
+  CFG.productos.forEach(function(p){
+    var total = (qty[p.id]||0) + (boxFill[p.id]||0);
+    if (total > 0) stockChanges[p.id] = total;
+  });
+
   document.getElementById("ctab").disabled = true;
   document.getElementById("sbar").style.display = "flex";
 
@@ -998,7 +1005,8 @@ async function confirmar() {
     total:tot,
     pago:pago==="mp"?"Transferencia":"Efectivo",
     notas:nota,
-    estado:"Pendiente"
+    estado:"Pendiente",
+    stockChanges: stockChanges
   };
 
   try { await fetch(SH,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify(ped)}); } catch(e){}
