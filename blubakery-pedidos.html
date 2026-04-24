@@ -273,6 +273,7 @@ body{font-family:'Inter',sans-serif;color:var(--ink);min-height:100vh;font-weigh
   <div class="sec-title">Tus datos</div>
   <div class="fld"><label>Nombre completo</label><input type="text" id="fn" placeholder="María García" autocomplete="name"/></div>
   <div class="fld"><label>Teléfono (WhatsApp)</label><input type="tel" id="ft" placeholder="2284 000000" inputmode="tel"/></div>
+  <div class="fld"><label>Email <span style="font-size:11px;color:var(--muted);font-weight:400">(opcional)</span></label><input type="email" id="femail" placeholder="tu@email.com" autocomplete="email" inputmode="email"/></div>
   <div id="fdir"><div class="fld"><label>Dirección</label><input type="text" id="fd" placeholder="Calle y número, barrio"/></div></div>
   <div class="fld"><label>Aclaraciones (opcional)</label><textarea id="fo" placeholder="Alergias, instrucciones..."></textarea></div>
 </div>
@@ -939,6 +940,7 @@ async function generarNroOrden() {
 async function confirmar() {
   var nom = document.getElementById("fn").value.trim();
   var tel = document.getElementById("ft").value.trim();
+  var email = (document.getElementById("femail").value || "").trim();
   var dir = ent === "envio" ? document.getElementById("fd").value.trim() : "";
   var nota = document.getElementById("fo").value.trim();
   var hayAlgo = boxQty > 0 || totU("sueltas") > 0;
@@ -993,6 +995,7 @@ async function confirmar() {
     hora:new Date().toLocaleTimeString("es-AR",{hour:"2-digit",minute:"2-digit"}),
     nombre:nom,
     telefono:tel,
+    email:email,
     cookies:det,
     unidades:totU("all"),
     pack:descTxt,
@@ -1034,19 +1037,60 @@ async function confirmar() {
 
   // Bloque WhatsApp para comprobante (solo si pagó por transferencia)
   if (pago === "mp") {
-    var msg = encodeURIComponent("Hola! Te envío el comprobante de la orden N° " + nroOrden + " por $" + tot.toLocaleString("es-AR") + ".");
-    var wspLink = "https://wa.me/" + WSP_NUMBER + "?text=" + msg;
+    var alias = CFG.alias || "";
+    var banco = CFG.banco || "";
+    var wspComp = CFG.wspComprobante || WSP_NUMBER;
+    var msg = encodeURIComponent(
+      "Hola! Te envío el comprobante de la orden N° " + nroOrden +
+      " por $" + tot.toLocaleString("es-AR") + "."
+    );
+    var wspLink = "https://wa.me/" + (wspComp.replace(/[^\d]/g,"") || WSP_NUMBER.replace(/[^\d]/g,"")) + "?text=" + msg;
+
     document.getElementById("wsp-container").innerHTML =
-      '<div class="wsp-box">' +
-        '<div class="wsp-label">Importante</div>' +
-        '<div class="wsp-title">Enviá el comprobante de transferencia</div>' +
+      // Datos para transferir
+      '<div class="wsp-box" style="margin-bottom:12px">' +
+        '<div class="wsp-label">Datos para transferir</div>' +
+        '<div class="wsp-title" style="font-size:15px;margin-bottom:12px">Realizá la transferencia antes de retirar / recibir tu pedido</div>' +
+        '<div style="background:rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;margin-bottom:8px">' +
+          '<div style="font-size:11px;opacity:.7;margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase">Alias</div>' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">' +
+            '<span id="alias-txt" style="font-size:18px;font-weight:700;letter-spacing:.03em;font-family:monospace">' + alias + '</span>' +
+            '<button onclick="copiarAlias()" style="background:rgba(255,255,255,.2);border:none;border-radius:6px;padding:6px 12px;color:white;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0" id="btn-copiar">Copiar</button>' +
+          '</div>' +
+          (banco ? '<div style="font-size:12px;opacity:.75;margin-top:6px">' + banco + '</div>' : '') +
+        '</div>' +
+        '<div style="font-size:12px;opacity:.8;line-height:1.5;margin-bottom:14px">' +
+          'Transferí <strong>$' + tot.toLocaleString("es-AR") + '</strong> e indicá el número de orden <strong>#' + nroOrden + '</strong> al enviar el comprobante.' +
+        '</div>' +
         '<a class="wsp-btn" href="' + wspLink + '" target="_blank" rel="noopener">' +
           '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>' +
-          'Escribir a ' + WSP_DISPLAY +
+          'Enviar comprobante por WhatsApp' +
         '</a>' +
-        '<div class="wsp-hint">Tocá el botón y se abre WhatsApp con el mensaje listo</div>' +
+        '<div class="wsp-hint">Abrí WhatsApp, enviá el comprobante y mencioná tu N° de orden: <strong>#' + nroOrden + '</strong></div>' +
       '</div>';
   }
+}
+
+// Copia el alias al portapapeles y cambia el texto del botón brevemente
+function copiarAlias() {
+  var alias = document.getElementById("alias-txt");
+  var btn = document.getElementById("btn-copiar");
+  if (!alias || !btn) return;
+  navigator.clipboard.writeText(alias.textContent.trim()).then(function(){
+    btn.textContent = "✓ Copiado";
+    btn.style.background = "rgba(255,255,255,.4)";
+    setTimeout(function(){ btn.textContent = "Copiar"; btn.style.background = ""; }, 2000);
+  }).catch(function(){
+    // Fallback para navegadores sin clipboard API
+    var range = document.createRange();
+    range.selectNode(alias);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+    btn.textContent = "✓ Copiado";
+    setTimeout(function(){ btn.textContent = "Copiar"; }, 2000);
+  });
 }
 
 // Lightbox para ver fotos en grande
