@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Blu Bakery">
+<title>Blu Bakery — Gastos</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FAF9F7; color: #0D0D0D; min-height: 100vh; }
+  .app { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 1.75rem; }
+  .brand-name { font-size: 20px; font-weight: 600; letter-spacing: 0.08em; color: #0D0D0D; }
+  .connected-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; }
+
+  /* 3 botones de quien */
+  .quien-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+  .quien-btn { padding: 12px; border: 1.5px solid #C8C4BE; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; background: transparent; color: #6B6560; transition: all 0.15s; }
+  .quien-btn.active-july { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
+  .quien-btn.active-joa  { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
+  .quien-btn.active-blu  { border-color: #004e64; background: #E0EEF2; color: #004e64; }
+
+  .form-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem; }
+  .form-title { font-size: 11px; font-weight: 600; color: #6B6560; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: block; font-size: 12px; color: #6B6560; margin-bottom: 6px; font-weight: 500; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 11px 13px; font-size: 16px;
+    border: 0.5px solid #C8C4BE; border-radius: 8px;
+    background: #FAF9F7; color: #0D0D0D;
+    font-family: inherit; appearance: none; -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #0D0D0D; }
+  .field textarea { resize: none; height: 70px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .foto-btn { width: 100%; padding: 11px; background: transparent; border: 0.5px solid #C8C4BE; border-radius: 8px; font-size: 14px; color: #6B6560; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; }
+  .foto-btn:active { background: #F2F0ED; }
+  .foto-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 16px; }
+  .foto-btn svg { width: 16px; height: 16px; stroke: #6B6560; fill: none; stroke-width: 1.5; flex-shrink: 0; }
+
+  .preview-wrap { position: relative; margin-top: 10px; }
+  .preview-img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 8px; border: 0.5px solid #C8C4BE; display: block; background: #FAF9F7; }
+  .preview-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: white; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  .saving-indicator { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B6560; margin-bottom: 12px; }
+  .saving-spinner { width: 14px; height: 14px; border: 1.5px solid #C8C4BE; border-top-color: #0D0D0D; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .save-btn { width: 100%; padding: 14px; background: #0D0D0D; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+  .save-btn:active { opacity: 0.8; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .divider { border: none; border-top: 0.5px solid #C8C4BE; margin: 1.5rem 0; }
+
+  .sheet-link-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .section-title { font-size: 13px; font-weight: 500; color: #0D0D0D; }
+  .sheet-link { font-size: 13px; color: #1D9E75; text-decoration: none; font-weight: 500; }
+
+  .empty-state { text-align: center; padding: 2rem 1rem; color: #6B6560; font-size: 13px; line-height: 1.6; border: 0.5px solid #C8C4BE; border-radius: 14px; background: white; }
+
+  .gasto-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 12px 14px; border: 0.5px solid #C8C4BE; border-radius: 10px; margin-bottom: 7px; background: white; }
+  .gasto-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .gasto-avatar.july { background: #E1F5EE; color: #085041; }
+  .gasto-avatar.joa  { background: #E6F1FB; color: #0C447C; }
+  .gasto-avatar.blu  { background: #E0EEF2; color: #004e64; }
+  .gasto-info { overflow: hidden; }
+  .gasto-nombre { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gasto-meta { font-size: 11px; color: #6B6560; margin-top: 2px; }
+  .gasto-monto { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; }
+  .synced-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
+
+  /* 3 columnas para los totales */
+  .totales { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 1rem; }
+  .total-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 10px; padding: 12px; text-align: center; }
+  .total-label { font-size: 11px; color: #6B6560; margin-bottom: 5px; font-weight: 500; }
+  .total-num { font-size: 17px; font-weight: 600; color: #0D0D0D; }
+  .total-card.july .total-num { color: #085041; }
+  .total-card.joa  .total-num { color: #0C447C; }
+  .total-card.blu  .total-num { color: #004e64; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0D0D0D; color: white; padding: 11px 22px; border-radius: 24px; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+  .toast.error { background: #A32D2D; }
+  .toast.success { background: #085041; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="brand">
+    <span class="brand-name">BLU BAKERY</span>
+    <span class="connected-badge"><span class="dot-live"></span>conectado</span>
+  </div>
+
+  <!-- 3 botones: July / Joa / Blu -->
+  <div class="quien-toggle">
+    <button class="quien-btn active-july" id="btn-july" onclick="setQuien('July')">July</button>
+    <button class="quien-btn" id="btn-joa"  onclick="setQuien('Joa')">Joa</button>
+    <button class="quien-btn" id="btn-blu"  onclick="setQuien('Blu')">Blu 🏪</button>
+  </div>
+
+  <div class="form-card">
+    <div class="form-title">Nuevo gasto</div>
+
+    <div class="field">
+      <label>Descripción</label>
+      <input type="text" id="f-desc" placeholder="ej: Manteca x2kg" autocomplete="off" />
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Monto ($)</label>
+        <input type="number" id="f-monto" placeholder="0" inputmode="decimal" />
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="f-fecha" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Categoría</label>
+      <select id="f-cat">
+        <option>Insumos — Olavarría</option>
+        <option>Insumos — BsAs / envío</option>
+        <option>Packaging</option>
+        <option>Logística / delivery</option>
+        <option>Marketing / contenido</option>
+        <option>Traslados</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Proveedor / Lugar de compra (opcional)</label>
+      <input type="text" id="f-proveedor" placeholder="ej: Día, Mercado Libre, Makro..." autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>Notas (opcional)</label>
+      <textarea id="f-notas" placeholder="ej: Alcanza para 4 tandas"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Foto del ticket (opcional)</label>
+      <div class="foto-btn">
+        <input type="file" accept="image/*" capture="environment" id="file-input" onchange="handleFile(event)" />
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span id="foto-label">Sacar o subir foto</span>
+      </div>
+      <div class="preview-wrap" id="preview-wrap" style="display:none">
+        <img id="preview" class="preview-img" />
+        <button class="preview-remove" onclick="removeImage()">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="saving-indicator" class="saving-indicator" style="display:none">
+    <div class="saving-spinner"></div>
+    <span>Guardando en Google Sheets...</span>
+  </div>
+
+  <button class="save-btn" id="save-btn" onclick="saveGasto()">Guardar en Google Sheets</button>
+
+  <hr class="divider" />
+
+  <div class="sheet-link-row">
+    <span class="section-title">Gastos de esta sesión</span>
+    <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI/edit" target="_blank">Ver planilla →</a>
+  </div>
+
+  <div id="gastos-list">
+    <div class="empty-state">Todavía no hay gastos en esta sesión.<br>Completá el formulario arriba para agregar uno.</div>
+  </div>
+
+  <div id="totales-section" style="display:none">
+    <div class="totales">
+      <div class="total-card">
+        <div class="total-label">Total</div>
+        <div class="total-num" id="total-all">$0</div>
+      </div>
+      <div class="total-card july">
+        <div class="total-label">July</div>
+        <div class="total-num" id="total-july">$0</div>
+      </div>
+      <div class="total-card joa">
+        <div class="total-label">Joa</div>
+        <div class="total-num" id="total-joa">$0</div>
+      </div>
+      <div class="total-card blu">
+        <div class="total-label">Blu</div>
+        <div class="total-num" id="total-blu">$0</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-0uINYXnekrhvujophjeQMlWIiHk2a4s4-kPsuhKfeEG98i4XFzFqibbdQv-WIhI/exec";
+
+let quien = 'July';
+let gastos = [];
+
+document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+
+function setQuien(q) {
+  quien = q;
+  document.getElementById('btn-july').className = 'quien-btn' + (q === 'July' ? ' active-july' : '');
+  document.getElementById('btn-joa').className  = 'quien-btn' + (q === 'Joa'  ? ' active-joa'  : '');
+  document.getElementById('btn-blu').className  = 'quien-btn' + (q === 'Blu'  ? ' active-blu'  : '');
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('preview').src = ev.target.result;
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('foto-label').textContent = 'Foto adjunta';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage() {
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('foto-label').textContent = 'Sacar o subir foto';
+}
+
+async function saveGasto() {
+  const desc      = document.getElementById('f-desc').value.trim();
+  const monto     = parseFloat(document.getElementById('f-monto').value) || 0;
+  const fecha     = document.getElementById('f-fecha').value;
+  const cat       = document.getElementById('f-cat').value;
+  const proveedor = document.getElementById('f-proveedor').value.trim();
+  const notas     = document.getElementById('f-notas').value.trim();
+
+  if (!desc)  { showToast('Escribí una descripción', true); return; }
+  if (!monto) { showToast('Ingresá el monto', true); return; }
+
+  document.getElementById('save-btn').disabled = true;
+  document.getElementById('saving-indicator').style.display = 'flex';
+
+  // tipo: "gasto" para que el Apps Script lo distinga de pedidos y config
+  const gasto = { tipo: 'gasto', fecha, quien, desc, monto, cat, proveedor, notas };
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(gasto)
+    });
+    showToast('Guardado en Google Sheets ✓', false, true);
+  } catch(err) {
+    showToast('Sin conexión — intentá de nuevo', true);
+    document.getElementById('save-btn').disabled = false;
+    document.getElementById('saving-indicator').style.display = 'none';
+    return;
+  }
+
+  gastos.unshift({ ...gasto, id: Date.now() });
+  renderGastos();
+
+  // Reset
+  document.getElementById('f-desc').value      = '';
+  document.getElementById('f-monto').value     = '';
+  document.getElementById('f-notas').value     = '';
+  document.getElementById('f-proveedor').value = '';
+  document.getElementById('f-fecha').value     = new Date().toISOString().split('T')[0];
+  document.getElementById('f-cat').value       = 'Insumos — Olavarría';
+  removeImage();
+
+  document.getElementById('saving-indicator').style.display = 'none';
+  document.getElementById('save-btn').disabled = false;
+}
+
+function avatarClass(q) {
+  if (q === 'July') return 'july';
+  if (q === 'Joa')  return 'joa';
+  return 'blu';
+}
+function avatarInitials(q) {
+  if (q === 'July') return 'JU';
+  if (q === 'Joa')  return 'JO';
+  return 'BL';
+}
+
+function renderGastos() {
+  const list = document.getElementById('gastos-list');
+  if (!gastos.length) {
+    list.innerHTML = '<div class="empty-state">Todavía no hay gastos en esta sesión.<br>Completá el formulario arriba para agregar uno.</div>';
+    document.getElementById('totales-section').style.display = 'none';
+    return;
+  }
+  list.innerHTML = gastos.map(g => `
+    <div class="gasto-row">
+      <div class="gasto-avatar ${avatarClass(g.quien)}">${avatarInitials(g.quien)}</div>
+      <div class="gasto-info">
+        <div class="gasto-nombre">${g.desc}${g.proveedor ? ' · <span style="font-weight:400;color:#6B6560">' + g.proveedor + '</span>' : ''}</div>
+        <div class="gasto-meta">${g.cat} · ${g.fecha} · <strong>${g.quien}</strong></div>
+      </div>
+      <div class="gasto-monto">$${Math.round(g.monto).toLocaleString('es-AR')}</div>
+      <div class="synced-dot" title="Guardado en Sheets"></div>
+    </div>
+  `).join('');
+
+  const sum = (arr) => arr.reduce((s,g) => s + g.monto, 0);
+  document.getElementById('total-all').textContent   = '$' + Math.round(sum(gastos)).toLocaleString('es-AR');
+  document.getElementById('total-july').textContent  = '$' + Math.round(sum(gastos.filter(g=>g.quien==='July'))).toLocaleString('es-AR');
+  document.getElementById('total-joa').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Joa'))).toLocaleString('es-AR');
+  document.getElementById('total-blu').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Blu'))).toLocaleString('es-AR');
+  document.getElementById('totales-section').style.display = 'block';
+}
+
+function showToast(msg, isError, isSuccess) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : isSuccess ? ' success' : '');
+  setTimeout(() => t.className = 'toast', 2800);
+}
+</script>
+</body>
+</html>
