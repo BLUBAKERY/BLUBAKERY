@@ -18,10 +18,12 @@
   .connected-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
   .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; }
 
-  .quien-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+  /* 3 botones de quien */
+  .quien-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
   .quien-btn { padding: 12px; border: 1.5px solid #C8C4BE; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; background: transparent; color: #6B6560; transition: all 0.15s; }
   .quien-btn.active-july { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
-  .quien-btn.active-joa { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
+  .quien-btn.active-joa  { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
+  .quien-btn.active-blu  { border-color: #004e64; background: #E0EEF2; color: #004e64; }
 
   .form-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem; }
   .form-title { font-size: 11px; font-weight: 600; color: #6B6560; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
@@ -66,19 +68,22 @@
   .gasto-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 12px 14px; border: 0.5px solid #C8C4BE; border-radius: 10px; margin-bottom: 7px; background: white; }
   .gasto-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
   .gasto-avatar.july { background: #E1F5EE; color: #085041; }
-  .gasto-avatar.joa { background: #E6F1FB; color: #0C447C; }
+  .gasto-avatar.joa  { background: #E6F1FB; color: #0C447C; }
+  .gasto-avatar.blu  { background: #E0EEF2; color: #004e64; }
   .gasto-info { overflow: hidden; }
   .gasto-nombre { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .gasto-meta { font-size: 11px; color: #6B6560; margin-top: 2px; }
   .gasto-monto { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; }
   .synced-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
 
-  .totales { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 1rem; }
+  /* 3 columnas para los totales */
+  .totales { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 1rem; }
   .total-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 10px; padding: 12px; text-align: center; }
   .total-label { font-size: 11px; color: #6B6560; margin-bottom: 5px; font-weight: 500; }
   .total-num { font-size: 17px; font-weight: 600; color: #0D0D0D; }
   .total-card.july .total-num { color: #085041; }
-  .total-card.joa .total-num { color: #0C447C; }
+  .total-card.joa  .total-num { color: #0C447C; }
+  .total-card.blu  .total-num { color: #004e64; }
 
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0D0D0D; color: white; padding: 11px 22px; border-radius: 24px; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
   .toast.show { opacity: 1; }
@@ -94,9 +99,11 @@
     <span class="connected-badge"><span class="dot-live"></span>conectado</span>
   </div>
 
+  <!-- 3 botones: July / Joa / Blu -->
   <div class="quien-toggle">
     <button class="quien-btn active-july" id="btn-july" onclick="setQuien('July')">July</button>
-    <button class="quien-btn" id="btn-joa" onclick="setQuien('Joa')">Joa</button>
+    <button class="quien-btn" id="btn-joa"  onclick="setQuien('Joa')">Joa</button>
+    <button class="quien-btn" id="btn-blu"  onclick="setQuien('Blu')">Blu 🏪</button>
   </div>
 
   <div class="form-card">
@@ -132,8 +139,13 @@
     </div>
 
     <div class="field">
+      <label>Proveedor / Lugar de compra (opcional)</label>
+      <input type="text" id="f-proveedor" placeholder="ej: Día, Mercado Libre, Makro..." autocomplete="off" />
+    </div>
+
+    <div class="field">
       <label>Notas (opcional)</label>
-      <textarea id="f-notas" placeholder="ej: Comprado en Dia, alcanza para 4 tandas"></textarea>
+      <textarea id="f-notas" placeholder="ej: Alcanza para 4 tandas"></textarea>
     </div>
 
     <div class="field">
@@ -182,6 +194,10 @@
         <div class="total-label">Joa</div>
         <div class="total-num" id="total-joa">$0</div>
       </div>
+      <div class="total-card blu">
+        <div class="total-label">Blu</div>
+        <div class="total-num" id="total-blu">$0</div>
+      </div>
     </div>
   </div>
 
@@ -190,18 +206,18 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycby28zGJEpl3nDlDmLqq3PPOFmJ1Vzovy8SGd7b6fX-VaZF6YDLu6LGkzuam8fV1Xrdo/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-0uINYXnekrhvujophjeQMlWIiHk2a4s4-kPsuhKfeEG98i4XFzFqibbdQv-WIhI/exec";
 
 let quien = 'July';
 let gastos = [];
 
-// Set today's date by default
 document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
 
 function setQuien(q) {
   quien = q;
   document.getElementById('btn-july').className = 'quien-btn' + (q === 'July' ? ' active-july' : '');
-  document.getElementById('btn-joa').className = 'quien-btn' + (q === 'Joa' ? ' active-joa' : '');
+  document.getElementById('btn-joa').className  = 'quien-btn' + (q === 'Joa'  ? ' active-joa'  : '');
+  document.getElementById('btn-blu').className  = 'quien-btn' + (q === 'Blu'  ? ' active-blu'  : '');
 }
 
 function handleFile(e) {
@@ -223,19 +239,21 @@ function removeImage() {
 }
 
 async function saveGasto() {
-  const desc = document.getElementById('f-desc').value.trim();
-  const monto = parseFloat(document.getElementById('f-monto').value) || 0;
-  const fecha = document.getElementById('f-fecha').value;
-  const cat = document.getElementById('f-cat').value;
-  const notas = document.getElementById('f-notas').value.trim();
+  const desc      = document.getElementById('f-desc').value.trim();
+  const monto     = parseFloat(document.getElementById('f-monto').value) || 0;
+  const fecha     = document.getElementById('f-fecha').value;
+  const cat       = document.getElementById('f-cat').value;
+  const proveedor = document.getElementById('f-proveedor').value.trim();
+  const notas     = document.getElementById('f-notas').value.trim();
 
-  if (!desc) { showToast('Escribí una descripción', true); return; }
+  if (!desc)  { showToast('Escribí una descripción', true); return; }
   if (!monto) { showToast('Ingresá el monto', true); return; }
 
   document.getElementById('save-btn').disabled = true;
   document.getElementById('saving-indicator').style.display = 'flex';
 
-  const gasto = { fecha, quien, desc, monto, cat, notas };
+  // tipo: "gasto" para que el Apps Script lo distinga de pedidos y config
+  const gasto = { tipo: 'gasto', fecha, quien, desc, monto, cat, proveedor, notas };
 
   try {
     await fetch(SHEET_URL, {
@@ -244,7 +262,7 @@ async function saveGasto() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(gasto)
     });
-    showToast('Guardado en Google Sheets', false, true);
+    showToast('Guardado en Google Sheets ✓', false, true);
   } catch(err) {
     showToast('Sin conexión — intentá de nuevo', true);
     document.getElementById('save-btn').disabled = false;
@@ -255,16 +273,28 @@ async function saveGasto() {
   gastos.unshift({ ...gasto, id: Date.now() });
   renderGastos();
 
-  // Reset form
-  document.getElementById('f-desc').value = '';
-  document.getElementById('f-monto').value = '';
-  document.getElementById('f-notas').value = '';
-  document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
-  document.getElementById('f-cat').value = 'Insumos — Olavarría';
+  // Reset
+  document.getElementById('f-desc').value      = '';
+  document.getElementById('f-monto').value     = '';
+  document.getElementById('f-notas').value     = '';
+  document.getElementById('f-proveedor').value = '';
+  document.getElementById('f-fecha').value     = new Date().toISOString().split('T')[0];
+  document.getElementById('f-cat').value       = 'Insumos — Olavarría';
   removeImage();
 
   document.getElementById('saving-indicator').style.display = 'none';
   document.getElementById('save-btn').disabled = false;
+}
+
+function avatarClass(q) {
+  if (q === 'July') return 'july';
+  if (q === 'Joa')  return 'joa';
+  return 'blu';
+}
+function avatarInitials(q) {
+  if (q === 'July') return 'JU';
+  if (q === 'Joa')  return 'JO';
+  return 'BL';
 }
 
 function renderGastos() {
@@ -276,10 +306,10 @@ function renderGastos() {
   }
   list.innerHTML = gastos.map(g => `
     <div class="gasto-row">
-      <div class="gasto-avatar ${g.quien === 'July' ? 'july' : 'joa'}">${g.quien === 'July' ? 'JU' : 'JO'}</div>
+      <div class="gasto-avatar ${avatarClass(g.quien)}">${avatarInitials(g.quien)}</div>
       <div class="gasto-info">
-        <div class="gasto-nombre">${g.desc}</div>
-        <div class="gasto-meta">${g.cat} · ${g.fecha}</div>
+        <div class="gasto-nombre">${g.desc}${g.proveedor ? ' · <span style="font-weight:400;color:#6B6560">' + g.proveedor + '</span>' : ''}</div>
+        <div class="gasto-meta">${g.cat} · ${g.fecha} · <strong>${g.quien}</strong></div>
       </div>
       <div class="gasto-monto">$${Math.round(g.monto).toLocaleString('es-AR')}</div>
       <div class="synced-dot" title="Guardado en Sheets"></div>
@@ -287,9 +317,10 @@ function renderGastos() {
   `).join('');
 
   const sum = (arr) => arr.reduce((s,g) => s + g.monto, 0);
-  document.getElementById('total-all').textContent = '$' + Math.round(sum(gastos)).toLocaleString('es-AR');
-  document.getElementById('total-july').textContent = '$' + Math.round(sum(gastos.filter(g=>g.quien==='July'))).toLocaleString('es-AR');
-  document.getElementById('total-joa').textContent = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Joa'))).toLocaleString('es-AR');
+  document.getElementById('total-all').textContent   = '$' + Math.round(sum(gastos)).toLocaleString('es-AR');
+  document.getElementById('total-july').textContent  = '$' + Math.round(sum(gastos.filter(g=>g.quien==='July'))).toLocaleString('es-AR');
+  document.getElementById('total-joa').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Joa'))).toLocaleString('es-AR');
+  document.getElementById('total-blu').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Blu'))).toLocaleString('es-AR');
   document.getElementById('totales-section').style.display = 'block';
 }
 
