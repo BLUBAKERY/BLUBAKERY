@@ -134,6 +134,8 @@
   .sim-result-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
   .sim-result-value{font-size:16px;font-weight:600;color:var(--teal);font-variant-numeric:tabular-nums;margin-top:2px}
 
+  .sim-bar{background:var(--cream-dark);padding:14px;border-radius:var(--radius);margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
   /* Responsive */
   @media (max-width:640px){
     .content{padding:16px}
@@ -289,6 +291,7 @@ let state = {
   recetas: [],
   subrecetas: [],
   cookiesPorTanda: 12,  // default global
+  pesoGlobalSim: 0,     // peso simulado en el resumen (no se guarda)
   dirty: false,
   loaded: false
 };
@@ -384,8 +387,12 @@ async function cargarDatos(){
       cargarSubrecetasIniciales();
     }
 
-    // Migración: asegurar que las recetas tengan pesoPorCookie
-    migrarRecetas();
+    // Migración silenciosa: asegurar que las recetas tengan pesoBasePorCookie (default 130g)
+    state.recetas.forEach(r => {
+      if (!r.pesoBasePorCookie || r.pesoBasePorCookie <= 0) {
+        r.pesoBasePorCookie = 130;
+      }
+    });
 
     state.loaded = true;
     render();
@@ -393,23 +400,11 @@ async function cargarDatos(){
   } catch(e) {
     console.error(e);
     cargarDatosIniciales();
-    migrarRecetas();
+    state.recetas.forEach(r => { if (!r.pesoBasePorCookie) r.pesoBasePorCookie = 130; });
     state.loaded = true;
     render();
     status('No se pudieron cargar datos del Sheet. Trabajando con datos locales.', 'error');
   }
-}
-
-/* Migración silenciosa: si una receta no tiene pesoPorCookie, lo deducimos del peso total / cookies por tanda.
-   Esto se ejecuta una vez al cargar y NO marca dirty (no obliga a guardar). */
-function migrarRecetas(){
-  state.recetas.forEach(r => {
-    if (!r.pesoPorCookie || r.pesoPorCookie <= 0) {
-      const pesoTotal = pesoTotalReceta(r);
-      const cookies = r.cookiesPorTanda || 12;
-      r.pesoPorCookie = cookies > 0 ? Math.round(pesoTotal / cookies) : 0;
-    }
-  });
 }
 
 /* ========== DATOS INICIALES (pre-cargados) ========== */
@@ -457,6 +452,7 @@ function cargarDatosIniciales(){
       id:'clasica',
       nombre:'Clásica Chocolate Chip',
       cookiesPorTanda:12,
+      pesoBasePorCookie:130,
       ingredientes:[
         {ingredienteId:'manteca', cantidad:200, seccion:'masa', nota:'avellanada'},
         {ingredienteId:'huevos', cantidad:2, seccion:'masa'},
@@ -474,6 +470,7 @@ function cargarDatosIniciales(){
       id:'arandanosCastanas',
       nombre:'Castañas y Arándanos',
       cookiesPorTanda:10,
+      pesoBasePorCookie:130,
       ingredientes:[
         {ingredienteId:'manteca', cantidad:170, seccion:'masa', nota:'beurre noisette'},
         {ingredienteId:'azucarRubia', cantidad:120, seccion:'masa', nota:'mascabo'},
@@ -494,6 +491,7 @@ function cargarDatosIniciales(){
       id:'tripleChoco',
       nombre:'Triple Chocolate',
       cookiesPorTanda:24,
+      pesoBasePorCookie:130,
       ingredientes:[
         {ingredienteId:'manteca', cantidad:460, seccion:'masa', nota:'pomada'},
         {ingredienteId:'azucarBlanca', cantidad:200, seccion:'masa'},
@@ -514,6 +512,7 @@ function cargarDatosIniciales(){
       id:'pistacho',
       nombre:'Pistacho',
       cookiesPorTanda:24,
+      pesoBasePorCookie:130,
       ingredientes:[
         {ingredienteId:'manteca', cantidad:460, seccion:'masa', nota:'pomada'},
         {ingredienteId:'azucarBlanca', cantidad:200, seccion:'masa'},
@@ -532,6 +531,7 @@ function cargarDatosIniciales(){
       id:'bariloche',
       nombre:'Bariloche',
       cookiesPorTanda:12,
+      pesoBasePorCookie:130,
       ingredientes:[
         {ingredienteId:'manteca', cantidad:200, seccion:'masa', nota:'avellanada'},
         {ingredienteId:'huevos', cantidad:2, seccion:'masa'},
@@ -611,42 +611,17 @@ function costoSubreceta(sub){
   return {costoTotal: total, costoPorUnidad: cpu, advertencias: [...new Set(advertencias)]};
 }
 
-/* Peso total de la masa/relleno/topping de una receta (en g/ml).
-   Solo cuenta ingredientes con unidad de masa real (g, ml, kg).
-   Ingredientes contados por unidad (huevos, limones) se traducen a peso aprox:
-   - huevo: 60g
-   - limón: 0g (es ralladura, ignoramos peso)
-   - cualquier otro 'u': 0g (ignoramos)
-   Las sub-recetas se cuentan tal cual la cantidad en g. */
-function pesoTotalReceta(receta){
-  let peso = 0;
-  (receta.ingredientes || []).forEach(item => {
-    if (item.tipo === 'subreceta') {
-      // Las sub-recetas siempre se miden en g/ml, sumamos directo
-      peso += (item.cantidad || 0);
-      return;
-    }
-    const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
-    if (!ing) return;
-    const u = (ing.unidad || 'g').toLowerCase();
-    const cant = item.cantidad || 0;
-    if (u === 'g' || u === 'ml') {
-      peso += cant;
-    } else if (u === 'kg') {
-      peso += cant * 1000;
-    } else if (u === 'u') {
-      // Caso huevo: 1 unidad ≈ 60g (la mayoría de las recetas lo asumen así)
-      // Otras unidades (limón para ralladura) las ignoramos
-      const nombre = (ing.nombre || '').toLowerCase();
-      if (nombre.includes('huevo')) peso += cant * 60;
-      // limón, etc → 0
-    }
-  });
-  return peso;
-}
-
+/*
+  Lógica de costo de receta:
+  - Costo total tanda = suma de ingredientes (a cantidades cargadas)
+  - Esa tanda rinde N cookies de "pesoBase" (vos lo configurás)
+  - Para CUALQUIER otro peso pedido, la cantidad de cookies de la tanda cambia proporcionalmente:
+       cookies(pesoX) = cookiesPorTanda × (pesoBase / pesoX)
+    porque la masa total no cambia, solo cómo la dividimos.
+  - Costo unitario = costo total tanda ÷ cookies(pesoX)
+*/
 function costoReceta(receta){
-  let costoIng = 0;
+  let costoIngTanda = 0;
   let advertencias = [];
   receta.ingredientes.forEach(item => {
     // Si es sub-receta
@@ -655,7 +630,7 @@ function costoReceta(receta){
       if (!sub) { advertencias.push('Sub-receta no encontrada'); return; }
       const info = costoSubreceta(sub);
       if (info.advertencias.length) advertencias.push(...info.advertencias);
-      costoIng += info.costoPorUnidad * (item.cantidad || 0);
+      costoIngTanda += info.costoPorUnidad * (item.cantidad || 0);
       return;
     }
     // Ingrediente normal
@@ -665,68 +640,65 @@ function costoReceta(receta){
       return;
     }
     if (!ing.precio) advertencias.push(ing.nombre);
-    costoIng += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
+    costoIngTanda += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
   });
 
   const costoPackaging = state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
 
+  // Costo fijo prorrateado por la cantidad de cookies que efectivamente salen (al peso base)
+  const cookiesBase = receta.cookiesPorTanda || 12;
   let costoFijoTanda = 0;
   state.fijos.forEach(f => {
-    const cxt = f.cookiesPorTanda || receta.cookiesPorTanda || 12;
-    costoFijoTanda += (f.precio || 0) / cxt;
+    // El costo del gas/luz por tanda se divide entre las cookies que efectivamente salen
+    costoFijoTanda += (f.precio || 0);
   });
+  const costoFijoUnit = costoFijoTanda / cookiesBase;
 
-  const cookies = receta.cookiesPorTanda || 12;
-  const costoIngUnit = costoIng / cookies;
-  const costoTotalUnit = costoIngUnit + costoPackaging + costoFijoTanda;
-
-  // Información extra de peso
-  const pesoTotal = pesoTotalReceta(receta);
-  const pesoPorCookieReal = cookies > 0 ? pesoTotal / cookies : 0;
+  const costoIngUnit = costoIngTanda / cookiesBase;
+  const costoTotalUnit = costoIngUnit + costoPackaging + costoFijoUnit;
 
   return {
-    costoIng,
+    costoIngTanda,
     costoIngUnit,
     costoPackaging,
-    costoFijoUnit: costoFijoTanda,
+    costoFijoTanda,
+    costoFijoUnit,
     costoTotalUnit,
-    cookies,
-    pesoTotal,
-    pesoPorCookieReal,
+    cookies: cookiesBase,
+    pesoBase: receta.pesoBasePorCookie || 130,
     advertencias: [...new Set(advertencias)]
   };
 }
 
-/* Simulación con peso por cookie alternativo:
-   recalcula cuántas cookies salen de la masa total a ese peso,
-   y cuánto cuesta cada cookie. */
+/* Simulación con OTRO peso por cookie:
+   - La masa total de la tanda NO cambia (los ingredientes son los mismos)
+   - Solo cambia cuántas cookies salen: cookies(pesoX) = cookiesBase × pesoBase / pesoX
+   - El costo total de la tanda es el MISMO; el unitario cambia. */
 function simularConPeso(receta, pesoSimulado){
+  if (!pesoSimulado || pesoSimulado <= 0) return null;
   const c = costoReceta(receta);
-  if (!pesoSimulado || pesoSimulado <= 0 || c.pesoTotal <= 0) {
-    return null;
-  }
-  const cookiesSimuladas = Math.floor(c.pesoTotal / pesoSimulado);
+  const cookiesBase = c.cookies;
+  const pesoBase = c.pesoBase;
+  if (cookiesBase <= 0 || pesoBase <= 0) return null;
+
+  // Regla de tres: si "cookiesBase" pesan "pesoBase" cada una,
+  // ¿cuántas pesan "pesoSimulado"? → cookiesBase × (pesoBase / pesoSimulado)
+  const cookiesSimuladas = (cookiesBase * pesoBase) / pesoSimulado;
+
   if (cookiesSimuladas <= 0) return null;
 
-  // Costo de ingredientes por cookie a ese peso
-  const costoIngUnitSim = c.costoIng / cookiesSimuladas;
-
-  // Costos fijos: se prorratean por las nuevas cookies de la tanda
-  let costoFijoUnitSim = 0;
-  state.fijos.forEach(f => {
-    // El gas/luz de la tanda no cambia, lo dividimos por las nuevas cookies
-    costoFijoUnitSim += (f.precio || 0) / cookiesSimuladas;
-  });
-
-  const costoTotalUnitSim = costoIngUnitSim + c.costoPackaging + costoFijoUnitSim;
+  // Mismo costo de tanda, dividido entre las cookies nuevas
+  const costoIngUnit = c.costoIngTanda / cookiesSimuladas;
+  const costoFijoUnit = c.costoFijoTanda / cookiesSimuladas;
+  const costoTotalUnit = costoIngUnit + c.costoPackaging + costoFijoUnit;
 
   return {
     pesoSimulado,
     cookiesSimuladas,
-    costoIngUnit: costoIngUnitSim,
-    costoFijoUnit: costoFijoUnitSim,
+    costoIngUnit,
+    costoFijoUnit,
     costoPackaging: c.costoPackaging,
-    costoTotalUnit: costoTotalUnitSim
+    costoTotalUnit
   };
 }
 
@@ -738,6 +710,12 @@ function formatAR(n){
 function formatARdec(n){
   if (!n && n !== 0) return '-';
   return '$' + n.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+/* Formatea cantidad de cookies redondeada hacia abajo (no podés tener "media cookie") */
+function formatCookies(n){
+  if (!n) return '-';
+  return Math.floor(n).toLocaleString('es-AR');
 }
 
 /* ========== RENDER ========== */
@@ -771,14 +749,14 @@ function renderResumen(){
     </div>
   `;
 
-  // Selector global de peso simulado
+  // Barra del simulador global
   html += `
-    <div style="background:var(--cream-dark);padding:14px;border-radius:var(--radius);margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div class="sim-bar">
       <div style="font-weight:600;color:var(--teal);font-size:13px">⚖ Simular cookies de:</div>
-      <input type="number" id="pesoGlobal" value="${state.pesoGlobalSim || ''}" placeholder="Ej: 50" step="1" style="width:90px" onchange="setPesoGlobalSim(this.value)">
+      <input type="number" id="pesoGlobal" value="${state.pesoGlobalSim || ''}" placeholder="Ej: 50" step="1" style="width:90px" onchange="setPesoGlobalSim(this.value)" oninput="setPesoGlobalSim(this.value)">
       <span class="t-muted" style="font-size:12px">gramos por cookie</span>
       ${state.pesoGlobalSim ? `<button class="btn btn-sm btn-ghost" onclick="setPesoGlobalSim(0)">Limpiar</button>` : ''}
-      <span class="t-muted" style="font-size:11px;margin-left:auto">Aplica solo a la vista del resumen, no modifica las recetas</span>
+      <span class="t-muted" style="font-size:11px;margin-left:auto">Solo simulación visual; no modifica las recetas</span>
     </div>
   `;
 
@@ -786,33 +764,27 @@ function renderResumen(){
 
   html += `<table><thead><tr>
     <th>Receta</th>
-    <th class="t-center">Peso/cookie</th>
+    <th class="t-center">Peso base</th>
     <th class="t-center">Cookies/tanda</th>
-    <th class="t-num">Ingredientes</th>
-    <th class="t-num">+ Packaging</th>
-    <th class="t-num">+ Fijos</th>
-    <th class="t-num">Costo por cookie</th>
-    ${haySim ? `<th class="t-num" style="background:#fff4d6">Simulado a ${state.pesoGlobalSim}g</th>` : ''}
+    <th class="t-num">Costo unitario</th>
+    ${haySim ? `<th class="t-center" style="background:#fff4d6">A ${state.pesoGlobalSim}g · cookies</th><th class="t-num" style="background:#fff4d6">A ${state.pesoGlobalSim}g · costo c/u</th>` : ''}
     <th></th>
   </tr></thead><tbody>`;
 
   state.recetas.forEach(r => {
     const c = costoReceta(r);
     const warn = c.advertencias.length > 0;
-    const peso = r.pesoPorCookie || Math.round(c.pesoPorCookieReal);
     const sim = haySim ? simularConPeso(r, state.pesoGlobalSim) : null;
 
     html += `<tr>
       <td><strong>${escape(r.nombre)}</strong>${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
-      <td class="t-center">${peso}g</td>
+      <td class="t-center">${c.pesoBase}g</td>
       <td class="t-center">${c.cookies}</td>
-      <td class="t-num">${formatAR(c.costoIngUnit)}</td>
-      <td class="t-num">${formatAR(c.costoPackaging)}</td>
-      <td class="t-num">${formatAR(c.costoFijoUnit)}</td>
       <td class="t-num" style="font-weight:600;color:var(--teal);font-size:15px">${formatAR(c.costoTotalUnit)}</td>
       ${haySim ? (sim
-        ? `<td class="t-num" style="background:#fff9e5"><div style="font-weight:600;color:var(--teal)">${formatAR(sim.costoTotalUnit)}</div><div class="t-muted" style="font-size:11px">${sim.cookiesSimuladas} cookies</div></td>`
-        : `<td class="t-num t-muted" style="background:#fff9e5">—</td>`
+        ? `<td class="t-center" style="background:#fff9e5">${formatCookies(sim.cookiesSimuladas)}</td>
+           <td class="t-num" style="background:#fff9e5;font-weight:600;color:var(--teal)">${formatAR(sim.costoTotalUnit)}</td>`
+        : `<td class="t-center t-muted" style="background:#fff9e5">—</td><td class="t-num t-muted" style="background:#fff9e5">—</td>`
       ) : ''}
       <td><button class="btn btn-sm btn-ghost" onclick="verReceta('${r.id}')">Ver</button></td>
     </tr>`;
@@ -838,11 +810,10 @@ function renderRecetas(){
   let html = '<div class="cards">';
   state.recetas.forEach(r => {
     const c = costoReceta(r);
-    const peso = r.pesoPorCookie || Math.round(c.pesoPorCookieReal);
     html += `
       <div class="card">
         <div class="card-title">${escape(r.nombre)}</div>
-        <div class="card-meta">${c.cookies} cookies × ${peso}g · ${r.ingredientes.length} ingredientes</div>
+        <div class="card-meta">${c.cookies} cookies × ${c.pesoBase}g · ${r.ingredientes.length} ingredientes</div>
         <div class="card-cost-label">Costo por cookie</div>
         <div class="card-cost">${formatAR(c.costoTotalUnit)}</div>
         <div class="card-section">
@@ -1027,9 +998,8 @@ function borrarFijo(idx){
 function agregarIngrediente(){
   const nombre = prompt('Nombre del ingrediente:');
   if (!nombre) return;
-  const unidad = prompt('Unidad de medida (g, ml, u, kg):', 'g') || 'g';
   const id = 'ing_' + Date.now();
-  state.ingredientes.push({id, nombre, marca:'', presentacion:1000, unidad, precio:0});
+  state.ingredientes.push({id, nombre, marca:'', presentacion:1000, unidad:'g', precio:0});
   markDirty(); render();
 }
 
@@ -1055,7 +1025,7 @@ function nuevaReceta(){
     id: 'rec_' + Date.now(),
     nombre,
     cookiesPorTanda: 12,
-    pesoPorCookie: 130,
+    pesoBasePorCookie: 130,
     ingredientes: []
   };
   state.recetas.push(nueva);
@@ -1139,9 +1109,7 @@ function editarReceta(id){
     <optgroup label="Ingredientes">${optsIng}</optgroup>
   `;
 
-  // Datos de peso
-  const pesoTotal = c.pesoTotal;
-  const pesoOficial = r.pesoPorCookie || Math.round(c.pesoPorCookieReal);
+  // Simulador de la receta
   const pesoSimVal = r._pesoSim || '';
   const sim = pesoSimVal ? simularConPeso(r, parseFloat(pesoSimVal)) : null;
 
@@ -1153,22 +1121,21 @@ function editarReceta(id){
 
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px">
       <div>
-        <label>Cookies por tanda</label>
+        <label>Cookies por tanda <span class="t-muted">(al peso base)</span></label>
         <input type="number" value="${r.cookiesPorTanda}" onchange="actReceta('${r.id}','cookiesPorTanda',parseInt(this.value)||12)">
       </div>
       <div>
-        <label>Peso oficial por cookie (g)</label>
-        <input type="number" value="${pesoOficial}" step="1" onchange="actReceta('${r.id}','pesoPorCookie',parseFloat(this.value)||0)">
+        <label>Peso base por cookie (g)</label>
+        <input type="number" value="${r.pesoBasePorCookie || 130}" step="1" onchange="actReceta('${r.id}','pesoBasePorCookie',parseFloat(this.value)||130)">
       </div>
       <div>
-        <label>Costo por cookie</label>
+        <label>Costo por cookie (al peso base)</label>
         <div style="padding:7px 10px;background:var(--teal-light);border-radius:var(--radius);font-weight:600;color:var(--teal);font-size:16px">${formatAR(c.costoTotalUnit)}</div>
       </div>
     </div>
 
     <div style="background:#f5efd7;padding:8px 12px;border-radius:var(--radius);margin-top:10px;font-size:12px;color:var(--muted)">
-      📊 Peso total de masa de esta receta: <strong style="color:var(--teal)">${Math.round(pesoTotal)}g</strong>
-      · Peso real por cookie con la cantidad actual: <strong style="color:var(--teal)">${Math.round(c.pesoPorCookieReal)}g</strong>
+      💡 La tanda completa cuesta <strong style="color:var(--teal)">${formatAR(c.costoIngTanda + c.costoFijoTanda + c.costoPackaging * c.cookies)}</strong> y rinde ${c.cookies} cookies de ${c.pesoBase}g. Si pesás distinto, sale otra cantidad pero el costo de la tanda no cambia.
     </div>
 
     <!-- SIMULADOR DE PESO -->
@@ -1177,29 +1144,29 @@ function editarReceta(id){
       <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
         <div>
           <label style="font-size:11px">Peso por cookie a simular (g)</label>
-          <input type="number" value="${pesoSimVal}" placeholder="Ej: 50" step="1" onchange="setRecetaSim('${r.id}',this.value)">
+          <input type="number" value="${pesoSimVal}" placeholder="Ej: 50" step="1" onchange="setRecetaSim('${r.id}',this.value)" oninput="setRecetaSim('${r.id}',this.value)">
         </div>
         <button class="btn btn-sm btn-outline" onclick="setRecetaSim('${r.id}','')" ${!pesoSimVal ? 'style="visibility:hidden"' : ''}>Limpiar</button>
       </div>
       ${sim ? `
         <div class="sim-result">
           <div>
-            <div class="sim-result-label">Cookies por tanda</div>
-            <div class="sim-result-value">${sim.cookiesSimuladas}</div>
+            <div class="sim-result-label">Cookies de ${pesoSimVal}g</div>
+            <div class="sim-result-value">${formatCookies(sim.cookiesSimuladas)}</div>
           </div>
           <div>
             <div class="sim-result-label">Costo c/u</div>
             <div class="sim-result-value">${formatAR(sim.costoTotalUnit)}</div>
           </div>
           <div>
-            <div class="sim-result-label">Costo total tanda</div>
-            <div class="sim-result-value">${formatAR(sim.costoTotalUnit * sim.cookiesSimuladas)}</div>
+            <div class="sim-result-label">Total tanda</div>
+            <div class="sim-result-value">${formatAR(sim.costoTotalUnit * Math.floor(sim.cookiesSimuladas))}</div>
           </div>
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center">
-          Esta simulación NO modifica la receta. Si querés guardarlo, cambiá el peso oficial arriba.
+          Esta simulación NO modifica la receta. Los ingredientes y la tanda son los mismos; cambia solo el gramaje.
         </div>
-      ` : (pesoSimVal ? `<div style="font-size:12px;color:var(--warning);margin-top:8px">No se puede simular con ese peso (¿es mayor al total de masa?)</div>` : '')}
+      ` : (pesoSimVal ? `<div style="font-size:12px;color:var(--warning);margin-top:8px">Ingresá un peso válido (mayor a 0)</div>` : '')}
     </div>
 
     <div class="recipe-editor">
@@ -1467,7 +1434,7 @@ async function guardarTodo(){
 
   status('Guardando en Google Sheets...');
   try {
-    // Limpiar campos efímeros (_pesoSim) antes de guardar para no contaminar el JSON
+    // Limpiar campos efímeros (_pesoSim) antes de guardar
     const recetasParaGuardar = state.recetas.map(r => {
       const copia = {...r};
       delete copia._pesoSim;
