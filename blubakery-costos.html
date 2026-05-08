@@ -589,10 +589,41 @@ function cargarSubrecetasIniciales(){
 }
 
 /* ========== CÁLCULOS ========== */
+
+/* Convierte una cantidad pedida por una receta a la MISMA unidad
+   en la que está cargado el ingrediente.
+   Ejemplos:
+     - Ingrediente en kg, receta pide 320 (g) → devuelve 0.32 kg
+     - Ingrediente en g, receta pide 200 (g) → devuelve 200 g (sin cambio)
+     - Ingrediente en l, receta pide 100 (ml) → devuelve 0.1 l
+     - Ingrediente en ml, receta pide 5 (ml) → devuelve 5 ml (sin cambio)
+     - Ingrediente en u, receta pide 2 (u) → devuelve 2 u
+   Si las unidades son incompatibles (ej. ingrediente en u y receta pide gramos),
+   se asume que la cantidad de la receta está en la unidad del ingrediente. */
+function convertirCantidad(cantidadReceta, unidadIngrediente){
+  const u = (unidadIngrediente || 'g').toLowerCase();
+  // El ingrediente está cargado en kg → la receta normalmente lo pide en g
+  if (u === 'kg') return cantidadReceta / 1000;
+  // El ingrediente está cargado en l → la receta normalmente lo pide en ml
+  if (u === 'l')  return cantidadReceta / 1000;
+  // g, ml, u → sin conversión
+  return cantidadReceta;
+}
+
+/* Costo del ingrediente: precio dividido por su presentación, en la unidad cargada */
 function costoPorUnidad(ingId){
   const ing = state.ingredientes.find(i => i.id === ingId);
   if (!ing || !ing.precio || !ing.presentacion) return 0;
   return ing.precio / ing.presentacion;
+}
+
+/* Costo de USAR cierta cantidad (de la receta) de un ingrediente.
+   Aplica conversión de unidades automáticamente. */
+function costoUsoIngrediente(ingId, cantidadReceta){
+  const ing = state.ingredientes.find(i => i.id === ingId);
+  if (!ing) return 0;
+  const cantConvertida = convertirCantidad(cantidadReceta || 0, ing.unidad);
+  return costoPorUnidad(ingId) * cantConvertida;
 }
 
 /* Costo total de una sub-receta (suma de ingredientes) */
@@ -604,7 +635,7 @@ function costoSubreceta(sub){
     const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
     if (!ing) { advertencias.push('Ingrediente no encontrado'); return; }
     if (!ing.precio) advertencias.push(ing.nombre);
-    total += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
+    total += costoUsoIngrediente(item.ingredienteId, item.cantidad || 0);
   });
   const rend = sub.rendimiento || 0;
   const cpu = rend > 0 ? total / rend : 0;
@@ -640,7 +671,7 @@ function costoReceta(receta){
       return;
     }
     if (!ing.precio) advertencias.push(ing.nombre);
-    costoIngTanda += costoPorUnidad(item.ingredienteId) * (item.cantidad || 0);
+    costoIngTanda += costoUsoIngrediente(item.ingredienteId, item.cantidad || 0);
   });
 
   const costoPackaging = state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
@@ -1089,7 +1120,7 @@ function editarReceta(id){
       }
       // Ingrediente normal
       const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
-      const costo = ing ? costoPorUnidad(item.ingredienteId) * item.cantidad : 0;
+      const costo = ing ? costoUsoIngrediente(item.ingredienteId, item.cantidad) : 0;
       ingredientesHtml += `<div class="ingr-row">
         <div class="ingr-name">${ing ? escape(ing.nombre) : '<span style="color:var(--danger)">⚠ Ingrediente inexistente</span>'}${item.nota ? `<br><span class="t-muted">${escape(item.nota)}</span>` : ''}</div>
         <input class="inline-sm" type="number" value="${item.cantidad}" step="0.01" onchange="actRecIng('${r.id}',${item._idx},'cantidad',parseFloat(this.value)||0)">
@@ -1293,7 +1324,7 @@ function editarSubreceta(id){
   } else {
     s.ingredientes.forEach((item, idx) => {
       const ing = state.ingredientes.find(i => i.id === item.ingredienteId);
-      const costo = ing ? costoPorUnidad(item.ingredienteId) * item.cantidad : 0;
+      const costo = ing ? costoUsoIngrediente(item.ingredienteId, item.cantidad) : 0;
       ingredientesHtml += `<div class="ingr-row">
         <div class="ingr-name">${ing ? escape(ing.nombre) : '<span style="color:var(--danger)">⚠ Ingrediente inexistente</span>'}</div>
         <input class="inline-sm" type="number" value="${item.cantidad}" step="0.01" onchange="actSubIng('${s.id}',${idx},'cantidad',parseFloat(this.value)||0)">
