@@ -295,6 +295,11 @@
       <div class="stat-sub">ingresos − egresos</div>
     </div>
 
+    <div class="section-h">Salidas de plata por origen</div>
+    <div class="stat-card" id="r-salidas-card">
+      <div class="loading-wrap"><span class="spinner"></span>Cargando...</div>
+    </div>
+
     <div class="section-h">Dinero disponible</div>
     <div class="stat-card" id="r-disponible-card">
       <div class="loading-wrap"><span class="spinner"></span>Cargando...</div>
@@ -834,6 +839,50 @@ function renderResumen() {
   document.getElementById('r-egresos').textContent = fmt(egresos);
   document.getElementById('r-egresos-sub').textContent = nOut + ' movimientos';
   document.getElementById('r-resultado').textContent = fmt(ingresos - egresos);
+
+  // Salidas de plata por origen (qué caja "puso" la plata para los gastos/retiros del mes)
+  const salidasPorCaja = {};
+  state.cajas.forEach(c => { salidasPorCaja[c.id] = 0; });
+  movsMes.forEach(m => {
+    if (m.tipo === 'gasto' || m.tipo === 'retiro') {
+      (m.pagos || []).forEach(p => {
+        if (salidasPorCaja[p.cajaId] !== undefined) {
+          salidasPorCaja[p.cajaId] += parseFloat(p.monto) || 0;
+        }
+      });
+    }
+  });
+
+  // Agrupar: cajas Blu juntas + cada aporte separado
+  const cajasBluTotal = state.cajas.filter(c => c.tipo === 'caja').reduce((s,c) => s + salidasPorCaja[c.id], 0);
+  const aportesItems = state.cajas.filter(c => c.tipo === 'aporte').map(c => ({
+    nombre: c.nombre,
+    monto: salidasPorCaja[c.id],
+    color: c.id === 'ap1' ? '#085041' : '#0C447C'
+  }));
+  const totalSalidas = cajasBluTotal + aportesItems.reduce((s,a) => s + a.monto, 0);
+
+  let salidasHtml = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+      <span style="font-size:12px;color:#6B6560;">De plata de Blu (Caja Ahorro + Efectivo)</span>
+      <span style="font-size:14px;font-weight:500;color:#004e64;font-variant-numeric:tabular-nums;">${fmt(cajasBluTotal)}</span>
+    </div>
+  `;
+  aportesItems.forEach(a => {
+    salidasHtml += `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:12px;color:#6B6560;">De ${escapeHtml(a.nombre)}</span>
+        <span style="font-size:14px;font-weight:500;color:${a.color};font-variant-numeric:tabular-nums;">${fmt(a.monto)}</span>
+      </div>
+    `;
+  });
+  salidasHtml += `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:8px;border-top:0.5px solid #C8C4BE;">
+      <span style="font-size:13px;font-weight:600;">Total salidas del mes</span>
+      <span style="font-size:16px;font-weight:600;color:#A32D2D;font-variant-numeric:tabular-nums;">${fmt(totalSalidas)}</span>
+    </div>
+  `;
+  document.getElementById('r-salidas-card').innerHTML = salidasHtml;
 
   // Dinero disponible (cajas tipo "caja")
   const saldos = calcularSaldos();
