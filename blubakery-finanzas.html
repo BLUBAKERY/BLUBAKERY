@@ -309,6 +309,15 @@
     <div class="stat-card" id="r-aportes-card">
       <div class="loading-wrap"><span class="spinner"></span>Cargando...</div>
     </div>
+
+    <div style="margin-top:2rem;padding-top:1rem;border-top:0.5px dashed #C8C4BE;">
+      <div style="font-size:10px;color:#9B9590;text-align:center;margin-bottom:8px;letter-spacing:0.05em;">HERRAMIENTAS</div>
+      <button class="action-btn full" style="opacity:0.7;font-size:11px;" onclick="iniciarImportacion()">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:#6B6560;fill:none;stroke-width:1.8;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Importar gastos históricos de gastos2
+      </button>
+      <div style="font-size:10px;color:#9B9590;text-align:center;margin-top:6px;">Solo se ejecuta una vez. Importa la tab "Gastos" del Sheet sin afectar los saldos actuales.</div>
+    </div>
   </div>
 
 </div>
@@ -694,6 +703,8 @@ async function cargarMovimientos() {
     let items = []; let pagos = [];
     try { items = row[7] ? JSON.parse(row[7]) : []; } catch(e) {}
     try { pagos = row[8] ? JSON.parse(row[8]) : []; } catch(e) {}
+    const notas = row[10] || '';
+    const historico = notas.startsWith('[HISTORICO]');
     return {
       id: row[0] || '',
       fecha: row[1] || '',
@@ -704,7 +715,8 @@ async function cargarMovimientos() {
       proveedor: row[6] || '',
       items, pagos,
       montoTotal: parseFloat(row[9]) || 0,
-      notas: row[10] || ''
+      notas: historico ? notas.replace('[HISTORICO]', '').trim() : notas,
+      historico
     };
   }).filter(m => m.id);
   state.movimientos.sort((a,b) => (b.fecha || '').localeCompare(a.fecha || ''));
@@ -744,23 +756,21 @@ async function guardarMovimientoEnSheet(mov) {
 function calcularSaldos() {
   // Para cada caja: saldo inicial + suma de pagos que la afectan
   // Los gastos restan, los ingresos suman, las transferencias mueven.
+  // Los movimientos con historico=true se IGNORAN (son data importada que no debe afectar saldos)
   const saldos = {};
   state.cajas.forEach(c => { saldos[c.id] = c.saldoInicial; });
 
   state.movimientos.forEach(mov => {
+    if (mov.historico) return; // Saltar movimientos históricos importados
     const factor = (mov.tipo === 'gasto' || mov.tipo === 'retiro') ? -1 : 1;
     (mov.pagos || []).forEach(p => {
       if (saldos[p.cajaId] !== undefined) {
         saldos[p.cajaId] += factor * (parseFloat(p.monto) || 0);
       }
     });
-    // Para transferencia: el primer pago resta de su caja, el "destino" se suma (guardado en mov.destino)
+    // Para transferencia: el primer pago resta de su caja, el "destino" se suma
     if (mov.tipo === 'transferencia' && mov.destino) {
       if (saldos[mov.destino] !== undefined) saldos[mov.destino] += mov.montoTotal;
-      if (mov.pagos[0] && saldos[mov.pagos[0].cajaId] !== undefined) {
-        // Ya restamos arriba con factor -1, pero transferencia debe ser neta: restamos y sumamos.
-        // factor para transferencia debería ser -1 (sale de la caja origen). El destino lo sumamos acá.
-      }
     }
   });
   return saldos;
@@ -794,7 +804,7 @@ function renderCajas() {
   }).join('');
 
   // Movimientos recientes
-  const recientes = state.movimientos.slice(0, 8);
+  const recientes = state.movimientos.filter(m => !m.historico).slice(0, 8);
   const mc = document.getElementById('movimientos-recientes');
   if (!recientes.length) {
     mc.innerHTML = '<div class="empty-state">Sin movimientos aún.</div>';
@@ -824,7 +834,7 @@ function renderCajas() {
 function renderResumen() {
   const hoy = new Date();
   const mesActual = hoy.toISOString().slice(0,7); // "YYYY-MM"
-  const movsMes = state.movimientos.filter(m => m.fecha.startsWith(mesActual));
+  const movsMes = state.movimientos.filter(m => m.fecha.startsWith(mesActual) && !m.historico);
 
   let ingresos = 0, egresos = 0, nIn = 0, nOut = 0;
   movsMes.forEach(m => {
@@ -1021,6 +1031,188 @@ function formatFecha(f) {
   const parts = f.split('-');
   if (parts.length === 3) return parts[2] + '/' + parts[1];
   return f;
+}
+
+// =============================================
+// IMPORTACIÓN DE GASTOS HISTÓRICOS
+// =============================================
+async function iniciarImportacion() {
+  if (!accessToken) { toast('Tocá "conectar" arriba primero', 'error'); return; }
+
+  // Confirmar primero que el usuario realmente quiere hacer esto
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">Importar gastos históricos</div>
+    <p style="font-size:13px;color:#6B6560;line-height:1.5;margin-bottom:14px;">
+      Voy a leer la tab <b>Gastos</b> del Sheet y traer todos los gastos al sistema nuevo como
+      <b>histórico contable</b>. Los saldos actuales <b>no se modifican</b>.
+    </p>
+    <p style="font-size:12px;color:#9B9590;line-height:1.5;margin-bottom:14px;">
+      Antes de avanzar, te voy a mostrar cuántos gastos encontré para que confirmes.
+    </p>
+    <div style="display:flex;gap:8px;">
+      <button class="action-btn" style="flex:1;" onclick="cerrarModal()">Cancelar</button>
+      <button class="save-btn" style="flex:1;margin:0;" onclick="leerGastosViejos()">Continuar →</button>
+    </div>
+  `;
+  document.getElementById('modal-bg').classList.add('show');
+}
+
+async function leerGastosViejos() {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">Leyendo gastos...</div>
+    <div class="loading-wrap"><span class="spinner"></span>Buscando en la tab Gastos del Sheet...</div>
+  `;
+
+  try {
+    // Leer la tab Gastos completa
+    const r = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent('Gastos!A2:G')}`,
+      { headers: { 'Authorization': 'Bearer ' + accessToken } }
+    );
+    if (!r.ok) throw new Error('No se pudo leer la tab Gastos');
+    const data = await r.json();
+    const filas = data.values || [];
+
+    // Tu tab Gastos: FECHA | QUIÉN | PRODUCTO | GASTO TOTAL | TIPO DE GASTO | PROVEEDOR | NOTAS
+    const gastos = filas.map(row => ({
+      fecha: row[0] || '',
+      quien: row[1] || '',
+      desc: row[2] || '',
+      monto: parseFloat(String(row[3] || '0').replace(/[^\d.,-]/g,'').replace(',','.')) || 0,
+      cat: row[4] || '',
+      proveedor: row[5] || '',
+      notas: row[6] || ''
+    })).filter(g => g.monto > 0 && g.desc);
+
+    if (gastos.length === 0) {
+      document.getElementById('modal-content').innerHTML = `
+        <div class="modal-title">No hay gastos para importar</div>
+        <p style="font-size:13px;color:#6B6560;margin-bottom:14px;">No encontré gastos en la tab "Gastos" del Sheet.</p>
+        <button class="action-btn full" onclick="cerrarModal()">Cerrar</button>
+      `;
+      return;
+    }
+
+    const total = gastos.reduce((s,g) => s + g.monto, 0);
+    const porQuien = { July: 0, Joa: 0, Blu: 0 };
+    gastos.forEach(g => { if (porQuien[g.quien] !== undefined) porQuien[g.quien] += g.monto; });
+
+    // Guardamos en variable global temporal para acceder en el siguiente paso
+    window._gastosAImportar = gastos;
+
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-title">Preview de importación</div>
+      <div class="info-pill ok" style="margin-bottom:12px;">
+        <span>Encontré ${gastos.length} gastos</span><b>${fmt(total)}</b>
+      </div>
+      <div style="background:#F1EFE8;padding:10px 12px;border-radius:7px;margin-bottom:14px;font-size:12px;line-height:1.7;">
+        <div style="display:flex;justify-content:space-between;"><span>July paga (→ Aporte July)</span><b>${fmt(porQuien.July)}</b></div>
+        <div style="display:flex;justify-content:space-between;"><span>Joa paga (→ Aporte Joa)</span><b>${fmt(porQuien.Joa)}</b></div>
+        <div style="display:flex;justify-content:space-between;"><span>Blu paga (→ Caja Ahorro Blu)</span><b>${fmt(porQuien.Blu)}</b></div>
+      </div>
+      <p style="font-size:11px;color:#9B9590;line-height:1.5;margin-bottom:14px;">
+        Se marcarán como <b>históricos</b>. Aparecen en el historial y en el resumen mensual de meses pasados, pero <b>no afectan los saldos actuales</b>.
+      </p>
+      <div style="display:flex;gap:8px;">
+        <button class="action-btn" style="flex:1;" onclick="cerrarModal()">Cancelar</button>
+        <button class="save-btn" style="flex:1;margin:0;" onclick="ejecutarImportacion()">Importar ${gastos.length} gastos</button>
+      </div>
+    `;
+  } catch(err) {
+    console.error(err);
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-title">Error</div>
+      <p style="font-size:13px;color:#A32D2D;margin-bottom:14px;">${escapeHtml(err.message)}</p>
+      <button class="action-btn full" onclick="cerrarModal()">Cerrar</button>
+    `;
+  }
+}
+
+async function ejecutarImportacion() {
+  const gastos = window._gastosAImportar || [];
+  if (!gastos.length) { cerrarModal(); return; }
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-title">Importando...</div>
+    <div class="loading-wrap"><span class="spinner"></span><span id="import-progress">Preparando ${gastos.length} gastos...</span></div>
+  `;
+
+  // Construir todas las filas a insertar en Movimientos
+  const filas = gastos.map((g, idx) => {
+    // Convertir fecha si viene en formato dd/mm/yyyy
+    let fecha = g.fecha;
+    if (fecha.includes('/')) {
+      const parts = fecha.split('/');
+      if (parts.length === 3) {
+        const dd = parts[0].padStart(2, '0');
+        const mm = parts[1].padStart(2, '0');
+        const yyyy = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+        fecha = `${yyyy}-${mm}-${dd}`;
+      }
+    }
+
+    // Asignar caja según quien pagó
+    let cajaId = 'caja1'; // default: Caja Ahorro Blu
+    if (g.quien === 'July') cajaId = 'ap1';
+    else if (g.quien === 'Joa') cajaId = 'ap2';
+    else if (g.quien === 'Blu') cajaId = 'caja1';
+
+    return [
+      'imp_' + Date.now() + '_' + idx, // id único
+      fecha,
+      'gasto',
+      g.quien || 'Blu',
+      g.desc,
+      g.cat || '',
+      g.proveedor || '',
+      JSON.stringify([]), // items
+      JSON.stringify([{ cajaId, monto: g.monto }]),
+      g.monto,
+      '[HISTORICO] ' + (g.notas || '').trim()
+    ];
+  });
+
+  try {
+    document.getElementById('import-progress').textContent = `Guardando ${gastos.length} gastos en Movimientos...`;
+
+    // Insertar todas las filas de una sola vez
+    const r = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Movimientos!A:K:append?valueInputOption=RAW`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ values: filas })
+      }
+    );
+    if (!r.ok) {
+      const txt = await r.text();
+      throw new Error('Error al guardar: ' + txt.substring(0, 150));
+    }
+
+    // Recargar todo
+    await cargarMovimientos();
+    renderCajas();
+    renderResumen();
+
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-title">¡Listo!</div>
+      <div class="info-pill ok" style="margin-bottom:14px;">
+        <span>${gastos.length} gastos importados</span><b>✓</b>
+      </div>
+      <p style="font-size:12px;color:#6B6560;line-height:1.5;margin-bottom:14px;">
+        Los gastos ya están en el sistema como histórico. Los saldos actuales no cambiaron.
+      </p>
+      <button class="action-btn full" onclick="cerrarModal()">Cerrar</button>
+    `;
+    delete window._gastosAImportar;
+  } catch(err) {
+    console.error(err);
+    document.getElementById('modal-content').innerHTML = `
+      <div class="modal-title">Error al importar</div>
+      <p style="font-size:13px;color:#A32D2D;margin-bottom:14px;">${escapeHtml(err.message)}</p>
+      <button class="action-btn full" onclick="cerrarModal()">Cerrar</button>
+    `;
+  }
 }
 
 function escapeHtml(s) {
