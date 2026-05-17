@@ -525,21 +525,53 @@ var dw = document.getElementById("dwrap");
 
   // disp ahora incluye TODOS los días (cerrados también), pero marcados
   disp = diasConEstado;
+ var disponibles = disp.filter(function(x){ return x.disponible; });
+  var cerrados = disp.filter(function(x){ return !x.disponible; });
+
   if (!disp.length) {
     dw.innerHTML = '<div class="nd">No hay días disponibles. Volvé pronto.</div>';
     diaId = null;
     document.getElementById("fwrap").innerHTML = "";
   } else {
-    disp.forEach(function(d, i) {
+    // Si ninguno está disponible, mostrar mensaje arriba
+    if (!disponibles.length) {
+      var msg = document.createElement("div");
+      msg.className = "nd";
+      msg.style.cssText = "background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px;margin-bottom:10px;font-size:13px;color:#856404";
+      msg.innerHTML = "⚠ Los pedidos para los días disponibles ya cerraron (mínimo " + minH + "hs de anticipación). Volvé cuando carguemos nuevas fechas.";
+      dw.appendChild(msg);
+    }
+
+    disp.forEach(function(item, i) {
+      var d = item.dia;
       var b = document.createElement("button");
-      b.className = "db" + (i === 0 ? " act" : "");
-      b.textContent = d.label;
-      b.id = "d-" + d.id;
-      b.onclick = (function(id){ return function(){ setDia(id); }; })(d.id);
+      if (item.disponible) {
+        b.className = "db" + (i === 0 || (!disponibles.length && false) ? "" : "");
+        b.textContent = d.label;
+        b.id = "d-" + d.id;
+        b.onclick = (function(id){ return function(){ setDia(id); }; })(d.id);
+      } else {
+        b.className = "db";
+        b.style.cssText = "opacity:.45;text-decoration:line-through;cursor:not-allowed";
+        b.textContent = d.label + " · cerrado";
+        b.id = "d-" + d.id;
+        b.onclick = function(){
+          alert("Este día ya no se puede pedir. Hace falta un mínimo de " + minH + " horas de anticipación. Elegí otra fecha disponible.");
+        };
+      }
       dw.appendChild(b);
     });
-    diaId = disp[0].id;
-    renderFranjas();
+
+    // Marcar el primer disponible como activo
+    if (disponibles.length) {
+      diaId = disponibles[0].dia.id;
+      var btnAct = document.getElementById("d-" + diaId);
+      if (btnAct) btnAct.className = "db act";
+      renderFranjas();
+    } else {
+      diaId = null;
+      document.getElementById("fwrap").innerHTML = "";
+    }
   }
   updR();
 }
