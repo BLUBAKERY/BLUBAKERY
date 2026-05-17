@@ -533,11 +533,12 @@ function formatearFechaSheet(v) {
   const m = s.match(/^Date\((\d+),(\d+),(\d+)/);
   if (m) {
     const anio = parseInt(m[1]);
-    const mes = parseInt(m[2]) + 1; // 0-indexed → 1-indexed
+    const mes = parseInt(m[2]); // 0-indexed (enero=0)
     const dia = parseInt(m[3]);
     const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-    const f = new Date(anio, mes-1, dia);
-    return `${dias[f.getDay()]} ${dia}/${mes}`;
+    const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    const f = new Date(anio, mes, dia);
+    return `${dias[f.getDay()]} ${dia} de ${meses[mes]}`;
   }
   return s;
 }
@@ -639,9 +640,19 @@ function renderPedidos() {
 }
 
 function parsearFechaDeLabel(label) {
-  const m = String(label).match(/(\d{1,2})\/(\d{1,2})/);
-  if (!m) return null;
-  return new Date(new Date().getFullYear(), parseInt(m[2]) - 1, parseInt(m[1]));
+  const s = String(label || "");
+  // Formato "Sábado 23 de mayo"
+  const meses = {"enero":0,"febrero":1,"marzo":2,"abril":3,"mayo":4,"junio":5,"julio":6,"agosto":7,"septiembre":8,"octubre":9,"noviembre":10,"diciembre":11};
+  const m1 = s.toLowerCase().match(/(\d{1,2})\s+de\s+([a-záéíóú]+)/);
+  if (m1 && meses[m1[2]] !== undefined) {
+    return new Date(new Date().getFullYear(), meses[m1[2]], parseInt(m1[1]));
+  }
+  // Formato "23/5" o "Sábado 23/5"
+  const m2 = s.match(/(\d{1,2})\/(\d{1,2})/);
+  if (m2) {
+    return new Date(new Date().getFullYear(), parseInt(m2[2]) - 1, parseInt(m2[1]));
+  }
+  return null;
 }
 
 function renderResumenProduccion(peds) {
