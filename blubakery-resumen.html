@@ -360,6 +360,41 @@
   </div>
 </div>
 
+<!-- MODAL Editar Pedido -->
+<div class="modal-bg" id="modal-editar">
+  <div class="modal" style="max-width:480px">
+    <h3>Editar pedido</h3>
+    <div id="editar-info" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+
+    <label>Contenido del pedido (cookies / box)</label>
+    <textarea id="edit-cookies" rows="3" style="font-family:inherit;width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--cream-2);font-size:13px"></textarea>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">Ej: Box x 4 cookies a elección x1 (1 Red Velvet + 1 Toffee + 1 Pistacho + 1 Choco chips)</div>
+
+    <label>Total ($)</label>
+    <input type="number" id="edit-total" step="0.01">
+
+    <label>Forma de pago</label>
+    <select id="edit-pago">
+      <option value="Efectivo">Efectivo</option>
+      <option value="Transferencia">Transferencia</option>
+    </select>
+
+    <label>Horario</label>
+    <input type="text" id="edit-horario" placeholder="ej: 15:00 – 16:30 hs">
+
+    <label>Dirección (si es envío)</label>
+    <input type="text" id="edit-direccion">
+
+    <label>Notas / aclaraciones</label>
+    <textarea id="edit-notas" rows="2"></textarea>
+
+    <div class="modal-actions">
+      <button class="cancelar" onclick="closeModal('modal-editar')">Cancelar</button>
+      <button class="confirmar" id="btnConfirmarEdit">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL Cambiar Fecha -->
 <div class="modal-bg" id="modal-fecha">
   <div class="modal">
@@ -751,6 +786,7 @@ function renderPedidoCard(p) {
       actions += `<button onclick="abrirCobrar('${nroOrden}')">💰 Marcar cobrado</button>`;
     }
     actions += `<button class="primary" onclick="abrirEntregar('${nroOrden}')">✓ Entregado</button>`;
+    actions += `<button onclick="abrirEditar('${nroOrden}')">✏️ Editar</button>`;
     actions += `<button onclick="abrirCambiarFecha('${nroOrden}')">📅 Cambiar fecha</button>`;
     actions += `<button class="danger" onclick="cancelarPedido('${nroOrden}')">✕ Cancelar</button>`;
   }
@@ -911,6 +947,48 @@ function abrirCambiarFecha(nroOrden) {
   $("nueva-fecha").value = "";
   $("modal-fecha").classList.add("active");
 }
+
+function abrirEditar(nroOrden) {
+  pedidoActivo = pedidos.find(p => String(p.NroOrden) === String(nroOrden));
+  if (!pedidoActivo) return;
+  $("editar-info").textContent = `Pedido #${nroOrden} · ${pedidoActivo.Nombre}`;
+  $("edit-cookies").value = pedidoActivo.Cookies || "";
+  $("edit-total").value = pedidoActivo.Total || "";
+  // Detectar pago actual
+  const pagoActual = String(pedidoActivo.Pago || "").toLowerCase();
+  $("edit-pago").value = pagoActual.includes("transfer") ? "Transferencia" : "Efectivo";
+  $("edit-horario").value = pedidoActivo.Horario || "";
+  $("edit-direccion").value = pedidoActivo.Direccion || "";
+  $("edit-notas").value = pedidoActivo.Notas || "";
+  $("modal-editar").classList.add("active");
+}
+
+$("btnConfirmarEdit").addEventListener("click", async () => {
+  if (!pedidoActivo) return;
+  const nuevosCookies = $("edit-cookies").value.trim();
+  const nuevoTotal = parseFloat($("edit-total").value) || 0;
+  if (!nuevosCookies) { alert("El contenido del pedido no puede estar vacío"); return; }
+  if (nuevoTotal <= 0) { alert("El total tiene que ser mayor a 0"); return; }
+  // Si ya estaba cobrado y se cambia el total, avisar
+  const cobradoVal = String(pedidoActivo.Cobrado || "").toLowerCase();
+  const cobrado = cobradoVal === "sí" || cobradoVal === "si";
+  if (cobrado && Math.abs(nuevoTotal - (parseFloat(pedidoActivo.Total) || 0)) > 0.01) {
+    if (!confirm("Este pedido ya está cobrado y vas a cambiar el total. El monto que ya se sumó a caja NO se va a ajustar automáticamente. ¿Continuar?")) return;
+  }
+  await enviar({
+    tipo: "update_pedido",
+    accion: "editar",
+    nro_orden: pedidoActivo.NroOrden,
+    cookies: nuevosCookies,
+    total: nuevoTotal,
+    pago: $("edit-pago").value,
+    horario: $("edit-horario").value.trim(),
+    direccion: $("edit-direccion").value.trim(),
+    notas: $("edit-notas").value.trim()
+  });
+  closeModal("modal-editar");
+  setTimeout(cargarTodo, 1200);
+});
 
 $("btnConfirmarFecha").addEventListener("click", async () => {
   const nueva = $("nueva-fecha").value.trim();
