@@ -78,6 +78,29 @@
   .tab.active { background: var(--navy); color: white; }
 
   /* Día agrupador */
+  .dashboard {
+    background: white; border: 2px solid var(--navy);
+    border-radius: 14px; margin-bottom: 20px; overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,78,100,.1);
+  }
+  .dashboard-header {
+    background: var(--navy); color: white; padding: 14px 16px;
+  }
+  .dashboard-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700;
+  }
+  .dashboard-meta { font-size: 13px; opacity: .9; margin-top: 2px; }
+  .dashboard .resumen-prod {
+    background: white; border: none; padding: 16px;
+  }
+  .dashboard .resumen-prod .label { font-size: 12px; color: var(--brown); }
+  .dashboard .resumen-prod .item {
+    display: inline-block; padding: 4px 10px;
+    background: var(--cream); border-radius: 16px;
+    margin: 3px 4px 3px 0; font-size: 13px;
+  }
+
   .dia-grupo {
     background: white; border: 1px solid var(--border);
     border-radius: 14px; margin-bottom: 16px; overflow: hidden;
@@ -520,6 +543,9 @@ function renderPedidos() {
   const cont = $("dias-container");
   cont.innerHTML = "";
 
+  // Filtrar fecha pasada solo cuando estamos viendo "pendientes"
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
   let pedFiltrados = pedidos.filter(p => {
     const estado = String(p.Estado || "").toLowerCase().trim();
     if (filtroActual === "pendientes") return estado === "pendiente" || estado === "";
@@ -540,14 +566,43 @@ function renderPedidos() {
     grupos[dia].push(p);
   });
 
-  // Ordenar días: intentamos parsear fecha del label
+  // Ordenar días: por fecha real cuando se puede parsear
   const diasOrdenados = Object.keys(grupos).sort((a, b) => {
     const fa = parsearFechaDeLabel(a);
     const fb = parsearFechaDeLabel(b);
     if (fa && fb) return fa - fb;
+    if (fa) return -1;
+    if (fb) return 1;
     return a.localeCompare(b);
   });
 
+  // DASHBOARD: si estamos en "Pendientes", mostrar resumen consolidado de la próxima fecha
+  if (filtroActual === "pendientes" && diasOrdenados.length > 0) {
+    // Buscar el primer día que sea hoy o futuro
+    let proximoDia = null;
+    for (const d of diasOrdenados) {
+      const f = parsearFechaDeLabel(d);
+      if (!f || f >= hoy) { proximoDia = d; break; }
+    }
+    if (!proximoDia) proximoDia = diasOrdenados[0];
+
+    const pedsProx = grupos[proximoDia];
+    const resumenHtml = renderResumenProduccion(pedsProx);
+    if (resumenHtml) {
+      const dashboard = document.createElement("div");
+      dashboard.className = "dashboard";
+      dashboard.innerHTML = `
+        <div class="dashboard-header">
+          <div class="dashboard-label">🍪 Próxima tanda · ${escapeHtml(proximoDia)}</div>
+          <div class="dashboard-meta">${pedsProx.length} pedido${pedsProx.length !== 1 ? "s" : ""} pendiente${pedsProx.length !== 1 ? "s" : ""}</div>
+        </div>
+        ${resumenHtml}
+      `;
+      cont.appendChild(dashboard);
+    }
+  }
+
+  // Grupos por día (sin resumen interno)
   diasOrdenados.forEach(dia => {
     const peds = grupos[dia];
     const grupo = document.createElement("div");
@@ -557,7 +612,6 @@ function renderPedidos() {
         <h2>${escapeHtml(dia)}</h2>
         <div class="meta">${peds.length} pedido${peds.length !== 1 ? "s" : ""}</div>
       </div>
-      ${renderResumenProduccion(peds)}
       <div class="pedidos-list">
         ${peds.map(renderPedidoCard).join("")}
       </div>
