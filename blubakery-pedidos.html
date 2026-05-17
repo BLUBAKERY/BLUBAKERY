@@ -484,18 +484,47 @@ function init() {
   renderBoxFill();
 
   // Render dias con corte
-  var dw = document.getElementById("dwrap");
+var dw = document.getElementById("dwrap");
   dw.innerHTML = "";
   var now = new Date();
-  var MAP = {lunes:1,martes:2,miercoles:3,jueves:4,viernes:5,sabado:6,domingo:0};
-  disp = CFG.diasEntrega.filter(function(d) {
-    var k = d.id ? d.id.toLowerCase() : d.label.toLowerCase().replace(/[^a-z]/g,"");
-    var n = MAP[k];
-    if (n === undefined) return true;
-    var diff = n - now.getDay();
-    if (diff <= 0) diff += 7;
-    return (diff * 24 - now.getHours()) >= (CFG.horasCorte || 24);
+  var minH = CFG.horasCorte || 24;
+
+  // Parsear cada día: extraer fecha del label y hora de inicio del horario
+  function parsearFechaDia(d) {
+    // Busca patrón "DD/M" o "D/M" o "DD/MM" en el label
+    var mFecha = (d.label || "").match(/(\d{1,2})\/(\d{1,2})/);
+    if (!mFecha) return null;
+    var dia = parseInt(mFecha[1], 10);
+    var mes = parseInt(mFecha[2], 10) - 1; // JS: enero=0
+    // Buscar hora de inicio en el horario (ej: "15:00 – 16:30 hs" o "15hs a 16.30hs")
+    var hStr = (d.horario || (d.franjas && d.franjas[0]) || "15:00");
+    var mHora = hStr.match(/(\d{1,2})[:.]?(\d{0,2})/);
+    var hora = mHora ? parseInt(mHora[1], 10) : 15;
+    var min = (mHora && mHora[2]) ? parseInt(mHora[2], 10) : 0;
+    // Año actual; si el mes ya pasó, asumimos año siguiente
+    var anio = now.getFullYear();
+    var fecha = new Date(anio, mes, dia, hora, min, 0);
+    if (fecha < now && (now.getMonth() - mes > 6)) {
+      fecha = new Date(anio + 1, mes, dia, hora, min, 0);
+    }
+    return fecha;
+  }
+
+  // Marcar cada día con su estado (disponible / cerrado)
+  var diasConEstado = CFG.diasEntrega.map(function(d) {
+    var fecha = parsearFechaDia(d);
+    if (!fecha) return { dia: d, disponible: true, horasFaltantes: null };
+    var horasFaltantes = (fecha - now) / (1000 * 60 * 60);
+    return {
+      dia: d,
+      disponible: horasFaltantes >= minH,
+      horasFaltantes: horasFaltantes,
+      fecha: fecha
+    };
   });
+
+  // disp ahora incluye TODOS los días (cerrados también), pero marcados
+  disp = diasConEstado;
   if (!disp.length) {
     dw.innerHTML = '<div class="nd">No hay días disponibles. Volvé pronto.</div>';
     diaId = null;
