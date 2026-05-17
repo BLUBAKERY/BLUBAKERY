@@ -521,7 +521,25 @@ function normalizarPedido(p) {
   Object.keys(p).forEach(k => { out[map[k] || k] = p[k]; });
   const dirText = String(out.Direccion || "");
   out.TipoEntrega = dirText.toLowerCase().includes("retiro") ? "Retiro" : "Envio";
+  // Normalizar campo DiaEntrega si vino como Date de gviz
+  out.DiaEntrega = formatearFechaSheet(out.DiaEntrega);
   return out;
+}
+
+function formatearFechaSheet(v) {
+  if (!v) return "";
+  const s = String(v);
+  // gviz devuelve fechas como "Date(YYYY,M,D)" donde M es 0-indexed (enero=0)
+  const m = s.match(/^Date\((\d+),(\d+),(\d+)/);
+  if (m) {
+    const anio = parseInt(m[1]);
+    const mes = parseInt(m[2]) + 1; // 0-indexed → 1-indexed
+    const dia = parseInt(m[3]);
+    const dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+    const f = new Date(anio, mes-1, dia);
+    return `${dias[f.getDay()]} ${dia}/${mes}`;
+  }
+  return s;
 }
 
 async function cargarConfig() {
