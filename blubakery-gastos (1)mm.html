@@ -3,332 +3,662 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Blu Bakery">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Blu Bakery — Gastos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #FAF9F7; color: #0D0D0D; min-height: 100vh; }
-  .app { max-width: 480px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-
-  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 1.75rem; }
-  .brand-name { font-size: 20px; font-weight: 600; letter-spacing: 0.08em; color: #0D0D0D; }
-  .connected-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; color: #085041; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
-  .dot-live { width: 6px; height: 6px; border-radius: 50%; background: #1D9E75; }
-
-  /* 3 botones de quien */
-  .quien-toggle { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
-  .quien-btn { padding: 12px; border: 1.5px solid #C8C4BE; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; background: transparent; color: #6B6560; transition: all 0.15s; }
-  .quien-btn.active-july { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
-  .quien-btn.active-joa  { border-color: #378ADD; background: #E6F1FB; color: #0C447C; }
-  .quien-btn.active-blu  { border-color: #004e64; background: #E0EEF2; color: #004e64; }
-
-  .form-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 14px; padding: 1.25rem; margin-bottom: 1.25rem; }
-  .form-title { font-size: 11px; font-weight: 600; color: #6B6560; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  .field label { display: block; font-size: 12px; color: #6B6560; margin-bottom: 6px; font-weight: 500; }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 11px 13px; font-size: 16px;
-    border: 0.5px solid #C8C4BE; border-radius: 8px;
-    background: #FAF9F7; color: #0D0D0D;
-    font-family: inherit; appearance: none; -webkit-appearance: none;
+  :root {
+    --cream: #fff9e5;
+    --cream-2: #faf6ea;
+    --navy: #004e64;
+    --navy-dark: #003647;
+    --brown: #6b4423;
+    --border: #e8e0c8;
+    --muted: #6b6657;
+    --danger: #c0392b;
+    --success: #2c7a4b;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #0D0D0D; }
-  .field textarea { resize: none; height: 70px; }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream);
+    color: var(--navy-dark);
+    font-family: 'Lato', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--navy);
+    margin: 0;
+    letter-spacing: -.5px;
+  }
+  header .sub {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    margin-top: 4px;
+  }
+  .status {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .status.ok { color: var(--success); }
+  .status.err { color: var(--danger); }
 
-  .foto-btn { width: 100%; padding: 11px; background: transparent; border: 0.5px solid #C8C4BE; border-radius: 8px; font-size: 14px; color: #6B6560; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; position: relative; }
-  .foto-btn:active { background: #F2F0ED; }
-  .foto-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 16px; }
-  .foto-btn svg { width: 16px; height: 16px; stroke: #6B6560; fill: none; stroke-width: 1.5; flex-shrink: 0; }
+  /* Cajas (saldos) */
+  .cajas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .caja-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .caja-card .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+  .caja-card .saldo {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 4px;
+  }
+  .caja-card.efectivo .saldo { color: var(--brown); }
 
-  .preview-wrap { position: relative; margin-top: 10px; }
-  .preview-img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 8px; border: 0.5px solid #C8C4BE; display: block; background: #FAF9F7; }
-  .preview-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.55); border: none; color: white; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  /* Pagador tabs */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--navy);
+    margin: 0 0 10px;
+  }
+  .pagadores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .pag-btn {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy-dark);
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .pag-btn.active {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  .pag-btn.blu.active {
+    background: var(--brown);
+    border-color: var(--brown);
+  }
 
-  .saving-indicator { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6B6560; margin-bottom: 12px; }
-  .saving-spinner { width: 14px; height: 14px; border: 1.5px solid #C8C4BE; border-top-color: #0D0D0D; border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* Form */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 6px;
+    margin-top: 14px;
+  }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    background: var(--cream-2);
+    color: var(--navy-dark);
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--navy);
+    background: white;
+  }
+  .row {
+    display: grid;
+    gap: 10px;
+  }
+  .row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
 
-  .save-btn { width: 100%; padding: 14px; background: #0D0D0D; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
-  .save-btn:active { opacity: 0.8; }
-  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* Cantidad helper */
+  .qty-helper {
+    background: var(--cream-2);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .qty-helper b { color: var(--navy); }
 
-  .divider { border: none; border-top: 0.5px solid #C8C4BE; margin: 1.5rem 0; }
+  /* Caja origen (solo si Blu) */
+  #cajaSection { display: none; }
+  #cajaSection.active { display: block; }
+  .caja-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .caja-opt {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all .15s;
+  }
+  .caja-opt.active {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  #splitFields { display: none; margin-top: 10px; }
+  #splitFields.active { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  #splitWarn {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: var(--danger);
+    text-align: center;
+    margin-top: 4px;
+    min-height: 16px;
+  }
 
-  .sheet-link-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .section-title { font-size: 13px; font-weight: 500; color: #0D0D0D; }
-  .sheet-link { font-size: 13px; color: #1D9E75; text-decoration: none; font-weight: 500; }
+  /* Save button */
+  .save-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .save-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+  }
+  .save-btn:not(:disabled):hover { background: var(--navy-dark); }
 
-  .empty-state { text-align: center; padding: 2rem 1rem; color: #6B6560; font-size: 13px; line-height: 1.6; border: 0.5px solid #C8C4BE; border-radius: 14px; background: white; }
+  /* Lista de gastos */
+  .gasto-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .gasto-item .info { flex: 1; }
+  .gasto-item .desc { font-weight: 600; font-size: 14px; }
+  .gasto-item .meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .gasto-item .monto {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--navy);
+    white-space: nowrap;
+  }
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 24px 12px;
+  }
 
-  .gasto-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 10px; align-items: center; padding: 12px 14px; border: 0.5px solid #C8C4BE; border-radius: 10px; margin-bottom: 7px; background: white; }
-  .gasto-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
-  .gasto-avatar.july { background: #E1F5EE; color: #085041; }
-  .gasto-avatar.joa  { background: #E6F1FB; color: #0C447C; }
-  .gasto-avatar.blu  { background: #E0EEF2; color: #004e64; }
-  .gasto-info { overflow: hidden; }
-  .gasto-nombre { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .gasto-meta { font-size: 11px; color: #6B6560; margin-top: 2px; }
-  .gasto-monto { font-size: 14px; font-weight: 500; color: #0D0D0D; white-space: nowrap; }
-  .synced-dot { width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; }
+  /* Totales */
+  .totales {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .total-card {
+    background: var(--cream-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+  }
+  .total-card .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+  .total-card .val { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 16px; color: var(--navy); margin-top: 2px; }
+  .total-card.total { background: var(--navy); }
+  .total-card.total .lbl { color: rgba(255,255,255,.7); }
+  .total-card.total .val { color: white; }
 
-  /* 3 columnas para los totales */
-  .totales { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 1rem; }
-  .total-card { background: white; border: 0.5px solid #C8C4BE; border-radius: 10px; padding: 12px; text-align: center; }
-  .total-label { font-size: 11px; color: #6B6560; margin-bottom: 5px; font-weight: 500; }
-  .total-num { font-size: 17px; font-weight: 600; color: #0D0D0D; }
-  .total-card.july .total-num { color: #085041; }
-  .total-card.joa  .total-num { color: #0C447C; }
-  .total-card.blu  .total-num { color: #004e64; }
-
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #0D0D0D; color: white; padding: 11px 22px; border-radius: 24px; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
-  .toast.show { opacity: 1; }
-  .toast.error { background: #A32D2D; }
-  .toast.success { background: #085041; }
+  .planilla-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--navy);
+    text-decoration: none;
+  }
+  .planilla-link:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="wrap">
 
-  <div class="brand">
-    <span class="brand-name">BLU BAKERY</span>
-    <span class="connected-badge"><span class="dot-live"></span>conectado</span>
+  <header>
+    <h1>Blu Bakery</h1>
+    <div class="sub">Gastos</div>
+  </header>
+
+  <div id="status" class="status">Conectando…</div>
+
+  <!-- Saldos de cajas -->
+  <div class="cajas">
+    <div class="caja-card efectivo">
+      <div class="label">💵 Efectivo</div>
+      <div class="saldo" id="saldoEfectivo">—</div>
+    </div>
+    <div class="caja-card">
+      <div class="label">🏦 Banco</div>
+      <div class="saldo" id="saldoBanco">—</div>
+    </div>
   </div>
 
-  <!-- 3 botones: July / Joa / Blu -->
-  <div class="quien-toggle">
-    <button class="quien-btn active-july" id="btn-july" onclick="setQuien('July')">July</button>
-    <button class="quien-btn" id="btn-joa"  onclick="setQuien('Joa')">Joa</button>
-    <button class="quien-btn" id="btn-blu"  onclick="setQuien('Blu')">Blu 🏪</button>
-  </div>
+  <!-- Form -->
+  <div class="card">
+    <h2 class="section-title">Nuevo gasto</h2>
 
-  <div class="form-card">
-    <div class="form-title">Nuevo gasto</div>
-
-    <div class="field">
-      <label>Descripción</label>
-      <input type="text" id="f-desc" placeholder="ej: Manteca x2kg" autocomplete="off" />
+    <label>Pagador</label>
+    <div class="pagadores">
+      <button class="pag-btn" data-pag="July">July</button>
+      <button class="pag-btn" data-pag="Joa">Joa</button>
+      <button class="pag-btn blu" data-pag="Blu">Blu</button>
     </div>
 
-    <div class="field-row">
-      <div class="field">
-        <label>Monto ($)</label>
-        <input type="number" id="f-monto" placeholder="0" inputmode="decimal" />
+    <label>Producto / descripción</label>
+    <input type="text" id="desc" placeholder="Ej: Harina 0000">
+
+    <div class="row cols-3">
+      <div>
+        <label>Cantidad</label>
+        <input type="number" id="cantidad" step="0.01" placeholder="1" value="1">
       </div>
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" id="f-fecha" />
+      <div>
+        <label>Formato</label>
+        <input type="text" id="formato" placeholder="1kg / 250g / unid.">
       </div>
-    </div>
-
-    <div class="field">
-      <label>Categoría</label>
-      <select id="f-cat">
-        <option>Insumos — Olavarría</option>
-        <option>Insumos — BsAs / envío</option>
-        <option>Packaging</option>
-        <option>Logística / delivery</option>
-        <option>Marketing / contenido</option>
-        <option>Traslados</option>
-        <option>Otro</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <label>Proveedor / Lugar de compra (opcional)</label>
-      <input type="text" id="f-proveedor" placeholder="ej: Día, Mercado Libre, Makro..." autocomplete="off" />
-    </div>
-
-    <div class="field">
-      <label>Notas (opcional)</label>
-      <textarea id="f-notas" placeholder="ej: Alcanza para 4 tandas"></textarea>
-    </div>
-
-    <div class="field">
-      <label>Foto del ticket (opcional)</label>
-      <div class="foto-btn">
-        <input type="file" accept="image/*" capture="environment" id="file-input" onchange="handleFile(event)" />
-        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <span id="foto-label">Sacar o subir foto</span>
-      </div>
-      <div class="preview-wrap" id="preview-wrap" style="display:none">
-        <img id="preview" class="preview-img" />
-        <button class="preview-remove" onclick="removeImage()">✕</button>
+      <div>
+        <label>Precio unit.</label>
+        <input type="number" id="precioUnitario" step="0.01" placeholder="0">
       </div>
     </div>
+
+    <div class="qty-helper" id="qtyHelper">
+      Total: <b id="totalCalc">$0</b>
+    </div>
+
+    <label>Gasto total ($)</label>
+    <input type="number" id="monto" step="0.01" placeholder="0">
+
+    <label>Fecha</label>
+    <input type="date" id="fecha">
+
+    <label>Categoría</label>
+    <select id="categoria">
+      <option value="Insumos — Olavarría">Insumos — Olavarría</option>
+      <option value="Insumos — BsAs / envío">Insumos — BsAs / envío</option>
+      <option value="Packaging">Packaging</option>
+      <option value="Logística / delivery">Logística / delivery</option>
+      <option value="Marketing / contenido">Marketing / contenido</option>
+      <option value="Traslados">Traslados</option>
+      <option value="Otro">Otro</option>
+    </select>
+
+    <label>Proveedor (opcional)</label>
+    <input type="text" id="proveedor" placeholder="Ej: Aguila, Tía Isabel">
+
+    <label>Notas (opcional)</label>
+    <textarea id="notas" rows="2" placeholder=""></textarea>
+
+    <!-- Caja origen (solo aparece si pagador = Blu) -->
+    <div id="cajaSection">
+      <label>Caja origen</label>
+      <div class="caja-options">
+        <div class="caja-opt" data-caja="Efectivo">💵 Efectivo</div>
+        <div class="caja-opt" data-caja="Banco">🏦 Banco</div>
+        <div class="caja-opt" data-caja="Split">⚡ Dividido</div>
+      </div>
+
+      <div id="splitFields">
+        <div>
+          <label>Efectivo ($)</label>
+          <input type="number" id="montoEfectivo" step="0.01" placeholder="0">
+        </div>
+        <div>
+          <label>Banco ($)</label>
+          <input type="number" id="montoBanco" step="0.01" placeholder="0">
+        </div>
+        <div id="splitWarn"></div>
+      </div>
+    </div>
+
+    <button class="save-btn" id="btnGuardar" disabled>Guardar gasto</button>
   </div>
 
-  <div id="saving-indicator" class="saving-indicator" style="display:none">
-    <div class="saving-spinner"></div>
-    <span>Guardando en Google Sheets...</span>
-  </div>
+  <!-- Lista de gastos de la sesión -->
+  <div class="card">
+    <h2 class="section-title">Gastos de esta sesión</h2>
+    <div id="lista">
+      <div class="empty">Todavía no hay gastos en esta sesión.</div>
+    </div>
 
-  <button class="save-btn" id="save-btn" onclick="saveGasto()">Guardar en Google Sheets</button>
-
-  <hr class="divider" />
-
-  <div class="sheet-link-row">
-    <span class="section-title">Gastos de esta sesión</span>
-    <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI/edit" target="_blank">Ver planilla →</a>
-  </div>
-
-  <div id="gastos-list">
-    <div class="empty-state">Todavía no hay gastos en esta sesión.<br>Completá el formulario arriba para agregar uno.</div>
-  </div>
-
-  <div id="totales-section" style="display:none">
     <div class="totales">
+      <div class="total-card total">
+        <div class="lbl">Total</div>
+        <div class="val" id="tTotal">$0</div>
+      </div>
       <div class="total-card">
-        <div class="total-label">Total</div>
-        <div class="total-num" id="total-all">$0</div>
+        <div class="lbl">July</div>
+        <div class="val" id="tJuly">$0</div>
       </div>
-      <div class="total-card july">
-        <div class="total-label">July</div>
-        <div class="total-num" id="total-july">$0</div>
+      <div class="total-card">
+        <div class="lbl">Joa</div>
+        <div class="val" id="tJoa">$0</div>
       </div>
-      <div class="total-card joa">
-        <div class="total-label">Joa</div>
-        <div class="total-num" id="total-joa">$0</div>
-      </div>
-      <div class="total-card blu">
-        <div class="total-label">Blu</div>
-        <div class="total-num" id="total-blu">$0</div>
+      <div class="total-card">
+        <div class="lbl">Blu</div>
+        <div class="val" id="tBlu">$0</div>
       </div>
     </div>
+
+    <a class="planilla-link" href="https://docs.google.com/spreadsheets/d/1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI/edit" target="_blank">Ver planilla →</a>
   </div>
 
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-0uINYXnekrhvujophjeQMlWIiHk2a4s4-kPsuhKfeEG98i4XFzFqibbdQv-WIhI/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
 
-let quien = 'July';
-let gastos = [];
+let pagadorSel = null;
+let cajaSel = null;
+let gastosSesion = [];
 
-document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+const $ = (id) => document.getElementById(id);
+const status = $("status");
 
-function setQuien(q) {
-  quien = q;
-  document.getElementById('btn-july').className = 'quien-btn' + (q === 'July' ? ' active-july' : '');
-  document.getElementById('btn-joa').className  = 'quien-btn' + (q === 'Joa'  ? ' active-joa'  : '');
-  document.getElementById('btn-blu').className  = 'quien-btn' + (q === 'Blu'  ? ' active-blu'  : '');
+// Setear fecha de hoy
+(function setHoy(){
+  const d = new Date();
+  $("fecha").value = d.toISOString().split("T")[0];
+})();
+
+// === Saldos ===
+async function cargarSaldos() {
+  try {
+    const r = await fetch(APPS_SCRIPT_URL + "?accion=saldos");
+    const d = await r.json();
+    if (d.status === "ok" && d.saldos) {
+      $("saldoEfectivo").textContent = formatPesos(d.saldos.Efectivo || 0);
+      $("saldoBanco").textContent = formatPesos(d.saldos.Banco || 0);
+      status.textContent = "Conectado a Blu Bakery";
+      status.className = "status ok";
+    } else {
+      throw new Error("respuesta invalida");
+    }
+  } catch (e) {
+    $("saldoEfectivo").textContent = "—";
+    $("saldoBanco").textContent = "—";
+    status.textContent = "No se pudo conectar (los gastos igual se guardan)";
+    status.className = "status err";
+  }
+}
+cargarSaldos();
+
+function formatPesos(n) {
+  return "$" + Math.round(n).toLocaleString("es-AR");
 }
 
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('preview').src = ev.target.result;
-    document.getElementById('preview-wrap').style.display = 'block';
-    document.getElementById('foto-label').textContent = 'Foto adjunta';
+// === Pagador ===
+document.querySelectorAll(".pag-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".pag-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    pagadorSel = btn.dataset.pag;
+    if (pagadorSel === "Blu") {
+      $("cajaSection").classList.add("active");
+    } else {
+      $("cajaSection").classList.remove("active");
+      cajaSel = null;
+      document.querySelectorAll(".caja-opt").forEach(o => o.classList.remove("active"));
+      $("splitFields").classList.remove("active");
+    }
+    validar();
+  });
+});
+
+// === Caja origen ===
+document.querySelectorAll(".caja-opt").forEach(opt => {
+  opt.addEventListener("click", () => {
+    document.querySelectorAll(".caja-opt").forEach(o => o.classList.remove("active"));
+    opt.classList.add("active");
+    cajaSel = opt.dataset.caja;
+    if (cajaSel === "Split") {
+      $("splitFields").classList.add("active");
+    } else {
+      $("splitFields").classList.remove("active");
+    }
+    validar();
+  });
+});
+
+// === Cálculo automático del total a partir de cantidad x precio ===
+function recalcularTotal() {
+  const cant = parseFloat($("cantidad").value) || 0;
+  const pu = parseFloat($("precioUnitario").value) || 0;
+  if (cant > 0 && pu > 0) {
+    const total = cant * pu;
+    $("totalCalc").textContent = formatPesos(total);
+    // Solo autocomplete el monto si está vacío o coincide
+    if (!$("monto").value || parseFloat($("monto").value) === 0) {
+      $("monto").value = total;
+    }
+  } else {
+    $("totalCalc").textContent = "$0";
+  }
+  validar();
+}
+["cantidad","precioUnitario","monto"].forEach(id => {
+  $(id).addEventListener("input", recalcularTotal);
+});
+
+// === Split validation ===
+["montoEfectivo","montoBanco","monto"].forEach(id => {
+  $(id).addEventListener("input", () => {
+    if (cajaSel === "Split") {
+      const efec = parseFloat($("montoEfectivo").value) || 0;
+      const banco = parseFloat($("montoBanco").value) || 0;
+      const total = parseFloat($("monto").value) || 0;
+      const suma = efec + banco;
+      const w = $("splitWarn");
+      if (Math.abs(suma - total) > 0.01 && total > 0) {
+        w.textContent = `⚠ La suma (${formatPesos(suma)}) no coincide con el total (${formatPesos(total)})`;
+      } else {
+        w.textContent = "";
+      }
+    }
+    validar();
+  });
+});
+
+// === Validación general ===
+function validar() {
+  const ok = pagadorSel && $("desc").value.trim() && parseFloat($("monto").value) > 0 && $("fecha").value;
+  let cajaOk = true;
+  if (pagadorSel === "Blu") {
+    if (!cajaSel) cajaOk = false;
+    else if (cajaSel === "Split") {
+      const efec = parseFloat($("montoEfectivo").value) || 0;
+      const banco = parseFloat($("montoBanco").value) || 0;
+      const total = parseFloat($("monto").value) || 0;
+      if (Math.abs((efec + banco) - total) > 0.01 || total === 0) cajaOk = false;
+    }
+  }
+  $("btnGuardar").disabled = !(ok && cajaOk);
+}
+$("desc").addEventListener("input", validar);
+$("fecha").addEventListener("input", validar);
+
+// === Guardar ===
+$("btnGuardar").addEventListener("click", async () => {
+  $("btnGuardar").disabled = true;
+  $("btnGuardar").textContent = "Guardando…";
+
+  const monto = parseFloat($("monto").value) || 0;
+  const payload = {
+    tipo: "gasto",
+    fecha: $("fecha").value,
+    quien: pagadorSel,
+    desc: $("desc").value.trim(),
+    monto: monto,
+    cat: $("categoria").value,
+    proveedor: $("proveedor").value.trim(),
+    notas: $("notas").value.trim(),
+    cantidad: $("cantidad").value || "",
+    formato: $("formato").value.trim(),
+    precio_unitario: $("precioUnitario").value || "",
+    caja_origen: pagadorSel === "Blu" ? cajaSel : "",
+    monto_efectivo: (pagadorSel === "Blu" && cajaSel === "Split") ? parseFloat($("montoEfectivo").value) || 0 : (pagadorSel === "Blu" && cajaSel === "Efectivo" ? monto : ""),
+    monto_banco: (pagadorSel === "Blu" && cajaSel === "Split") ? parseFloat($("montoBanco").value) || 0 : (pagadorSel === "Blu" && cajaSel === "Banco" ? monto : "")
   };
-  reader.readAsDataURL(file);
-}
-
-function removeImage() {
-  document.getElementById('preview-wrap').style.display = 'none';
-  document.getElementById('file-input').value = '';
-  document.getElementById('foto-label').textContent = 'Sacar o subir foto';
-}
-
-async function saveGasto() {
-  const desc      = document.getElementById('f-desc').value.trim();
-  const monto     = parseFloat(document.getElementById('f-monto').value) || 0;
-  const fecha     = document.getElementById('f-fecha').value;
-  const cat       = document.getElementById('f-cat').value;
-  const proveedor = document.getElementById('f-proveedor').value.trim();
-  const notas     = document.getElementById('f-notas').value.trim();
-
-  if (!desc)  { showToast('Escribí una descripción', true); return; }
-  if (!monto) { showToast('Ingresá el monto', true); return; }
-
-  document.getElementById('save-btn').disabled = true;
-  document.getElementById('saving-indicator').style.display = 'flex';
-
-  // tipo: "gasto" para que el Apps Script lo distinga de pedidos y config
-  const gasto = { tipo: 'gasto', fecha, quien, desc, monto, cat, proveedor, notas };
 
   try {
-    await fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(gasto)
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type": "text/plain;charset=utf-8"},
+      body: JSON.stringify(payload)
     });
-    showToast('Guardado en Google Sheets ✓', false, true);
-  } catch(err) {
-    showToast('Sin conexión — intentá de nuevo', true);
-    document.getElementById('save-btn').disabled = false;
-    document.getElementById('saving-indicator').style.display = 'none';
-    return;
+    // Agregar a la lista local
+    gastosSesion.unshift(payload);
+    renderLista();
+    limpiarForm();
+    // Refrescar saldos si fue Blu
+    if (payload.quien === "Blu") {
+      setTimeout(cargarSaldos, 1500);
+    }
+    status.textContent = "✓ Gasto guardado";
+    status.className = "status ok";
+  } catch (err) {
+    status.textContent = "Error al guardar: " + err.message;
+    status.className = "status err";
   }
+  $("btnGuardar").textContent = "Guardar gasto";
+  validar();
+});
 
-  gastos.unshift({ ...gasto, id: Date.now() });
-  renderGastos();
-
-  // Reset
-  document.getElementById('f-desc').value      = '';
-  document.getElementById('f-monto').value     = '';
-  document.getElementById('f-notas').value     = '';
-  document.getElementById('f-proveedor').value = '';
-  document.getElementById('f-fecha').value     = new Date().toISOString().split('T')[0];
-  document.getElementById('f-cat').value       = 'Insumos — Olavarría';
-  removeImage();
-
-  document.getElementById('saving-indicator').style.display = 'none';
-  document.getElementById('save-btn').disabled = false;
+function limpiarForm() {
+  $("desc").value = "";
+  $("cantidad").value = "1";
+  $("formato").value = "";
+  $("precioUnitario").value = "";
+  $("monto").value = "";
+  $("proveedor").value = "";
+  $("notas").value = "";
+  $("montoEfectivo").value = "";
+  $("montoBanco").value = "";
+  $("totalCalc").textContent = "$0";
+  $("splitWarn").textContent = "";
+  cajaSel = null;
+  document.querySelectorAll(".caja-opt").forEach(o => o.classList.remove("active"));
+  $("splitFields").classList.remove("active");
 }
 
-function avatarClass(q) {
-  if (q === 'July') return 'july';
-  if (q === 'Joa')  return 'joa';
-  return 'blu';
-}
-function avatarInitials(q) {
-  if (q === 'July') return 'JU';
-  if (q === 'Joa')  return 'JO';
-  return 'BL';
-}
-
-function renderGastos() {
-  const list = document.getElementById('gastos-list');
-  if (!gastos.length) {
-    list.innerHTML = '<div class="empty-state">Todavía no hay gastos en esta sesión.<br>Completá el formulario arriba para agregar uno.</div>';
-    document.getElementById('totales-section').style.display = 'none';
-    return;
+function renderLista() {
+  const lista = $("lista");
+  if (gastosSesion.length === 0) {
+    lista.innerHTML = '<div class="empty">Todavía no hay gastos en esta sesión.</div>';
+  } else {
+    lista.innerHTML = gastosSesion.map(g => {
+      const cantFormato = g.cantidad && g.formato ? `${g.cantidad} × ${g.formato} · ` : "";
+      const cajaInfo = g.quien === "Blu" && g.caja_origen ? ` · ${g.caja_origen === "Split" ? "Efec+Banco" : g.caja_origen}` : "";
+      return `<div class="gasto-item">
+        <div class="info">
+          <div class="desc">${escapeHtml(g.desc)}</div>
+          <div class="meta">${cantFormato}${escapeHtml(g.quien)} · ${escapeHtml(g.cat)}${cajaInfo}</div>
+        </div>
+        <div class="monto">${formatPesos(g.monto)}</div>
+      </div>`;
+    }).join("");
   }
-  list.innerHTML = gastos.map(g => `
-    <div class="gasto-row">
-      <div class="gasto-avatar ${avatarClass(g.quien)}">${avatarInitials(g.quien)}</div>
-      <div class="gasto-info">
-        <div class="gasto-nombre">${g.desc}${g.proveedor ? ' · <span style="font-weight:400;color:#6B6560">' + g.proveedor + '</span>' : ''}</div>
-        <div class="gasto-meta">${g.cat} · ${g.fecha} · <strong>${g.quien}</strong></div>
-      </div>
-      <div class="gasto-monto">$${Math.round(g.monto).toLocaleString('es-AR')}</div>
-      <div class="synced-dot" title="Guardado en Sheets"></div>
-    </div>
-  `).join('');
-
-  const sum = (arr) => arr.reduce((s,g) => s + g.monto, 0);
-  document.getElementById('total-all').textContent   = '$' + Math.round(sum(gastos)).toLocaleString('es-AR');
-  document.getElementById('total-july').textContent  = '$' + Math.round(sum(gastos.filter(g=>g.quien==='July'))).toLocaleString('es-AR');
-  document.getElementById('total-joa').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Joa'))).toLocaleString('es-AR');
-  document.getElementById('total-blu').textContent   = '$' + Math.round(sum(gastos.filter(g=>g.quien==='Blu'))).toLocaleString('es-AR');
-  document.getElementById('totales-section').style.display = 'block';
+  // Totales
+  let tot = 0, july = 0, joa = 0, blu = 0;
+  gastosSesion.forEach(g => {
+    tot += g.monto;
+    if (g.quien === "July") july += g.monto;
+    else if (g.quien === "Joa") joa += g.monto;
+    else if (g.quien === "Blu") blu += g.monto;
+  });
+  $("tTotal").textContent = formatPesos(tot);
+  $("tJuly").textContent = formatPesos(july);
+  $("tJoa").textContent = formatPesos(joa);
+  $("tBlu").textContent = formatPesos(blu);
 }
 
-function showToast(msg, isError, isSuccess) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (isError ? ' error' : isSuccess ? ' success' : '');
-  setTimeout(() => t.className = 'toast', 2800);
+function escapeHtml(s) {
+  return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 }
 </script>
 </body>
