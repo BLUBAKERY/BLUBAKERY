@@ -467,8 +467,38 @@ async function cargarPedidos() {
     row.c.forEach((cell, i) => {
       obj[cols[i]] = cell ? cell.v : "";
     });
-    return obj;
+    return normalizarPedido(obj);
   });
+}
+
+function normalizarPedido(p) {
+  const map = {
+    "Fecha":"Fecha","Hora":"Hora",
+    "N ORDEN":"NroOrden","Nro Orden":"NroOrden","Nº Orden":"NroOrden",
+    "Nombre":"Nombre",
+    "Teléfono":"Telefono","Telefono":"Telefono",
+    "Email":"Email",
+    "Cookies":"Cookies",
+    "Cantidad":"Unidades","Unidades":"Unidades",
+    "Subtotal":"Subtotal",
+    "Envío":"Pack","Envio":"Pack","Pack":"Pack",
+    "Dirección":"Direccion","Direccion":"Direccion",
+    "Día de entrega":"DiaEntrega","Dia de entrega":"DiaEntrega","Dia entrega":"DiaEntrega",
+    "Horario":"Horario",
+    "Pago de envío":"CostoEnvio","Pago de envio":"CostoEnvio","Costo envio":"CostoEnvio",
+    "Total":"Total",
+    "Forma de pago":"Pago","Pago":"Pago",
+    "Aclaraciones":"Notas","Notas":"Notas",
+    "Estado":"Estado",
+    "Cobrado":"Cobrado",
+    "Fecha cobro":"FechaCobro",
+    "Cobrado en":"CobradoEn"
+  };
+  const out = {};
+  Object.keys(p).forEach(k => { out[map[k] || k] = p[k]; });
+  const dirText = String(out.Direccion || "");
+  out.TipoEntrega = dirText.toLowerCase().includes("retiro") ? "Retiro" : "Envio";
+  return out;
 }
 
 async function cargarConfig() {
@@ -491,7 +521,7 @@ function renderPedidos() {
   cont.innerHTML = "";
 
   let pedFiltrados = pedidos.filter(p => {
-    const estado = (p.Estado || "Pendiente").toLowerCase();
+    const estado = String(p.Estado || "").toLowerCase().trim();
     if (filtroActual === "pendientes") return estado === "pendiente" || estado === "";
     if (filtroActual === "entregados") return estado === "entregado";
     return true; // todos
@@ -505,7 +535,7 @@ function renderPedidos() {
   // Agrupar por día de entrega
   const grupos = {};
   pedFiltrados.forEach(p => {
-    const dia = p["Dia entrega"] || "(Sin fecha)";
+    const dia = p.DiaEntrega || "(Sin fecha)";
     if (!grupos[dia]) grupos[dia] = [];
     grupos[dia].push(p);
   });
@@ -543,40 +573,87 @@ function parsearFechaDeLabel(label) {
 }
 
 function renderResumenProduccion(peds) {
-  // Parsear los items de "Cookies" para consolidar
   const conteo = {};
-  let totalBox = 0, totalSueltas = 0;
+  let totalBoxes = 0;
+
   peds.forEach(p => {
-    if ((p.Estado || "").toLowerCase() === "cancelado") return;
-    const cookiesStr = p.Cookies || "";
-    // Formato esperado: "3 chocochips, 2 red velvet" o similar
-    const partes = cookiesStr.split(/[,;\n]/);
-    partes.forEach(parte => {
-      const m = parte.trim().match(/^(\d+)\s+(.+)$/);
+    if (String(p.Estado || "").toLowerCase() === "cancelado") return;
+    const cookiesStr = String(p.Cookies || "");
+
+    // 1) Buscar contenidos de Box: "Box x N cookies a elección xK (1 X + 2 Y + 1 Z)"
+    // Cada paréntesis después de un "Box" tiene los sabores que van adentro
+    const reBoxContent = /\(([^)]+)\)/g;
+    let mBox;
+    while ((mBox = reBoxContent.exec(cookiesStr)) !== null) {
+      const interior = mBox[1];
+      const items = interior.split(/\s*\+\s*/);
+      items.forEach(it => {
+        const m = it.trim().match(/^(\d+)\s+(.+)$/);
+        if (m) {
+          const cant = parseInt(m[1]);
+          const nombre = m[2].trim();
+          conteo[nombre] = (conteo[nombre] || 0) + cant;
+        }
+      });
+    }
+
+    // 2) Buscar boxes (cantidad de boxes a preparar): "Box x N cookies a elección xK"
+    const reBoxCant = /Box[^x]*x\s*\d+[^x]*x\s*(\d+)/gi;
+    let mBC;
+    while ((mBC = reBoxCant.exec(cookiesStr)) !== null) {
+      totalBoxes += parseInt(mBC[1]);
+    }
+
+    // 3) Cookies sueltas (sin paréntesis adelante): formato "N nombre" separadas por | o ,
+    // Quitamos primero los box completos para no contar dos veces
+    let restoSinBox = cookiesStr.replace(/Box[^|]+(\([^)]+\))?[^|]*/gi, "");
+    const sueltas = restoSinBox.split(/[|,;\n]/);
+    sueltas.forEach(s => {
+      const m = s.trim().match(/^(\d+)\s+(.+?)(?:\s+x\s*\d+)?$/);
       if (m) {
         const cant = parseInt(m[1]);
-        const nombre = m[2].trim();
-        conteo[nombre] = (conteo[nombre] || 0) + cant;
+        let nombre = m[2].trim();
+        // Si formato es "Nombre x2", extraer
+        const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+        if (mX) {
+          nombre = mX[1].trim().replace(/^\d+\s+/, "");
+          conteo[nombre] = (conteo[nombre] || 0) + parseInt(mX[2]);
+        } else {
+          conteo[nombre] = (conteo[nombre] || 0) + cant;
+        }
+      } else {
+        // Formato "Nombre x N"
+        const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+        if (mX) {
+          const nombre = mX[1].trim();
+          conteo[nombre] = (conteo[nombre] || 0) + parseInt(mX[2]);
+        }
       }
     });
-    if ((p.Pack || "").toLowerCase().includes("box")) totalBox++;
   });
-  const items = Object.entries(conteo).map(([k, v]) => `<span class="item"><b>${v}</b> × ${escapeHtml(k)}</span>`);
-  if (items.length === 0) return '';
-  return `
-    <div class="resumen-prod">
-      <div class="label">📋 Para preparar</div>
-      ${items.join(" · ")}
-    </div>
-  `;
+
+  const items = Object.entries(conteo)
+    .filter(([k, v]) => v > 0 && k && !k.toLowerCase().includes("box"))
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `<span class="item"><b>${v}</b> × ${escapeHtml(k)}</span>`);
+
+  if (items.length === 0 && totalBoxes === 0) return '';
+
+  let html = '<div class="resumen-prod"><div class="label">📋 Para preparar</div>';
+  if (totalBoxes > 0) html += `<div class="item" style="margin-bottom:6px"><b>${totalBoxes}</b> Box${totalBoxes !== 1 ? "es" : ""} para armar</div>`;
+  html += items.join(" · ");
+  html += '</div>';
+  return html;
 }
 
 function renderPedidoCard(p) {
-  const estado = (p.Estado || "Pendiente").toLowerCase();
-  const cobrado = (p.Cobrado || "").toLowerCase() === "sí" || (p.Cobrado || "").toLowerCase() === "si";
-  const esEnvio = (p.Entrega || "").toLowerCase() === "envio";
+  const estado = String(p.Estado || "").toLowerCase().trim();
+  const cobradoVal = String(p.Cobrado || "").toLowerCase().trim();
+  const cobrado = cobradoVal === "sí" || cobradoVal === "si";
+  const esEnvio = p.TipoEntrega === "Envio";
   const total = parseFloat(p.Total) || 0;
   const cssClass = estado === "entregado" ? "entregado" : (estado === "cancelado" ? "cancelado" : "");
+  const nroOrden = p.NroOrden || "";
 
   let badges = '';
   if (estado === "cancelado") badges += '<span class="badge cancelado">Cancelado</span>';
@@ -588,11 +665,11 @@ function renderPedidoCard(p) {
   let actions = '';
   if (estado !== "cancelado" && estado !== "entregado") {
     if (!cobrado) {
-      actions += `<button onclick="abrirCobrar('${p["Nro Orden"]}')">💰 Marcar cobrado</button>`;
+      actions += `<button onclick="abrirCobrar('${nroOrden}')">💰 Marcar cobrado</button>`;
     }
-    actions += `<button class="primary" onclick="abrirEntregar('${p["Nro Orden"]}')">✓ Entregado</button>`;
-    actions += `<button onclick="abrirCambiarFecha('${p["Nro Orden"]}')">📅 Cambiar fecha</button>`;
-    actions += `<button class="danger" onclick="cancelarPedido('${p["Nro Orden"]}')">✕ Cancelar</button>`;
+    actions += `<button class="primary" onclick="abrirEntregar('${nroOrden}')">✓ Entregado</button>`;
+    actions += `<button onclick="abrirCambiarFecha('${nroOrden}')">📅 Cambiar fecha</button>`;
+    actions += `<button class="danger" onclick="cancelarPedido('${nroOrden}')">✕ Cancelar</button>`;
   }
 
   return `
@@ -600,17 +677,16 @@ function renderPedidoCard(p) {
       <div class="pedido-top">
         <div>
           <div class="pedido-nombre">${escapeHtml(p.Nombre || "(Sin nombre)")}</div>
-          <div class="pedido-orden">Orden #${p["Nro Orden"] || "?"}</div>
+          <div class="pedido-orden">Orden #${escapeHtml(nroOrden || "?")}</div>
         </div>
         <div class="pedido-total">$${total.toLocaleString("es-AR")}</div>
       </div>
       <div class="pedido-meta">
         <div class="row"><span class="lbl">Pedido:</span> ${escapeHtml(p.Cookies || "—")}</div>
-        ${p.Pack ? `<div class="row"><span class="lbl">Box:</span> ${escapeHtml(p.Pack)}</div>` : ""}
         <div class="row"><span class="lbl">Tel:</span> ${escapeHtml(p.Telefono || "—")}</div>
-        ${esEnvio && p.Direccion ? `<div class="row"><span class="lbl">Dir:</span> ${escapeHtml(p.Direccion)}</div>` : ""}
+        ${esEnvio && p.Direccion ? `<div class="row"><span class="lbl">Dirección:</span> ${escapeHtml(p.Direccion)}</div>` : ""}
         <div class="row"><span class="lbl">Horario:</span> ${escapeHtml(p.Horario || "—")}</div>
-        <div class="row"><span class="lbl">Forma pago:</span> ${escapeHtml(p.Pago || "—")}${cobrado && p["Cobrado en"] ? ` <i style="color:var(--success)">(cobrado: ${escapeHtml(p["Cobrado en"])})</i>` : ""}</div>
+        <div class="row"><span class="lbl">Forma pago:</span> ${escapeHtml(p.Pago || "—")}${cobrado && p.CobradoEn ? ` <i style="color:var(--success)">(cobrado: ${escapeHtml(p.CobradoEn)})</i>` : ""}</div>
         ${p.Notas ? `<div class="row"><span class="lbl">Notas:</span> <i>${escapeHtml(p.Notas)}</i></div>` : ""}
       </div>
       <div class="badges">${badges}</div>
@@ -621,11 +697,10 @@ function renderPedidoCard(p) {
 
 // ===== ACCIONES =====
 function abrirCobrar(nroOrden) {
-  pedidoActivo = pedidos.find(p => String(p["Nro Orden"]) === String(nroOrden));
+  pedidoActivo = pedidos.find(p => String(p.NroOrden) === String(nroOrden));
   if (!pedidoActivo) return;
   $("cobrar-info").textContent = `Pedido #${nroOrden} · ${pedidoActivo.Nombre} · $${parseFloat(pedidoActivo.Total).toLocaleString("es-AR")}`;
-  // Pre-seleccionar según forma de pago elegida por la cliente
-  const pago = (pedidoActivo.Pago || "").toLowerCase();
+  const pago = String(pedidoActivo.Pago || "").toLowerCase();
   document.querySelectorAll("#caja-opts-cobrar .caja-opt").forEach(o => o.classList.remove("active"));
   $("split-fields-cobrar").style.display = "none";
   $("cobrar-efec").value = "";
@@ -676,7 +751,7 @@ $("btnConfirmarCobro").addEventListener("click", async () => {
   await enviar({
     tipo: "update_pedido",
     accion: "cobrar",
-    nro_orden: pedidoActivo["Nro Orden"],
+    nro_orden: pedidoActivo.NroOrden,
     nombre: pedidoActivo.Nombre,
     monto: total,
     cobrado_en: caja,
@@ -688,10 +763,11 @@ $("btnConfirmarCobro").addEventListener("click", async () => {
 });
 
 function abrirEntregar(nroOrden) {
-  pedidoActivo = pedidos.find(p => String(p["Nro Orden"]) === String(nroOrden));
+  pedidoActivo = pedidos.find(p => String(p.NroOrden) === String(nroOrden));
   if (!pedidoActivo) return;
   $("entregar-info").textContent = `Pedido #${nroOrden} · ${pedidoActivo.Nombre} · $${parseFloat(pedidoActivo.Total).toLocaleString("es-AR")}`;
-  const cobrado = (pedidoActivo.Cobrado || "").toLowerCase() === "sí" || (pedidoActivo.Cobrado || "").toLowerCase() === "si";
+  const cobradoVal = String(pedidoActivo.Cobrado || "").toLowerCase();
+  const cobrado = cobradoVal === "sí" || cobradoVal === "si";
   if (cobrado) {
     $("entregar-cobro-section").style.display = "none";
   } else {
@@ -701,7 +777,6 @@ function abrirEntregar(nroOrden) {
     $("entregar-efec").value = "";
     $("entregar-banco").value = "";
     $("entregar-warn").textContent = "";
-    // Pre-seleccionar efectivo por defecto (es lo más común al entregar)
     document.querySelector('#caja-opts-entregar .caja-opt[data-caja="Efectivo"]').classList.add("active");
   }
   $("modal-entregar").classList.add("active");
@@ -716,11 +791,12 @@ document.querySelectorAll("#caja-opts-entregar .caja-opt").forEach(o => {
 });
 
 $("btnConfirmarEntrega").addEventListener("click", async () => {
-  const cobrado = (pedidoActivo.Cobrado || "").toLowerCase() === "sí" || (pedidoActivo.Cobrado || "").toLowerCase() === "si";
+  const cobradoVal = String(pedidoActivo.Cobrado || "").toLowerCase();
+  const cobrado = cobradoVal === "sí" || cobradoVal === "si";
   let payload = {
     tipo: "update_pedido",
     accion: "entregar",
-    nro_orden: pedidoActivo["Nro Orden"],
+    nro_orden: pedidoActivo.NroOrden,
     nombre: pedidoActivo.Nombre,
     monto: parseFloat(pedidoActivo.Total) || 0
   };
@@ -746,9 +822,9 @@ $("btnConfirmarEntrega").addEventListener("click", async () => {
 });
 
 function abrirCambiarFecha(nroOrden) {
-  pedidoActivo = pedidos.find(p => String(p["Nro Orden"]) === String(nroOrden));
+  pedidoActivo = pedidos.find(p => String(p.NroOrden) === String(nroOrden));
   if (!pedidoActivo) return;
-  $("fecha-info").textContent = `Pedido #${nroOrden} · ${pedidoActivo.Nombre} · actualmente: ${pedidoActivo["Dia entrega"]}`;
+  $("fecha-info").textContent = `Pedido #${nroOrden} · ${pedidoActivo.Nombre} · actualmente: ${pedidoActivo.DiaEntrega}`;
   $("nueva-fecha").value = "";
   $("modal-fecha").classList.add("active");
 }
@@ -759,7 +835,7 @@ $("btnConfirmarFecha").addEventListener("click", async () => {
   await enviar({
     tipo: "update_pedido",
     accion: "cambiar_fecha",
-    nro_orden: pedidoActivo["Nro Orden"],
+    nro_orden: pedidoActivo.NroOrden,
     nuevo_dia: nueva
   });
   closeModal("modal-fecha");
@@ -768,18 +844,36 @@ $("btnConfirmarFecha").addEventListener("click", async () => {
 
 async function cancelarPedido(nroOrden) {
   if (!confirm("¿Cancelar este pedido? El stock se va a devolver y no se podrá deshacer.")) return;
-  const ped = pedidos.find(p => String(p["Nro Orden"]) === String(nroOrden));
+  const ped = pedidos.find(p => String(p.NroOrden) === String(nroOrden));
   if (!ped) return;
-  // Parsear cookies para devolver stock
   const stockChanges = {};
   const cookiesStr = ped.Cookies || "";
-  const partes = cookiesStr.split(/[,;\n]/);
-  partes.forEach(parte => {
-    const m = parte.trim().match(/^(\d+)\s+(.+)$/);
-    if (m) {
-      const cant = parseInt(m[1]);
-      const nombre = m[2].trim().toLowerCase();
-      const prod = config.productos.find(p => p.nombre.toLowerCase().includes(nombre) || nombre.includes(p.nombre.toLowerCase()));
+  // Parsear contenidos de Box
+  const reBox = /\(([^)]+)\)/g;
+  let m;
+  while ((m = reBox.exec(cookiesStr)) !== null) {
+    m[1].split(/\s*\+\s*/).forEach(it => {
+      const mi = it.trim().match(/^(\d+)\s+(.+)$/);
+      if (mi) {
+        const cant = parseInt(mi[1]);
+        const nom = mi[2].trim().toLowerCase();
+        const prod = config.productos.find(p =>
+          p.nombre.toLowerCase().includes(nom) || nom.includes(p.nombre.toLowerCase())
+        );
+        if (prod) stockChanges[prod.id] = (stockChanges[prod.id] || 0) + cant;
+      }
+    });
+  }
+  // Parsear sueltas
+  let resto = cookiesStr.replace(/Box[^|]+(\([^)]+\))?[^|]*/gi, "");
+  resto.split(/[|,;\n]/).forEach(s => {
+    const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+    if (mX) {
+      const nom = mX[1].trim().toLowerCase();
+      const cant = parseInt(mX[2]);
+      const prod = config.productos.find(p =>
+        p.nombre.toLowerCase().includes(nom) || nom.includes(p.nombre.toLowerCase())
+      );
       if (prod) stockChanges[prod.id] = (stockChanges[prod.id] || 0) + cant;
     }
   });
