@@ -924,7 +924,11 @@ function setE(t) {
 }
 function setDia(id) {
   diaId = id;
-  disp.forEach(function(d){ var b=document.getElementById("d-"+d.id); if(b) b.className="db"+(d.id===id?" act":""); });
+  disp.forEach(function(item){
+    var d = item.dia || item; // soporta el nuevo formato y el viejo
+    var b=document.getElementById("d-"+d.id);
+    if(b && item.disponible !== false) b.className="db"+(d.id===id?" act":"");
+  });
   renderFranjas();
 }
 function setP(t) {
