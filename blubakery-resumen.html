@@ -236,6 +236,67 @@
 
   .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-style: italic; }
 
+  /* Stats */
+  .stats-section {
+    background: white; border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-bottom: 14px;
+  }
+  .stats-section h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px; color: var(--navy); margin: 0 0 12px;
+  }
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .stat-card {
+    background: var(--cream-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px; text-align: center;
+  }
+  .stat-card .stat-lbl {
+    font-size: 10px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+  .stat-card .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 22px; color: var(--navy); margin-top: 2px;
+  }
+  .stat-card.big { grid-column: 1 / -1; }
+  .stat-card.highlight { background: var(--navy); }
+  .stat-card.highlight .stat-lbl { color: rgba(255,255,255,.7); }
+  .stat-card.highlight .stat-val { color: white; }
+
+  .ranking { list-style: none; padding: 0; margin: 0; }
+  .ranking li {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+  }
+  .ranking li:last-child { border: none; }
+  .ranking .pos {
+    font-weight: 700; color: var(--muted); width: 24px; font-size: 12px;
+  }
+  .ranking .name { flex: 1; }
+  .ranking .val { font-weight: 700; color: var(--navy); }
+  .ranking li:nth-child(1) .pos { color: #d4af37; }
+  .ranking li:nth-child(2) .pos { color: #999; }
+  .ranking li:nth-child(3) .pos { color: #cd7f32; }
+
+  .bar-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; font-size: 13px;
+  }
+  .bar-row .lbl { width: 100px; color: var(--muted); }
+  .bar-row .bar-bg {
+    flex: 1; background: var(--cream); height: 18px;
+    border-radius: 9px; overflow: hidden; position: relative;
+  }
+  .bar-row .bar-fill {
+    background: var(--navy); height: 100%;
+    border-radius: 9px; transition: width .3s;
+  }
+  .bar-row .val {
+    min-width: 50px; text-align: right; font-weight: 600; color: var(--navy);
+  }
+
   .filtros {
     display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
   }
@@ -277,6 +338,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="pedidos">📋 Pedidos</button>
     <button class="tab" data-tab="stock">📦 Stock</button>
+    <button class="tab" data-tab="stats">📊 Estadísticas</button>
   </div>
 
   <!-- PEDIDOS TAB -->
@@ -292,6 +354,11 @@
   <!-- STOCK TAB -->
   <div id="tab-stock" style="display:none">
     <div id="stock-container"></div>
+  </div>
+
+  <!-- STATS TAB -->
+  <div id="tab-stats" style="display:none">
+    <div id="stats-container"></div>
   </div>
 </div>
 
@@ -479,13 +546,17 @@ document.querySelectorAll(".tab").forEach(t => {
   t.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
     t.classList.add("active");
+    $("tab-pedidos").style.display = "none";
+    $("tab-stock").style.display = "none";
+    $("tab-stats").style.display = "none";
     if (t.dataset.tab === "pedidos") {
       $("tab-pedidos").style.display = "block";
-      $("tab-stock").style.display = "none";
-    } else {
-      $("tab-pedidos").style.display = "none";
+    } else if (t.dataset.tab === "stock") {
       $("tab-stock").style.display = "block";
       renderStock();
+    } else if (t.dataset.tab === "stats") {
+      $("tab-stats").style.display = "block";
+      renderStats();
     }
   });
 });
@@ -1081,6 +1152,225 @@ function abrirAjusteStock(productoId) {
   $("stock-info").textContent = `${stockProductoActivo.nombre} · stock actual: ${stockProductoActivo.stock || 0}`;
   $("stock-cambio").value = "";
   $("modal-stock").classList.add("active");
+}
+
+// ===== STATS =====
+function renderStats() {
+  const cont = $("stats-container");
+  cont.innerHTML = "";
+
+  // Solo pedidos no cancelados
+  const peds = pedidos.filter(p => String(p.Estado || "").toLowerCase() !== "cancelado");
+  if (peds.length === 0) {
+    cont.innerHTML = '<div class="empty">Todavía no hay pedidos para analizar</div>';
+    return;
+  }
+
+  // === GENERAL ===
+  const totalRecaudado = peds.reduce((acc, p) => acc + (parseFloat(p.Total) || 0), 0);
+  const ticketProm = Math.round(totalRecaudado / peds.length);
+  // Rango de fechas y promedio por semana
+  const fechas = peds.map(p => parsearFechaPedido(p.Fecha)).filter(Boolean).sort((a, b) => a - b);
+  const semanas = fechas.length > 1 ? Math.max(1, (fechas[fechas.length - 1] - fechas[0]) / (7 * 24 * 60 * 60 * 1000)) : 1;
+  const promPorSemana = (peds.length / semanas).toFixed(1);
+  const totalCookies = peds.reduce((acc, p) => acc + (parseInt(p.Unidades) || 0), 0);
+  const promCookiesPedido = (totalCookies / peds.length).toFixed(1);
+
+  cont.innerHTML += `
+    <div class="stats-section">
+      <h3>📊 Resumen general</h3>
+      <div class="stats-grid">
+        <div class="stat-card highlight">
+          <div class="stat-lbl">Total recaudado</div>
+          <div class="stat-val">$${totalRecaudado.toLocaleString("es-AR")}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Pedidos totales</div>
+          <div class="stat-val">${peds.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Promedio / semana</div>
+          <div class="stat-val">${promPorSemana}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Ticket promedio</div>
+          <div class="stat-val">$${ticketProm.toLocaleString("es-AR")}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Cookies vendidas</div>
+          <div class="stat-val">${totalCookies}</div>
+        </div>
+        <div class="stat-card big">
+          <div class="stat-lbl">Promedio cookies por pedido</div>
+          <div class="stat-val">${promCookiesPedido}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // === TOP SABORES ===
+  const conteoSabores = {};
+  peds.forEach(p => {
+    const cookiesStr = String(p.Cookies || "");
+    // Sabores dentro de Box
+    const reBox = /\(([^)]+)\)/g;
+    let m;
+    while ((m = reBox.exec(cookiesStr)) !== null) {
+      m[1].split(/\s*\+\s*/).forEach(it => {
+        const mi = it.trim().match(/^(\d+)\s+(.+)$/);
+        if (mi) {
+          const nombre = mi[2].trim();
+          conteoSabores[nombre] = (conteoSabores[nombre] || 0) + parseInt(mi[1]);
+        }
+      });
+    }
+    // Sueltas (formato "Nombre xN")
+    let resto = cookiesStr.replace(/Box[^|]+(\([^)]+\))?[^|]*/gi, "");
+    resto.split(/[|,;\n]/).forEach(s => {
+      const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+      if (mX) {
+        const nombre = mX[1].trim();
+        conteoSabores[nombre] = (conteoSabores[nombre] || 0) + parseInt(mX[2]);
+      }
+    });
+  });
+
+  const topSabores = Object.entries(conteoSabores)
+    .filter(([k, v]) => v > 0 && !k.toLowerCase().includes("box"))
+    .sort((a, b) => b[1] - a[1]);
+
+  if (topSabores.length > 0) {
+    const maxSabor = topSabores[0][1];
+    let saboresHtml = '<ol class="ranking">';
+    topSabores.forEach(([nombre, cant], i) => {
+      const emoji = i === 0 ? "🥇" : (i === 1 ? "🥈" : (i === 2 ? "🥉" : ""));
+      saboresHtml += `<li><span class="pos">${emoji || (i + 1) + "°"}</span><span class="name">${escapeHtml(nombre)}</span><span class="val">${cant}</span></li>`;
+    });
+    saboresHtml += '</ol>';
+    cont.innerHTML += `
+      <div class="stats-section">
+        <h3>🍪 Cookies más vendidas</h3>
+        ${saboresHtml}
+      </div>
+    `;
+  }
+
+  // === DÍA DE LA SEMANA QUE MÁS PIDEN ===
+  const diasSemana = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+  const porDiaSemana = [0,0,0,0,0,0,0];
+  peds.forEach(p => {
+    const f = parsearFechaPedido(p.Fecha);
+    if (f) porDiaSemana[f.getDay()]++;
+  });
+  const maxDia = Math.max(...porDiaSemana, 1);
+  let diasHtml = '';
+  diasSemana.forEach((d, i) => {
+    const cant = porDiaSemana[i];
+    const pct = (cant / maxDia) * 100;
+    diasHtml += `<div class="bar-row"><span class="lbl">${d}</span><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="val">${cant}</span></div>`;
+  });
+  cont.innerHTML += `
+    <div class="stats-section">
+      <h3>📅 Pedidos por día de la semana</h3>
+      ${diasHtml}
+    </div>
+  `;
+
+  // === HORARIO ===
+  const franjas = { "Mañana (6-12h)": 0, "Tarde (12-18h)": 0, "Noche (18-24h)": 0 };
+  peds.forEach(p => {
+    const horaStr = String(p.Hora || "");
+    // Formato: "11:34 a. m." o "06:28 p. m."
+    const m = horaStr.match(/(\d{1,2}):(\d{2})\s*([ap])/i);
+    if (m) {
+      let h = parseInt(m[1]);
+      const esPm = m[3].toLowerCase() === "p";
+      if (esPm && h !== 12) h += 12;
+      if (!esPm && h === 12) h = 0;
+      if (h >= 6 && h < 12) franjas["Mañana (6-12h)"]++;
+      else if (h >= 12 && h < 18) franjas["Tarde (12-18h)"]++;
+      else franjas["Noche (18-24h)"]++;
+    }
+  });
+  const maxFranja = Math.max(...Object.values(franjas), 1);
+  let horariosHtml = '';
+  Object.entries(franjas).forEach(([f, cant]) => {
+    const pct = (cant / maxFranja) * 100;
+    const pctTotal = peds.length > 0 ? Math.round((cant / peds.length) * 100) : 0;
+    horariosHtml += `<div class="bar-row"><span class="lbl" style="width:130px">${f}</span><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="val">${cant} (${pctTotal}%)</span></div>`;
+  });
+  cont.innerHTML += `
+    <div class="stats-section">
+      <h3>🕐 Horarios de pedido</h3>
+      ${horariosHtml}
+    </div>
+  `;
+
+  // === ENVÍO VS RETIRO ===
+  let cEnvio = 0, cRetiro = 0;
+  peds.forEach(p => {
+    if (p.TipoEntrega === "Envio") cEnvio++; else cRetiro++;
+  });
+  const pctRetiro = Math.round((cRetiro / peds.length) * 100);
+  const pctEnvio = Math.round((cEnvio / peds.length) * 100);
+
+  // === EFECTIVO VS TRANSFERENCIA ===
+  let cEfec = 0, cTransf = 0;
+  peds.forEach(p => {
+    const pago = String(p.Pago || "").toLowerCase();
+    if (pago.includes("transfer")) cTransf++; else cEfec++;
+  });
+  const pctEfec = Math.round((cEfec / peds.length) * 100);
+  const pctTransf = Math.round((cTransf / peds.length) * 100);
+
+  cont.innerHTML += `
+    <div class="stats-section">
+      <h3>🚚 Entrega y pago</h3>
+      <div class="bar-row"><span class="lbl">🏠 Retiro</span><div class="bar-bg"><div class="bar-fill" style="width:${pctRetiro}%"></div></div><span class="val">${cRetiro} (${pctRetiro}%)</span></div>
+      <div class="bar-row"><span class="lbl">🚚 Envío</span><div class="bar-bg"><div class="bar-fill" style="width:${pctEnvio}%"></div></div><span class="val">${cEnvio} (${pctEnvio}%)</span></div>
+      <div style="height:10px"></div>
+      <div class="bar-row"><span class="lbl">💵 Efectivo</span><div class="bar-bg"><div class="bar-fill" style="width:${pctEfec}%"></div></div><span class="val">${cEfec} (${pctEfec}%)</span></div>
+      <div class="bar-row"><span class="lbl">🏦 Transferencia</span><div class="bar-bg"><div class="bar-fill" style="width:${pctTransf}%"></div></div><span class="val">${cTransf} (${pctTransf}%)</span></div>
+    </div>
+  `;
+
+  // === CLIENTES RECURRENTES ===
+  const porCliente = {};
+  peds.forEach(p => {
+    const nombre = String(p.Nombre || "").trim();
+    if (!nombre) return;
+    porCliente[nombre] = (porCliente[nombre] || 0) + 1;
+  });
+  const recurrentes = Object.entries(porCliente)
+    .filter(([k, v]) => v > 1)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+
+  if (recurrentes.length > 0) {
+    let recHtml = '<ol class="ranking">';
+    recurrentes.forEach(([nombre, cant], i) => {
+      recHtml += `<li><span class="pos">${i + 1}°</span><span class="name">${escapeHtml(nombre)}</span><span class="val">${cant} pedidos</span></li>`;
+    });
+    recHtml += '</ol>';
+    cont.innerHTML += `
+      <div class="stats-section">
+        <h3>⭐ Clientes recurrentes</h3>
+        ${recHtml}
+      </div>
+    `;
+  }
+}
+
+function parsearFechaPedido(v) {
+  if (!v) return null;
+  const s = String(v);
+  // Formato Date(YYYY,M,D)
+  const m1 = s.match(/^Date\((\d+),(\d+),(\d+)/);
+  if (m1) return new Date(parseInt(m1[1]), parseInt(m1[2]), parseInt(m1[3]));
+  // Formato dd/mm/yyyy
+  const m2 = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m2) return new Date(parseInt(m2[3]), parseInt(m2[2]) - 1, parseInt(m2[1]));
+  return null;
 }
 
 $("btnConfirmarStock").addEventListener("click", async () => {
