@@ -1173,8 +1173,31 @@ function renderStats() {
   const fechas = peds.map(p => parsearFechaPedido(p.Fecha)).filter(Boolean).sort((a, b) => a - b);
   const semanas = fechas.length > 1 ? Math.max(1, (fechas[fechas.length - 1] - fechas[0]) / (7 * 24 * 60 * 60 * 1000)) : 1;
   const promPorSemana = (peds.length / semanas).toFixed(1);
-  const totalCookies = peds.reduce((acc, p) => acc + (parseInt(p.Unidades) || 0), 0);
-  const promCookiesPedido = (totalCookies / peds.length).toFixed(1);
+
+  // Calcular cookies parseando el contenido (más confiable que el campo Cantidad)
+  function contarCookiesEnPedido(p) {
+    const cookiesStr = String(p.Cookies || "");
+    let total = 0;
+    // Cookies dentro de Box (en paréntesis)
+    const reBox = /\(([^)]+)\)/g;
+    let m;
+    while ((m = reBox.exec(cookiesStr)) !== null) {
+      m[1].split(/\s*\+\s*/).forEach(it => {
+        const mi = it.trim().match(/^(\d+)\s+(.+)$/);
+        if (mi) total += parseInt(mi[1]);
+      });
+    }
+    // Cookies sueltas (formato "Nombre xN")
+    let resto = cookiesStr.replace(/Box[^|]+(\([^)]+\))?[^|]*/gi, "");
+    resto.split(/[|,;\n]/).forEach(s => {
+      const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+      if (mX) total += parseInt(mX[2]);
+    });
+    return total;
+  }
+
+  const totalCookies = peds.reduce((acc, p) => acc + contarCookiesEnPedido(p), 0);
+  const promCookiesPedido = peds.length > 0 ? (totalCookies / peds.length).toFixed(1) : 0;
 
   cont.innerHTML += `
     <div class="stats-section">
