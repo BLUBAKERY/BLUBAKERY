@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#004e64">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Blu Bakery</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #004e64;
+    --navy-deep: #0B2345;
+    --petrol: #12354A;
+    --cream: #F3EBDD;
+    --cream-2: #E7DAC8;
+    --mostaza: #D7A13A;
+    --bordo: #7E1F2D;
+    --terracota: #B85D45;
+    --oliva: #4E6546;
+    --lavanda: #D9CCE7;
+    --perla: #CFCBC7;
+    --ink: #1a1a1a;
+    --muted: #7a7466;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--cream);
+    color: var(--petrol);
+    font-family: 'Jost', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  body { overflow-x: hidden; }
+
+  /* ====== HEADER ====== */
+  .hdr {
+    text-align: center;
+    padding: 30px 20px 18px;
+    position: relative;
+  }
+  .hdr-logo {
+    width: 130px; height: auto;
+    margin: 0 auto 6px;
+    display: block;
+  }
+  .hdr h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 38px;
+    letter-spacing: 4px;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .hdr .slogan {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 15px;
+    color: var(--terracota);
+    margin-top: 6px;
+  }
+  .hdr .madein {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .hdr .madein::before,
+  .hdr .madein::after {
+    content: "";
+    width: 22px; height: 1px;
+    background: var(--mostaza);
+  }
+  .hdr-social {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .hdr-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--navy);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .hdr-social svg { width: 17px; height: 17px; }
+
+  /* ====== APP ====== */
+  .app {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 25px;
+    color: var(--navy);
+    margin: 28px 0 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--perla);
+  }
+
+  /* ====== COOKIE DEL MES ====== */
+  .cdm {
+    background: linear-gradient(160deg, var(--navy) 0%, var(--petrol) 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 8px;
+    box-shadow: 0 14px 30px -12px rgba(11,35,69,.5);
+  }
+  .cdm-badge {
+    position: absolute;
+    top: 14px; left: 14px;
+    background: var(--mostaza);
+    color: var(--navy-deep);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 100px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .cdm-badge .pulse {
+    width: 6px; height: 6px;
+    background: var(--navy-deep);
+    border-radius: 50%;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .4; transform: scale(1.5); }
+  }
+  .cdm-photo {
+    width: 100%;
+    aspect-ratio: 16/11;
+    object-fit: cover;
+    display: block;
+  }
+  .cdm-body { padding: 18px 20px 20px; }
+  .cdm-body h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--cream);
+    line-height: 1.1;
+  }
+  .cdm-body .quote {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--mostaza);
+    margin: 8px 0 14px;
+  }
+  .cdm-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .cdm-price {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--cream);
+  }
+  .cdm-btn {
+    background: var(--mostaza);
+    color: var(--navy-deep);
+    border: none;
+    font-family: 'Jost', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 13px 22px;
+    border-radius: 100px;
+    cursor: pointer;
+    letter-spacing: .3px;
+    transition: transform .12s, filter .12s;
+  }
+  .cdm-btn:active { transform: scale(.96); }
+  .cdm-btn:hover { filter: brightness(1.08); }
+  .cdm-btn.in-cart { background: var(--oliva); color: #fff; }
+
+  /* ====== BOX CARDS ====== */
+  .box-card {
+    background: var(--navy);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .box-card::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(215,161,58,.18), transparent 70%);
+  }
+  .box-photo {
+    width: 92px; height: 92px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .box-info { flex: 1; min-width: 0; }
+  .box-info h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--cream);
+    line-height: 1.15;
+  }
+  .box-info .box-desc {
+    font-size: 12.5px;
+    color: rgba(243,235,221,.7);
+    margin-top: 3px;
+  }
+  .box-info .box-price {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--mostaza);
+    margin-top: 5px;
+  }
+  .box-tag {
+    display: inline-block;
+    background: rgba(215,161,58,.2);
+    color: var(--mostaza);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 100px;
+    margin-top: 6px;
+  }
+  .qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Jost', sans-serif;
+    transition: transform .1s;
+  }
+  .qty-btn:active { transform: scale(.9); }
+  .qty-num {
+    min-width: 26px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .box-card .qty-btn { border-color: rgba(243,235,221,.5); color: var(--cream); }
+  .box-card .qty-num { color: var(--cream); }
+
+  /* ====== COOKIE CARDS ====== */
+  .cookie-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .cookie-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px -14px rgba(11,35,69,.4);
+    border: 1px solid var(--cream-2);
+  }
+  .cookie-card.agotada { opacity: .72; }
+  .cookie-photo-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background: var(--cream-2);
+  }
+  .cookie-photo {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+  }
+  .cookie-card:hover .cookie-photo { transform: scale(1.04); }
+  .cookie-flag {
+    position: absolute;
+    top: 12px; left: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 100px;
+  }
+  .cookie-flag.nueva { background: var(--oliva); color: #fff; }
+  .cookie-flag.poco { background: var(--bordo); color: #fff; }
+  .cookie-flag.agotado { background: var(--terracota); color: #fff; }
+  .cookie-body { padding: 16px 18px 18px; }
+  .cookie-body h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--navy);
+    line-height: 1.12;
+  }
+  .cookie-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin: 7px 0 0;
+    min-height: 38px;
+  }
+  .cookie-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+    gap: 12px;
+  }
+  .cookie-price {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--petrol);
+  }
+  .cookie-card .qty-btn { border-color: var(--cream-2); color: var(--navy); }
+  .avisar-btn {
+    width: 100%;
+    margin-top: 12px;
+    background: transparent;
+    border: 1.5px solid var(--terracota);
+    color: var(--terracota);
+    font-family: 'Jost', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 12px;
+    border-radius: 100px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .avisar-btn:active { transform: scale(.98); }
+
+  /* ====== GENERIC SECTIONS ====== */
+  .panel {
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+  .panel label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .panel label:first-child { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--cream-2);
+    border-radius: 10px;
+    font-family: 'Jost', sans-serif;
+    font-size: 15px;
+    background: var(--cream);
+    color: var(--petrol);
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--navy); background: #fff; }
+
+  /* ====== PILL SELECTORS ====== */
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    flex: 1;
+    min-width: 90px;
+    padding: 13px 10px;
+    border: 1.5px solid var(--cream-2);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Jost', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--petrol);
+    transition: all .14s;
+  }
+  .pill.act { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .pill.dis {
+    opacity: .42;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+  .pill .sub { display: block; font-size: 11px; opacity: .7; margin-top: 2px; }
+
+  .info-box {
+    background: var(--cream);
+    border-left: 3px solid var(--navy);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--petrol);
+  }
+  .info-box b { color: var(--navy); }
+  .warn-box {
+    background: #fdf3d6;
+    border: 1px solid var(--mostaza);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 13px;
+    color: #7a5a13;
+    margin-bottom: 10px;
+  }
+
+  /* ====== EVENTOS / NOVEDADES ====== */
+  .feature {
+    border-radius: 18px;
+    padding: 22px 20px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 21px;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .feature p { font-size: 14px; line-height: 1.5; }
+  .feature .feat-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 12px 20px;
+    border-radius: 100px;
+    font-family: 'Jost', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+  .feature.eventos {
+    background: linear-gradient(150deg, var(--bordo), #5e1622);
+    color: var(--cream);
+  }
+  .feature.eventos .feat-btn { background: var(--mostaza); color: var(--navy-deep); }
+  .feature.novedades {
+    background: var(--lavanda);
+    color: var(--navy-deep);
+  }
+  .nov-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(11,35,69,.12);
+  }
+  .nov-item:last-child { border-bottom: none; }
+  .nov-emoji { font-size: 19px; line-height: 1.3; }
+  .nov-item .nov-t { font-weight: 600; font-size: 14.5px; }
+  .nov-item .nov-d { font-size: 12.5px; opacity: .75; }
+  .feature.contacto {
+    background: var(--navy);
+    color: var(--cream);
+    text-align: center;
+  }
+  .feature.contacto .feat-btn {
+    background: #25D366; color: #fff;
+    margin: 14px auto 0;
+  }
+
+  /* ====== RESUMEN / CTA ====== */
+  .resumen-list { margin-bottom: 8px; }
+  .resumen-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed var(--cream-2);
+  }
+  .resumen-row.total {
+    border-bottom: none;
+    border-top: 2px solid var(--navy);
+    margin-top: 6px;
+    padding-top: 10px;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--navy);
+  }
+  .resumen-empty {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    font-family: 'Fraunces', serif;
+    padding: 14px;
+  }
+  .cta {
+    width: 100%;
+    padding: 17px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: .5px;
+  }
+  .cta:disabled { opacity: .45; cursor: not-allowed; }
+  .cta:not(:disabled):active { transform: scale(.99); }
+
+  /* ====== MODAL BOX SABORES ====== */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(11,35,69,.6);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--cream);
+    width: 100%;
+    max-width: 560px;
+    border-radius: 22px 22px 0 0;
+    padding: 22px 18px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .modal .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .sabor-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .sabor-row img {
+    width: 48px; height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  .sabor-row .sabor-name { flex: 1; font-size: 14px; font-weight: 500; }
+  .modal-counter {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    color: var(--navy);
+    margin: 10px 0;
+  }
+  .modal-counter b { font-size: 19px; }
+  .toast {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--navy-deep);
+    color: var(--cream);
+    padding: 13px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 200;
+    transition: transform .3s;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .loading { text-align:center; padding:60px 20px; color:var(--muted); font-family:'Fraunces',serif; font-style:italic; }
+</style>
+</head>
+<body>
+
+<!-- Imágenes ocultas precargadas -->
+<div style="display:none" aria-hidden="true">
+  <img id="img-logo" src="https://drive.google.com/thumbnail?id=1Xxv3pBkyW-3mi8oczFy_QEqx0yoKBUlD&sz=w600">
+</div>
+
+<header class="hdr">
+  <img class="hdr-logo" id="logoImg" src="https://drive.google.com/thumbnail?id=1Xxv3pBkyW-3mi8oczFy_QEqx0yoKBUlD&sz=w600" alt="Blu Bakery" onerror="this.style.display='none'">
+  <h1>BLU BAKERY</h1>
+  <div class="slogan">Lo bueno no necesita explicación</div>
+  <div class="madein">Hecho a mano en Olavarría</div>
+  <div class="hdr-social">
+    <a href="https://wa.me/5492284353970" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.5 2.6 1.6.3.1.5.1.7-.1l.8-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>
+      2284 35-3970
+    </a>
+    <a href="https://instagram.com/blubakery.bb" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.5-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-3.2-.1-4.8-1.7-4.9-4.9C2.1 15.5 2.1 15.2 2.1 12s0-3.5.1-4.8C2.3 4 3.9 2.4 7.1 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg>
+      @blubakery.bb
+    </a>
+  </div>
+</header>
+
+<div class="app" id="app">
+  <div class="loading">Horneando la página…</div>
+</div>
+
+<!-- MODAL: elegir sabores de la Box -->
+<div class="modal-bg" id="modalBox">
+  <div class="modal">
+    <h3 id="modalBoxTitle">Armá tu Box</h3>
+    <div class="modal-sub" id="modalBoxSub"></div>
+    <div id="modalBoxList"></div>
+    <div class="modal-counter">Elegiste <b id="modalBoxCount">0</b> de <span id="modalBoxMax">4</span></div>
+    <button class="cta" id="modalBoxConfirm">Confirmar Box</button>
+    <button class="cta" style="background:transparent;color:var(--muted);margin-top:4px" onclick="cerrarModalBox()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============ */
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
+var SHEET_ID = "1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI";
+var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config";
+var WSP_NUMERO = "5492284353970";
+
+/* Config por defecto (se sobreescribe con la del Sheet) */
+var CFG = {
+  productos: [],
+  box: { activo:true, nombre:"Box x 4 cookies a elección", cant:4, precio:17200, pctSueltas:10, emoji:"🎁", foto:"" },
+  box2: { activo:true, nombre:"Box x 6 cookies a elección", cant:6, precio:25800, pctSueltas:10, emoji:"🎁", foto:"" },
+  cookieDelMes: "nuevo_1777848533244",
+  cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
+  costoEnvio: 3000,
+  alias: "BLU.BAKERY",
+  banco: "Banco Galicia",
+  wspComprobante: "",
+  horasCorte: 24,
+  msgRetiro: "Se retira por Las Heras al 2900. Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
+  msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
+  msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
+  msgEfectivo: "Por favor abonar con el importe justo o con cambio.",
+  franjasDefault: ["15:00 - 17:00", "17:00 - 19:00"],
+  diasEntrega: [],
+  novedades: [
+    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
+    { emoji:"🎁", titulo:"Edición especial — pronto", desc:"Estamos preparando algo para una fecha muy especial." },
+    { emoji:"⚽", titulo:"Algo se viene para el Mundial", desc:"Atentos: una caja pensada para los días de partido." }
+  ]
+};
+
+/* ============ ESTADO ============ */
+var qty = {};          // cookies sueltas: qty[id] = cantidad
+var boxQty = 0;        // cantidad de Box 4
+var box2Qty = 0;       // cantidad de Box 6
+var boxFill = {};      // sabores dentro de Box 4: boxFill[id] = cant
+var box2Fill = {};     // sabores dentro de Box 6
+var ent = null;        // "envio" | "retiro"
+var diaId = null;
+var franja = null;
+var pago = null;       // "transferencia" | "efectivo"
+var disp = [];         // dias disponibles con estado
+var modalBoxTarget = null; // "box" | "box2"
+
+function $(id){ return document.getElementById(id); }
+function fmt(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
+function driveImg(idOrUrl){
+  if(!idOrUrl) return "";
+  if(idOrUrl.indexOf("http") === 0){
+    var m = idOrUrl.match(/[-\w]{25,}/);
+    if(m) return "https://drive.google.com/thumbnail?id=" + m[0] + "&sz=w1200";
+    return idOrUrl;
+  }
+  return "https://drive.google.com/thumbnail?id=" + idOrUrl + "&sz=w1200";
+}
+
+/* ============ CARGAR CONFIG ============ */
+(function(){
+  fetch(CONFIG_GVIZ)
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var json = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+      if(json.table.rows.length && json.table.rows[0].c[0]){
+        var data = JSON.parse(json.table.rows[0].c[0].v);
+        if(data.productos) CFG.productos = data.productos;
+        if(data.box) CFG.box = data.box;
+        if(data.box2) CFG.box2 = data.box2;
+        if(data.cookieDelMes) CFG.cookieDelMes = data.cookieDelMes;
+        if(data.cookieDelMesFrase) CFG.cookieDelMesFrase = data.cookieDelMesFrase;
+        if(data.costoEnvio) CFG.costoEnvio = data.costoEnvio;
+        if(data.alias) CFG.alias = data.alias;
+        if(data.banco) CFG.banco = data.banco;
+        if(data.wspComprobante) CFG.wspComprobante = data.wspComprobante;
+        if(data.horasCorte) CFG.horasCorte = data.horasCorte;
+        if(data.msgRetiro) CFG.msgRetiro = data.msgRetiro;
+        if(data.msgEnvio) CFG.msgEnvio = data.msgEnvio;
+        if(data.msgTransferencia) CFG.msgTransferencia = data.msgTransferencia;
+        if(data.msgEfectivo) CFG.msgEfectivo = data.msgEfectivo;
+        if(data.franjasDefault && data.franjasDefault.length) CFG.franjasDefault = data.franjasDefault;
+        if(data.diasEntrega && data.diasEntrega.length) CFG.diasEntrega = data.diasEntrega;
+        if(data.novedades && data.novedades.length) CFG.novedades = data.novedades;
+      }
+    })
+    .catch(function(e){ console.warn("No se pudo cargar config:", e); })
+    .finally(function(){ init(); });
+})();
+
+/* ============ INIT ============ */
+function init(){
+  CFG.productos.forEach(function(p){ qty[p.id] = 0; });
+  render();
+}
+
+/* ============ RENDER PRINCIPAL ============ */
+function render(){
+  var app = $("app");
+  app.innerHTML = "";
+
+  // --- COOKIE DEL MES ---
+  var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
+  if(cdm){
+    app.appendChild(seccionTitulo("Cookie del mes"));
+    app.appendChild(renderCookieDelMes(cdm));
+  }
+
+  // --- CATÁLOGO ---
+  app.appendChild(seccionTitulo("Elegí tus cookies"));
+
+  // Boxes
+  if(CFG.box && CFG.box.activo){
+    app.appendChild(renderBoxCard(CFG.box, "box"));
+  }
+  if(CFG.box2 && CFG.box2.activo){
+    app.appendChild(renderBoxCard(CFG.box2, "box2"));
+  }
+
+  // Cookies
+  var grid = document.createElement("div");
+  grid.className = "cookie-grid";
+  CFG.productos.forEach(function(p){
+    if(!p.activo) return;
+    grid.appendChild(renderCookieCard(p));
+  });
+  app.appendChild(grid);
+
+  // --- ENTREGA ---
+  app.appendChild(seccionTitulo("¿Envío o retiro?"));
+  app.appendChild(renderEntrega());
+
+  // --- DÍA ---
+  var diaWrap = document.createElement("div");
+  diaWrap.id = "dia-section";
+  app.appendChild(diaWrap);
+
+  // --- HORARIO ---
+  var franjaWrap = document.createElement("div");
+  franjaWrap.id = "franja-section";
+  app.appendChild(franjaWrap);
+
+  // --- DATOS ---
+  app.appendChild(seccionTitulo("Tus datos"));
+  app.appendChild(renderDatos());
+
+  // --- PAGO ---
+  app.appendChild(seccionTitulo("Forma de pago"));
+  app.appendChild(renderPago());
+
+  // --- RESUMEN ---
+  app.appendChild(seccionTitulo("Resumen"));
+  var resWrap = document.createElement("div");
+  resWrap.id = "resumen-section";
+  app.appendChild(resWrap);
+
+  // --- CTA ---
+  var cta = document.createElement("button");
+  cta.className = "cta";
+  cta.id = "btnConfirmar";
+  cta.textContent = "Confirmar pedido";
+  cta.onclick = confirmarPedido;
+  app.appendChild(cta);
+
+  // --- NOVEDADES ---
+  app.appendChild(seccionTitulo("Novedades"));
+  app.appendChild(renderNovedades());
+
+  // --- EVENTOS ---
+  app.appendChild(renderEventos());
+
+  // --- CONTACTO ---
+  app.appendChild(renderContacto());
+
+  renderDias();
+  renderResumen();
+}
+
+function seccionTitulo(txt){
+  var h = document.createElement("h2");
+  h.className = "section-title";
+  h.textContent = txt;
+  return h;
+}
+
+/* ---- COOKIE DEL MES ---- */
+function renderCookieDelMes(p){
+  var div = document.createElement("div");
+  div.className = "cdm";
+  var agotada = (parseInt(p.stock)||0) <= 0;
+  div.innerHTML =
+    '<div class="cdm-badge"><span class="pulse"></span>Cookie del mes</div>' +
+    '<img class="cdm-photo" src="' + driveImg(p.foto) + '" alt="' + esc(p.nombre) + '" onerror="this.style.display=\'none\'">' +
+    '<div class="cdm-body">' +
+      '<h3>' + esc(p.nombre) + '</h3>' +
+      '<div class="quote">' + esc(CFG.cookieDelMesFrase) + '</div>' +
+      '<div class="cdm-foot">' +
+        '<div class="cdm-price">' + fmt(p.precio) + '</div>' +
+        (agotada
+          ? '<button class="cdm-btn" style="background:var(--terracota);color:#fff" onclick="avisarStock(\'' + p.id + '\')">Avisame cuando vuelva</button>'
+          : '<button class="cdm-btn" id="cdm-btn-' + p.id + '" onclick="sumarDesdeCDM(\'' + p.id + '\')">Sumar al pedido</button>') +
+      '</div>' +
+    '</div>';
+  return div;
+}
+
+function sumarDesdeCDM(id){
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  if(!p) return;
+  if(qty[id] >= disponible(id)){
+    toast("No queda más stock de esa cookie");
+    return;
+  }
+  qty[id]++;
+  var btn = $("cdm-btn-" + id);
+  if(btn){ btn.textContent = "Agregada ✓ (" + qty[id] + ")"; btn.classList.add("in-cart"); }
+  actualizarCard(id);
+  renderResumen();
+  toast(p.nombre + " sumada");
+}
+
+/* ---- BOX CARD ---- */
+function renderBoxCard(box, tipo){
+  var div = document.createElement("div");
+  div.className = "box-card";
+  var cant = tipo === "box" ? boxQty : box2Qty;
+  div.innerHTML =
+    '<img class="box-photo" src="' + driveImg(box.foto) + '" alt="Box" onerror="this.style.visibility=\'hidden\'">' +
+    '<div class="box-info">' +
+      '<h3>' + esc(box.nombre) + '</h3>' +
+      '<div class="box-desc">Elegí ' + box.cant + ' sabores a gusto</div>' +
+      '<div class="box-price">' + fmt(box.precio) + '</div>' +
+      '<span class="box-tag">Precio especial</span>' +
+    '</div>' +
+    '<div class="qty-ctrl">' +
+      '<button class="qty-btn" onclick="cambiarBox(\'' + tipo + '\',-1)">−</button>' +
+      '<span class="qty-num" id="' + tipo + '-num">' + cant + '</span>' +
+      '<button class="qty-btn" onclick="cambiarBox(\'' + tipo + '\',1)">+</button>' +
+    '</div>';
+  return div;
+}
+
+function cambiarBox(tipo, delta){
+  if(delta > 0){
+    // Abrir modal para elegir sabores
+    modalBoxTarget = tipo;
+    abrirModalBox(tipo);
+  } else {
+    if(tipo === "box" && boxQty > 0){
+      boxQty--;
+      // quitar los sabores de la última box (proporcional simple: limpiamos todo si llega a 0)
+      if(boxQty === 0) boxFill = {};
+    }
+    if(tipo === "box2" && box2Qty > 0){
+      box2Qty--;
+      if(box2Qty === 0) box2Fill = {};
+    }
+    $(tipo + "-num").textContent = tipo === "box" ? boxQty : box2Qty;
+    renderResumen();
+  }
+}
+
+/* ---- MODAL BOX ---- */
+function abrirModalBox(tipo){
+  var box = tipo === "box" ? CFG.box : CFG.box2;
+  $("modalBoxTitle").textContent = "Armá tu " + box.nombre;
+  $("modalBoxSub").textContent = "Elegí " + box.cant + " cookies (podés repetir sabores)";
+  $("modalBoxMax").textContent = box.cant;
+  var tempFill = {};
+  CFG.productos.forEach(function(p){ tempFill[p.id] = 0; });
+  window._tempFill = tempFill;
+  window._tempBox = box;
+  window._tempTipo = tipo;
+
+  var list = $("modalBoxList");
+  list.innerHTML = "";
+  CFG.productos.forEach(function(p){
+    if(!p.activo) return;
+    var row = document.createElement("div");
+    row.className = "sabor-row";
+    row.innerHTML =
+      '<img src="' + driveImg(p.foto) + '" onerror="this.style.visibility=\'hidden\'">' +
+      '<span class="sabor-name">' + esc(p.nombre) + '</span>' +
+      '<div class="qty-ctrl">' +
+        '<button class="qty-btn" onclick="modalSabor(\'' + p.id + '\',-1)">−</button>' +
+        '<span class="qty-num" id="msab-' + p.id + '">0</span>' +
+        '<button class="qty-btn" onclick="modalSabor(\'' + p.id + '\',1)">+</button>' +
+      '</div>';
+    list.appendChild(row);
+  });
+  $("modalBoxCount").textContent = "0";
+  $("modalBox").classList.add("show");
+}
+
+function modalSabor(id, delta){
+  var box = window._tempBox;
+  var fill = window._tempFill;
+  var totalActual = 0;
+  Object.keys(fill).forEach(function(k){ totalActual += fill[k]; });
+  if(delta > 0){
+    if(totalActual >= box.cant){ toast("Ya elegiste " + box.cant + " cookies"); return; }
+    // chequear stock
+    var p = CFG.productos.find(function(x){ return x.id === id; });
+    var usado = (qty[id]||0) + (boxFill[id]||0) + (box2Fill[id]||0) + fill[id];
+    if(usado >= (parseInt(p.stock)||0)){ toast("Sin stock de " + p.nombre); return; }
+    fill[id]++;
+  } else {
+    if(fill[id] > 0) fill[id]--;
+  }
+  $("msab-" + id).textContent = fill[id];
+  var nuevoTotal = 0;
+  Object.keys(fill).forEach(function(k){ nuevoTotal += fill[k]; });
+  $("modalBoxCount").textContent = nuevoTotal;
+}
+
+$("modalBoxConfirm").onclick = function(){
+  var box = window._tempBox;
+  var fill = window._tempFill;
+  var tipo = window._tempTipo;
+  var total = 0;
+  Object.keys(fill).forEach(function(k){ total += fill[k]; });
+  if(total !== box.cant){
+    toast("Tenés que elegir exactamente " + box.cant + " cookies");
+    return;
+  }
+  // Sumar la box
+  if(tipo === "box"){
+    boxQty++;
+    Object.keys(fill).forEach(function(k){ boxFill[k] = (boxFill[k]||0) + fill[k]; });
+    $("box-num").textContent = boxQty;
+  } else {
+    box2Qty++;
+    Object.keys(fill).forEach(function(k){ box2Fill[k] = (box2Fill[k]||0) + fill[k]; });
+    $("box2-num").textContent = box2Qty;
+  }
+  cerrarModalBox();
+  renderResumen();
+  toast("Box agregada ✓");
+};
+
+function cerrarModalBox(){ $("modalBox").classList.remove("show"); }
+
+/* ---- COOKIE CARD ---- */
+function renderCookieCard(p){
+  var div = document.createElement("div");
+  div.className = "cookie-card";
+  div.id = "card-" + p.id;
+  var stock = parseInt(p.stock) || 0;
+  var agotada = stock <= 0;
+  if(agotada) div.classList.add("agotada");
+  var esNueva = (p.descripcion||"").toUpperCase().indexOf("NUEVA") === 0;
+
+  var flag = "";
+  if(agotada) flag = '<div class="cookie-flag agotado">Agotada</div>';
+  else if(stock <= 3) flag = '<div class="cookie-flag poco">Últimas ' + stock + '</div>';
+  else if(esNueva) flag = '<div class="cookie-flag nueva">Nueva</div>';
+
+  var desc = (p.descripcion||"").replace(/^NUEVA\s*[-–]\s*/i, "");
+
+  var foot = agotada
+    ? '<button class="avisar-btn" onclick="avisarStock(\'' + p.id + '\')">🔔 Avisame cuando vuelva</button>'
+    : '<div class="cookie-foot">' +
+        '<div class="cookie-price">' + fmt(p.precio) + '</div>' +
+        '<div class="qty-ctrl">' +
+          '<button class="qty-btn" onclick="cambiarCookie(\'' + p.id + '\',-1)">−</button>' +
+          '<span class="qty-num" id="qn-' + p.id + '">' + (qty[p.id]||0) + '</span>' +
+          '<button class="qty-btn" onclick="cambiarCookie(\'' + p.id + '\',1)">+</button>' +
+        '</div>' +
+      '</div>';
+
+  div.innerHTML =
+    '<div class="cookie-photo-wrap">' +
+      flag +
+      '<img class="cookie-photo" src="' + driveImg(p.foto) + '" alt="' + esc(p.nombre) + '" onerror="this.style.opacity=\'.3\'">' +
+    '</div>' +
+    '<div class="cookie-body">' +
+      '<h3>' + esc(p.nombre) + '</h3>' +
+      '<p class="cookie-desc">' + esc(desc) + '</p>' +
+      foot +
+    '</div>';
+  return div;
+}
+
+function disponible(id){
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  var stock = parseInt(p.stock) || 0;
+  return stock - (boxFill[id]||0) - (box2Fill[id]||0);
+}
+
+function cambiarCookie(id, delta){
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  if(delta > 0){
+    if((qty[id]||0) >= disponible(id)){
+      toast("Sin más stock de " + p.nombre);
+      return;
+    }
+    qty[id] = (qty[id]||0) + 1;
+  } else {
+    if((qty[id]||0) > 0) qty[id]--;
+  }
+  actualizarCard(id);
+  renderResumen();
+}
+
+function actualizarCard(id){
+  var el = $("qn-" + id);
+  if(el) el.textContent = qty[id] || 0;
+}
+
+/* ---- AVISAME CUANDO VUELVA ---- */
+function avisarStock(id){
+  var p = CFG.productos.find(function(x){ return x.id === id; });
+  var msg = "Hola Blu Bakery! Quiero que me avisen cuando vuelva la cookie " + (p ? p.nombre : "") + " 🍪";
+  window.open("https://wa.me/" + WSP_NUMERO + "?text=" + encodeURIComponent(msg), "_blank");
+}
+
+/* ---- ENTREGA ---- */
+function renderEntrega(){
+  var div = document.createElement("div");
+  var p = document.createElement("div");
+  p.className = "pill-row";
+  p.innerHTML =
+    '<button class="pill" id="pill-envio" onclick="setEntrega(\'envio\')">🚚 Envío<span class="sub">' + fmt(CFG.costoEnvio) + '</span></button>' +
+    '<button class="pill" id="pill-retiro" onclick="setEntrega(\'retiro\')">🏠 Retiro<span class="sub">Sin costo</span></button>';
+  div.appendChild(p);
+  var info = document.createElement("div");
+  info.id = "entrega-info";
+  div.appendChild(info);
+  return div;
+}
+
+function setEntrega(t){
+  ent = t;
+  $("pill-envio").classList.toggle("act", t === "envio");
+  $("pill-retiro").classList.toggle("act", t === "retiro");
+  var info = $("entrega-info");
+  if(t === "envio"){
+    info.innerHTML = '<div class="info-box"><b>Envío a domicilio.</b> ' + esc(CFG.msgEnvio) + '</div>';
+  } else {
+    info.innerHTML = '<div class="info-box"><b>Retiro.</b> ' + esc(CFG.msgRetiro) + '</div>';
+  }
+  // mostrar campo dirección
+  var dir = $("campo-direccion");
+  if(dir) dir.style.display = t === "envio" ? "block" : "none";
+  renderResumen();
+}
+
+/* ---- DÍAS (con corte de horas) ---- */
+function renderDias(){
+  var wrap = $("dia-section");
+  if(!wrap) return;
+  if(!CFG.diasEntrega.length){ wrap.innerHTML = ""; return; }
+
+  wrap.innerHTML = "";
+  wrap.appendChild(seccionTitulo("Día de entrega"));
+
+  var now = new Date();
+  var minH = CFG.horasCorte || 24;
+
+  function parsearFechaDia(d){
+    var mFecha = (d.label||"").match(/(\d{1,2})\/(\d{1,2})/);
+    if(!mFecha) return null;
+    var dia = parseInt(mFecha[1],10);
+    var mes = parseInt(mFecha[2],10) - 1;
+    var hStr = (d.horario || (d.franjas && d.franjas[0]) || "15:00");
+    var mHora = hStr.match(/(\d{1,2})[:.]?(\d{0,2})/);
+    var hora = mHora ? parseInt(mHora[1],10) : 15;
+    var min = (mHora && mHora[2]) ? parseInt(mHora[2],10) : 0;
+    var anio = now.getFullYear();
+    var fecha = new Date(anio, mes, dia, hora, min, 0);
+    if(fecha < now && (now.getMonth() - mes > 6)){
+      fecha = new Date(anio+1, mes, dia, hora, min, 0);
+    }
+    return fecha;
+  }
+
+  disp = CFG.diasEntrega.map(function(d){
+    var fecha = parsearFechaDia(d);
+    if(!fecha) return { dia:d, disponible:true };
+    var horas = (fecha - now) / 3600000;
+    return { dia:d, disponible: horas >= minH, fecha:fecha };
+  });
+
+  var disponibles = disp.filter(function(x){ return x.disponible; });
+
+  var pillRow = document.createElement("div");
+  pillRow.className = "pill-row";
+
+  if(!disponibles.length){
+    var w = document.createElement("div");
+    w.className = "warn-box";
+    w.textContent = "⚠ Los pedidos para los días disponibles ya cerraron (mínimo " + minH + "hs de anticipación). Volvé cuando carguemos nuevas fechas.";
+    wrap.appendChild(w);
+  }
+
+  disp.forEach(function(item){
+    var d = item.dia;
+    var btn = document.createElement("button");
+    if(item.disponible){
+      btn.className = "pill";
+      btn.id = "dia-" + d.id;
+      btn.textContent = d.label;
+      btn.onclick = (function(id){ return function(){ setDia(id); }; })(d.id);
+    } else {
+      btn.className = "pill dis";
+      btn.textContent = d.label + " · cerrado";
+      btn.onclick = function(){
+        toast("Ese día ya no se puede pedir. Mínimo " + minH + "hs de anticipación.");
+      };
+    }
+    pillRow.appendChild(btn);
+  });
+  wrap.appendChild(pillRow);
+
+  if(disponibles.length){
+    diaId = disponibles[0].dia.id;
+    var b = $("dia-" + diaId);
+    if(b) b.classList.add("act");
+    renderFranjas();
+  } else {
+    diaId = null;
+    $("franja-section").innerHTML = "";
+  }
+}
+
+function setDia(id){
+  diaId = id;
+  disp.forEach(function(item){
+    var d = item.dia;
+    var b = $("dia-" + d.id);
+    if(b && item.disponible) b.classList.toggle("act", d.id === id);
+  });
+  renderFranjas();
+}
+
+function renderFranjas(){
+  var wrap = $("franja-section");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  var d = CFG.diasEntrega.find(function(x){ return x.id === diaId; });
+  var franjas = [];
+  if(d && d.franjas && d.franjas.length) franjas = d.franjas;
+  else if(d && d.horario) franjas = [d.horario];
+  else franjas = CFG.franjasDefault || [];
+
+  if(!franjas.length){ franja = null; return; }
+
+  wrap.appendChild(seccionTitulo("Horario"));
+  var row = document.createElement("div");
+  row.className = "pill-row";
+  franjas.forEach(function(f, i){
+    var btn = document.createElement("button");
+    btn.className = "pill" + (i === 0 ? " act" : "");
+    btn.textContent = f;
+    btn.onclick = (function(val, elBtn){
+      return function(){
+        row.querySelectorAll(".pill").forEach(function(x){ x.classList.remove("act"); });
+        elBtn.classList.add("act");
+        franja = val;
+      };
+    })(f, btn);
+    row.appendChild(btn);
+  });
+  wrap.appendChild(row);
+  franja = franjas[0];
+}
+
+/* ---- DATOS ---- */
+function renderDatos(){
+  var div = document.createElement("div");
+  div.className = "panel";
+  div.innerHTML =
+    '<label>Nombre completo</label>' +
+    '<input type="text" id="in-nombre" placeholder="María García">' +
+    '<label>Teléfono (WhatsApp)</label>' +
+    '<input type="tel" id="in-tel" placeholder="2284 000000">' +
+    '<label>Email (opcional)</label>' +
+    '<input type="email" id="in-email" placeholder="tu@email.com">' +
+    '<div id="campo-direccion" style="display:none">' +
+      '<label>Dirección</label>' +
+      '<input type="text" id="in-dir" placeholder="Calle y número, barrio">' +
+    '</div>' +
+    '<label>Aclaraciones (opcional)</label>' +
+    '<textarea id="in-notas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
+  return div;
+}
+
+/* ---- PAGO ---- */
+function renderPago(){
+  var div = document.createElement("div");
+  var p = document.createElement("div");
+  p.className = "pill-row";
+  p.innerHTML =
+    '<button class="pill" id="pill-transf" onclick="setPago(\'transferencia\')">💳 Transferencia</button>' +
+    '<button class="pill" id="pill-efec" onclick="setPago(\'efectivo\')">💵 Efectivo</button>';
+  div.appendChild(p);
+  var info = document.createElement("div");
+  info.id = "pago-info";
+  div.appendChild(info);
+  return div;
+}
+
+function setPago(t){
+  pago = t;
+  $("pill-transf").classList.toggle("act", t === "transferencia");
+  $("pill-efec").classList.toggle("act", t === "efectivo");
+  var info = $("pago-info");
+  if(t === "transferencia"){
+    info.innerHTML =
+      '<div class="info-box">' +
+        '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Transferí al confirmar</div>' +
+        '<div style="font-family:\'Fraunces\',serif;font-weight:700;font-size:20px;color:var(--navy);margin-top:2px">' + esc(CFG.alias) + '</div>' +
+        '<div style="font-size:13px;color:var(--muted)">' + esc(CFG.banco) + '</div>' +
+        '<div style="margin-top:8px;font-size:13px">' + esc(CFG.msgTransferencia) + '</div>' +
+      '</div>';
+  } else {
+    info.innerHTML = '<div class="info-box">' + esc(CFG.msgEfectivo) + '</div>';
+  }
+  renderResumen();
+}
+
+/* ---- NOVEDADES ---- */
+function renderNovedades(){
+  var div = document.createElement("div");
+  div.className = "feature novedades";
+  var items = CFG.novedades.map(function(n){
+    return '<div class="nov-item">' +
+      '<span class="nov-emoji">' + esc(n.emoji||"✨") + '</span>' +
+      '<div><div class="nov-t">' + esc(n.titulo) + '</div>' +
+      '<div class="nov-d">' + esc(n.desc) + '</div></div>' +
+    '</div>';
+  }).join("");
+  div.innerHTML = '<h3>Lo que se viene 🔮</h3>' +
+    '<p style="margin-bottom:10px">Cosas nuevas horneándose en Blu:</p>' + items;
+  return div;
+}
+
+/* ---- EVENTOS ---- */
+function renderEventos(){
+  var div = document.createElement("div");
+  div.className = "feature eventos";
+  var msg = "Hola Blu Bakery! Quiero consultar por cookies para un evento 🎉";
+  div.innerHTML =
+    '<h3>¿Festejás algo? Llevamos Blu a tu evento 🎉</h3>' +
+    '<p>Cumpleaños, casamientos, eventos de empresa. Cookies para souvenir, para compartir, o nuestra mesa de cookies en tu fiesta. Contanos tu idea.</p>' +
+    '<a class="feat-btn" href="' + buildEventoWsp() + '" target="_blank" rel="noopener">💬 Consultar por WhatsApp</a>';
+  return div;
+}
+
+function buildEventoWsp(){
+  var msg =
+    "Hola Blu Bakery! Quiero hacer una consulta para un evento 🎉\n\n" +
+    "Les dejo algunos datos para que puedan ayudarme:\n" +
+    "• Tipo de evento: \n" +
+    "• Fecha aproximada: \n" +
+    "• Cookies grandes o mini: \n" +
+    "• Cantidad aproximada (o si prefiero charlarlo con ustedes): \n" +
+    "• Las quiero para: ofrecer en el evento / souvenir / que Blu esté presente sirviendo cookies\n\n" +
+    "¡Gracias! Quedo atenta/o a su respuesta 💛";
+  return "https://wa.me/" + WSP_NUMERO + "?text=" + encodeURIComponent(msg);
+}
+
+/* ---- CONTACTO ---- */
+function renderContacto(){
+  var div = document.createElement("div");
+  div.className = "feature contacto";
+  var msg = "Hola Blu Bakery! Tengo una consulta 🍪";
+  div.innerHTML =
+    '<h3>¿Tenés alguna consulta?</h3>' +
+    '<p style="opacity:.85">Escribinos por WhatsApp y te respondemos a la brevedad.</p>' +
+    '<a class="feat-btn" href="https://wa.me/' + WSP_NUMERO + '?text=' + encodeURIComponent(msg) + '" target="_blank" rel="noopener">💬 Contactanos</a>';
+  return div;
+}
+
+/* ---- RESUMEN ---- */
+function calcularTotales(){
+  var sueltas = 0, items = [];
+  CFG.productos.forEach(function(p){
+    if(qty[p.id] > 0){
+      sueltas += qty[p.id] * p.precio;
+      items.push({ nombre: p.nombre, cant: qty[p.id], tipo:"suelta" });
+    }
+  });
+  var totalBoxes = boxQty * (CFG.box.precio||0) + box2Qty * (CFG.box2.precio||0);
+  var hayBox = (boxQty + box2Qty) > 0;
+  // Descuento en sueltas si hay box
+  var pct = CFG.box.pctSueltas || 0;
+  var descuento = 0;
+  if(hayBox && pct > 0){
+    descuento = sueltas * (pct/100);
+  }
+  var total = totalBoxes + sueltas - descuento;
+  return {
+    sueltas: sueltas,
+    totalBoxes: totalBoxes,
+    descuento: descuento,
+    total: total,
+    items: items,
+    hayBox: hayBox
+  };
+}
+
+function renderResumen(){
+  var wrap = $("resumen-section");
+  if(!wrap) return;
+  var t = calcularTotales();
+  var hayAlgo = t.hayBox || t.items.length > 0;
+
+  var html = '<div class="panel">';
+  if(!hayAlgo){
+    html += '<div class="resumen-empty">Todavía no elegiste cookies</div>';
+  } else {
+    html += '<div class="resumen-list">';
+    if(boxQty > 0){
+      html += resumenRow(CFG.box.nombre + " ×" + boxQty, fmt(boxQty*CFG.box.precio));
+      html += boxFillDetalle(boxFill);
+    }
+    if(box2Qty > 0){
+      html += resumenRow(CFG.box2.nombre + " ×" + box2Qty, fmt(box2Qty*CFG.box2.precio));
+      html += boxFillDetalle(box2Fill);
+    }
+    t.items.forEach(function(it){
+      html += resumenRow(it.nombre + " ×" + it.cant, "");
+    });
+    if(t.descuento > 0){
+      html += resumenRow("Descuento en sueltas (" + CFG.box.pctSueltas + "%)", "−" + fmt(t.descuento));
+    }
+    html += '</div>';
+    html += '<div class="resumen-row total"><span>Total</span><span>' + fmt(t.total) + '</span></div>';
+    if(ent === "envio"){
+      html += '<div style="font-size:12px;color:var(--muted);margin-top:8px">+ Envío ' + fmt(CFG.costoEnvio) + ' (se abona a la mensajería al recibir)</div>';
+    }
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+
+  // habilitar/deshabilitar CTA
+  var btn = $("btnConfirmar");
+  if(btn) btn.disabled = !hayAlgo;
+}
+
+function resumenRow(label, val){
+  return '<div class="resumen-row"><span>' + esc(label) + '</span><span>' + val + '</span></div>';
+}
+function boxFillDetalle(fill){
+  var partes = [];
+  Object.keys(fill).forEach(function(k){
+    if(fill[k] > 0){
+      var p = CFG.productos.find(function(x){ return x.id === k; });
+      if(p) partes.push(fill[k] + " " + p.nombre);
+    }
+  });
+  if(!partes.length) return "";
+  return '<div style="font-size:11.5px;color:var(--muted);padding:2px 0 6px">↳ ' + esc(partes.join(" · ")) + '</div>';
+}
+
+/* ---- CONFIRMAR PEDIDO ---- */
+function confirmarPedido(){
+  var t = calcularTotales();
+  if(!t.hayBox && t.items.length === 0){ toast("Elegí al menos una cookie"); return; }
+
+  var nombre = $("in-nombre").value.trim();
+  var tel = $("in-tel").value.trim();
+  if(!nombre){ toast("Completá tu nombre"); return; }
+  if(!tel){ toast("Completá tu teléfono"); return; }
+  if(!ent){ toast("Elegí envío o retiro"); return; }
+  if(ent === "envio" && !$("in-dir").value.trim()){ toast("Completá la dirección"); return; }
+  if(!diaId){ toast("Elegí un día de entrega"); return; }
+  if(!pago){ toast("Elegí la forma de pago"); return; }
+
+  var dia = CFG.diasEntrega.find(function(d){ return d.id === diaId; });
+
+  // Construir texto de cookies
+  var cookiesTxt = [];
+  if(boxQty > 0){
+    var bf = [];
+    Object.keys(boxFill).forEach(function(k){
+      if(boxFill[k] > 0){
+        var p = CFG.productos.find(function(x){ return x.id === k; });
+        if(p) bf.push(boxFill[k] + " " + p.nombre);
+      }
+    });
+    cookiesTxt.push(CFG.box.nombre + " x" + boxQty + " (" + bf.join(" + ") + ")");
+  }
+  if(box2Qty > 0){
+    var bf2 = [];
+    Object.keys(box2Fill).forEach(function(k){
+      if(box2Fill[k] > 0){
+        var p = CFG.productos.find(function(x){ return x.id === k; });
+        if(p) bf2.push(box2Fill[k] + " " + p.nombre);
+      }
+    });
+    cookiesTxt.push(CFG.box2.nombre + " x" + box2Qty + " (" + bf2.join(" + ") + ")");
+  }
+  CFG.productos.forEach(function(p){
+    if(qty[p.id] > 0) cookiesTxt.push(p.nombre + " x" + qty[p.id]);
+  });
+
+  // Unidades totales
+  var unidades = boxQty*CFG.box.cant + box2Qty*CFG.box2.cant;
+  CFG.productos.forEach(function(p){ unidades += qty[p.id]||0; });
+
+  // Stock changes
+  var stockChanges = {};
+  CFG.productos.forEach(function(p){
+    var usado = (qty[p.id]||0) + (boxFill[p.id]||0) + (box2Fill[p.id]||0);
+    if(usado > 0) stockChanges[p.id] = usado;
+  });
+
+  var packTxt = [];
+  if(boxQty > 0) packTxt.push("Box4 x" + boxQty);
+  if(box2Qty > 0) packTxt.push("Box6 x" + box2Qty);
+  if(t.descuento > 0) packTxt.push(CFG.box.pctSueltas + "% sueltas");
+
+  var payload = {
+    tipo: "pedido",
+    fecha: formatHoy(),
+    hora: formatHora(),
+    nro_orden: "",
+    nombre: nombre,
+    telefono: tel,
+    email: $("in-email").value.trim(),
+    cookies: cookiesTxt.join(" | "),
+    unidades: unidades,
+    pack: packTxt.length ? packTxt.join(", ") : "No",
+    subtotal: t.total,
+    entrega: ent === "envio" ? "Envio" : "Retiro",
+    direccion: ent === "envio" ? $("in-dir").value.trim() : "Retiro en domicilio",
+    dia_entrega: dia ? dia.label : "",
+    horario: franja || "",
+    costo_envio: ent === "envio" ? CFG.costoEnvio : 0,
+    total: t.total,
+    pago: pago === "transferencia" ? "Transferencia" : "Efectivo",
+    notas: $("in-notas").value.trim(),
+    estado: "Pendiente",
+    stockChanges: stockChanges
+  };
+
+  var btn = $("btnConfirmar");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).then(function(){
+    mostrarConfirmacion(payload);
+  }).catch(function(){
+    mostrarConfirmacion(payload);
+  });
+}
+
+function mostrarConfirmacion(payload){
+  var app = $("app");
+  var wspMsg = "Hola Blu Bakery! Acabo de hacer un pedido 🍪\n\n" +
+    "Nombre: " + payload.nombre + "\n" +
+    "Pedido: " + payload.cookies + "\n" +
+    "Total: " + fmt(payload.total) + "\n" +
+    "Entrega: " + payload.entrega + " · " + payload.dia_entrega + " " + payload.horario + "\n" +
+    "Pago: " + payload.pago +
+    (payload.pago === "Transferencia" ? "\n\n(Adjunto el comprobante)" : "");
+  app.innerHTML =
+    '<div class="panel" style="text-align:center;padding:36px 22px">' +
+      '<div style="font-size:46px">🍪</div>' +
+      '<h2 style="font-family:\'Fraunces\',serif;color:var(--navy);font-size:26px;margin:10px 0 6px">¡Pedido recibido!</h2>' +
+      '<p style="color:var(--muted);font-size:14px;margin-bottom:8px">Gracias ' + esc(payload.nombre) + ' 💛</p>' +
+      '<p style="font-size:14px">Para confirmar tu pedido' +
+        (payload.pago === "Transferencia" ? ' y enviar el comprobante' : '') +
+        ', escribinos por WhatsApp:</p>' +
+      '<a class="feat-btn" style="background:#25D366;color:#fff;margin:16px auto 0" href="https://wa.me/' + WSP_NUMERO + '?text=' + encodeURIComponent(wspMsg) + '" target="_blank" rel="noopener">💬 Confirmar por WhatsApp</a>' +
+      '<div style="margin-top:20px"><a href="#" onclick="location.reload()" style="color:var(--navy);font-size:13px">Hacer otro pedido</a></div>' +
+    '</div>';
+  window.scrollTo(0,0);
+}
+
+/* ---- HELPERS ---- */
+function formatHoy(){
+  var d = new Date();
+  return d.getDate() + "/" + (d.getMonth()+1) + "/" + d.getFullYear();
+}
+function formatHora(){
+  var d = new Date();
+  var h = d.getHours();
+  var m = ("0"+d.getMinutes()).slice(-2);
+  var ap = h >= 12 ? "p. m." : "a. m.";
+  var h12 = h % 12; if(h12 === 0) h12 = 12;
+  return ("0"+h12).slice(-2) + ":" + m + " " + ap;
+}
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+var toastTimer;
+function toast(msg){
+  var el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 2600);
+}
+</script>
+</body>
+</html>
