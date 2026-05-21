@@ -354,6 +354,20 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
     <div class="hint" style="margin-top:8px">El emoji es opcional (ej: 🍪 👔 ⚽ 🎁). Si una novedad no tiene título, no se muestra.</div>
   </div>
 
+  <!-- BANNER DESLIZANTE -->
+  <div class="section-card">
+    <div class="section-title">Cintita deslizante (arriba del todo)</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      Es la cintita azul que se desliza debajo del logo. Escribí frases cortas, una por línea. Por ejemplo: "Hoy envíos gratis", "Hechas en el día".
+    </div>
+    <div class="field">
+      <label>Frases (una por línea)</label>
+      <textarea id="banner-frases" rows="4" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;resize:vertical">Hechas en el día
+Ingredientes reales
+Hecho a mano en Olavarría</textarea>
+    </div>
+  </div>
+
   <!-- DESCUENTOS -->
   <div class="section-card">
     <div class="section-title">
@@ -496,6 +510,7 @@ const CONFIG = {
   cookieDelMes: "",
   cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
   mostrarNovedades: true,
+  bannerFrases: ["Hechas en el día", "Ingredientes reales", "Hecho a mano en Olavarría"],
   novedades: [
     { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
     { emoji:"👔", titulo:"Box Día del Padre", desc:"Una edición especial para regalar. Pronto." },
@@ -534,6 +549,7 @@ function renderProductos(){
         <input type="text" id="pfoto-${i}" value="${(p.foto && !p.foto.startsWith('data:')) ? p.foto : ''}" placeholder="https://drive.google.com/file/d/XXXXX/view..."/>
         ${p.foto ? `<div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="${convertirLinkDrive(p.foto)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display='none'"/><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>` : ''}
       </div>
+      <label class="toggle" style="margin-top:8px"><input type="checkbox" id="pesp-${i}" ${p.especial?'checked':''}/><span>✦ Cookie especial / edición limitada (se muestra destacada con borde dorado)</span></label>
       ${stockBadge(p.stock||0)}
     </div>
   `).join('');
@@ -704,6 +720,7 @@ function getConfig() {
     const nf=document.getElementById("pfoto-"+i)?.value.trim();
     if(nf) p.foto=convertirLinkDrive(nf);
     p.activo=document.getElementById("act-"+i)?.checked;
+    p.especial=document.getElementById("pesp-"+i)?.checked||false;
   });
   CONFIG.descuentos.forEach((d,i)=>{
     d.activo=document.getElementById("dact-"+i)?.checked;
@@ -757,6 +774,9 @@ function getConfig() {
     });
   }
   const mostrarNov = document.getElementById("nov-activo")?.checked !== false;
+  // Banner deslizante
+  const bannerRaw = document.getElementById("banner-frases")?.value || "";
+  const bannerFrases = bannerRaw.split("\n").map(function(s){ return s.trim(); }).filter(function(s){ return s; });
   return {
     productos:CONFIG.productos,
     box:boxObj,
@@ -765,6 +785,7 @@ function getConfig() {
     cookieDelMesFrase:cdmFrase,
     mostrarNovedades:mostrarNov,
     novedades:novedades,
+    bannerFrases:bannerFrases,
     descuentos:CONFIG.descuentos,
     horasCorte:parseInt(document.getElementById("horas-corte").value)||24,
     costoEnvio:parseInt(document.getElementById("envio-precio").value)||4000,
@@ -862,6 +883,11 @@ function aplicarConfigAlFormulario(data){
   if (data.cookieDelMesFrase) CONFIG.cookieDelMesFrase = data.cookieDelMesFrase;
   if (data.mostrarNovedades !== undefined) CONFIG.mostrarNovedades = data.mostrarNovedades;
   if (data.novedades) CONFIG.novedades = data.novedades;
+  if (data.bannerFrases) {
+    CONFIG.bannerFrases = data.bannerFrases;
+    var bf = document.getElementById("banner-frases");
+    if (bf) bf.value = data.bannerFrases.join("\n");
+  }
 
   // Inputs de la Box x 6
   if (data.box2) {
