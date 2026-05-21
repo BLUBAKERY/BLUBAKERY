@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#F3EBDD">
+<title>Blu Bakery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #004e64;
+    --crema: #F3EBDD;
+    --crema-card: #FBF6EC;
+    --avena: #E7DAC8;
+    --lavanda: #D9CCE7;
+    --bordo: #7E1F2D;
+    --mostaza: #D7A13A;
+    --tinta: #1d2b30;
+    --gris: #8a8478;
+    --linea: #e3d6c2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--crema);
+    color: var(--tinta);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  body { overflow-x: hidden; }
+  img { display: block; max-width: 100%; }
+
+  .display { font-family: 'Bricolage Grotesque', sans-serif; }
+
+  /* ===== HEADER ===== */
+  .top {
+    text-align: center;
+    padding: 26px 16px 18px;
+  }
+  .top-logo {
+    width: min(500px, 94%);
+    height: auto;
+    margin: 0 auto;
+  }
+  .top-logo-fallback {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 42px;
+    letter-spacing: 3px;
+    color: var(--azul);
+  }
+  .top-links {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .top-links a {
+    color: var(--azul);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .top-links svg { width: 15px; height: 15px; }
+
+  /* ===== MARQUEE ===== */
+  .marquee {
+    background: var(--azul);
+    color: var(--crema);
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 9px 0;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+  .marquee span {
+    display: inline-block;
+    animation: slide 22s linear infinite;
+  }
+  @keyframes slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .marquee b { font-weight: 600; margin: 0 6px; color: var(--mostaza); }
+
+  /* ===== APP WRAP ===== */
+  .wrap {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 16px 70px;
+  }
+
+  .sec-head {
+    margin: 34px 0 16px;
+  }
+  .sec-head .eyebrow {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--bordo);
+  }
+  .sec-head h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--azul);
+    line-height: 1.05;
+    margin-top: 3px;
+    letter-spacing: -.5px;
+  }
+
+  /* ===== COOKIE DEL MES ===== */
+  .cdm {
+    margin: 22px 0 8px;
+    background: var(--bordo);
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+  }
+  .cdm-inner { padding: 22px 22px 24px; }
+  .cdm-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,.14);
+    color: #fff;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 13px;
+    border-radius: 100px;
+  }
+  .cdm-tag .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--mostaza);
+    animation: blink 1.5s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  .cdm-photo {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 16px;
+    margin: 16px 0;
+    background: #6a1a26;
+  }
+  .cdm h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 34px;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .cdm .cdm-desc {
+    color: rgba(255,255,255,.82);
+    font-size: 14px;
+    margin-top: 8px;
+    line-height: 1.45;
+  }
+  .cdm-buy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 18px;
+    gap: 14px;
+  }
+  .cdm-price {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    color: #fff;
+  }
+  .cdm-btn {
+    background: var(--crema);
+    color: var(--bordo);
+    border: none;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 24px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: transform .12s;
+  }
+  .cdm-btn:active { transform: scale(.95); }
+  .cdm-btn.added { background: var(--mostaza); color: var(--azul); }
+
+  /* ===== GRILLA COOKIES ===== */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .ck {
+    background: var(--crema-card);
+    border: 1px solid var(--linea);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .ck.out { opacity: .72; }
+  .ck-imgwrap {
+    position: relative;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+    background: var(--avena);
+  }
+  .ck-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s;
+  }
+  .ck:active .ck-img { transform: scale(1.05); }
+  .ck-badge {
+    position: absolute;
+    top: 9px; left: 9px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 100px;
+    color: #fff;
+  }
+  .ck-badge.nueva { background: var(--azul); }
+  .ck-badge.pocas { background: var(--bordo); }
+  .ck-badge.agot { background: #6b6b6b; }
+  .ck-body {
+    padding: 12px 13px 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .ck-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--azul);
+    line-height: 1.1;
+    letter-spacing: -.3px;
+  }
+  .ck-desc {
+    font-size: 11.5px;
+    color: var(--gris);
+    margin-top: 4px;
+    line-height: 1.35;
+    flex: 1;
+  }
+  .ck-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .ck-price {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--tinta);
+  }
+  .add-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform .1s;
+  }
+  .add-btn:active { transform: scale(.85); }
+  .stepper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--azul);
+    background: transparent;
+    color: var(--azul);
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step-num {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    min-width: 18px;
+    text-align: center;
+    color: var(--azul);
+  }
+  .avisar {
+    width: 100%;
+    background: transparent;
+    border: 1.5px solid #6b6b6b;
+    color: #555;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 600;
+    font-size: 11.5px;
+    padding: 9px;
+    border-radius: 100px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  /* ===== BOXES ===== */
+  .box {
+    background: var(--azul);
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .box.lav { background: linear-gradient(135deg, #b9a7d4, var(--lavanda)); }
+  .box-img {
+    width: 96px; height: 96px;
+    border-radius: 14px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.15);
+  }
+  .box-txt { flex: 1; min-width: 0; }
+  .box-txt h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -.3px;
+  }
+  .box.lav .box-txt h3 { color: var(--azul); }
+  .box-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.75);
+    margin-top: 2px;
+  }
+  .box.lav .box-sub { color: rgba(0,78,100,.7); }
+  .box-price {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--mostaza);
+    margin-top: 5px;
+  }
+  .box.lav .box-price { color: var(--bordo); }
+  .box-especial {
+    display: inline-block;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.18);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 100px;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .box.lav .box-especial { background: rgba(126,31,45,.15); color: var(--bordo); }
+  .box .stepper .step-btn { border-color: rgba(255,255,255,.6); color: #fff; }
+  .box .stepper .step-num { color: #fff; }
+  .box.lav .stepper .step-btn { border-color: var(--azul); color: var(--azul); }
+  .box.lav .stepper .step-num { color: var(--azul); }
+
+  /* ===== PANELES ===== */
+  .panel {
+    background: var(--crema-card);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+  .panel label {
+    display: block;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gris);
+    margin: 14px 0 6px;
+  }
+  .panel label:first-child { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid var(--linea);
+    border-radius: 11px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    background: #fff;
+    color: var(--tinta);
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--azul); }
+
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    flex: 1;
+    min-width: 88px;
+    padding: 13px 8px;
+    border: 1.5px solid var(--linea);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--tinta);
+    transition: all .14s;
+  }
+  .pill.on { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .pill.off { opacity: .4; text-decoration: line-through; cursor: not-allowed; }
+  .pill .s { display: block; font-size: 11px; opacity: .7; margin-top: 2px; font-family: 'Inter',sans-serif; font-weight:400; }
+
+  .note {
+    background: var(--crema);
+    border-left: 3px solid var(--azul);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+  }
+  .note b { color: var(--azul); }
+  .warn {
+    background: #fbeede;
+    border: 1px solid var(--mostaza);
+    border-radius: 11px;
+    padding: 11px 14px;
+    font-size: 13px;
+    color: #8a5a14;
+    margin-top: 10px;
+  }
+
+  /* ===== RESUMEN ===== */
+  .res-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 7px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed var(--linea);
+  }
+  .res-sub { font-size: 11.5px; color: var(--gris); padding: 1px 0 5px; }
+  .res-total {
+    display: flex;
+    justify-content: space-between;
+    border-top: 2px solid var(--azul);
+    margin-top: 6px;
+    padding-top: 11px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--azul);
+  }
+  .res-empty {
+    text-align: center;
+    color: var(--gris);
+    font-style: italic;
+    padding: 14px;
+    font-size: 14px;
+  }
+
+  .cta {
+    width: 100%;
+    padding: 17px;
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: .3px;
+  }
+  .cta:disabled { opacity: .4; cursor: not-allowed; }
+  .cta:not(:disabled):active { transform: scale(.99); }
+  .cta.ghost { background: transparent; color: var(--gris); font-size:14px; }
+
+  /* ===== NOVEDADES — BANNER ROTATIVO ===== */
+  .nov-banner {
+    margin-top: 22px;
+    background: var(--azul);
+    border-radius: 18px;
+    padding: 22px 20px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .nov-banner .nov-eyebrow {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--mostaza);
+  }
+  .nov-stage {
+    position: relative;
+    height: 96px;
+    margin-top: 10px;
+  }
+  .nov-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s, transform .5s;
+    pointer-events: none;
+  }
+  .nov-slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .nov-slide .nov-em { font-size: 30px; }
+  .nov-slide .nov-tt {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .nov-slide .nov-dd {
+    font-size: 13px;
+    color: rgba(255,255,255,.8);
+    max-width: 320px;
+  }
+  .nov-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .nov-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.3);
+    transition: background .3s, width .3s;
+  }
+  .nov-dot.on { background: var(--mostaza); width: 18px; border-radius: 100px; }
+
+  /* ===== BLOQUES FINALES — COHERENTES ===== */
+  .block {
+    border-radius: 18px;
+    padding: 24px 20px;
+    margin-top: 14px;
+    text-align: center;
+  }
+  .block .block-eyebrow {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    opacity: .65;
+  }
+  .block h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 23px;
+    line-height: 1.1;
+    margin: 6px 0 8px;
+    letter-spacing: -.4px;
+  }
+  .block p {
+    font-size: 13.5px;
+    line-height: 1.5;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .block .block-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 13px 24px;
+    border-radius: 100px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+  }
+  .block.eventos { background: var(--bordo); color: #fff; }
+  .block.eventos .block-eyebrow { color: var(--mostaza); opacity: 1; }
+  .block.eventos .block-btn { background: var(--mostaza); color: var(--azul); }
+  .block.contacto { background: var(--lavanda); color: var(--azul); }
+  .block.contacto .block-btn { background: var(--azul); color: #fff; }
+
+  .footer-end {
+    text-align: center;
+    padding: 30px 16px 0;
+    color: var(--gris);
+    font-size: 12px;
+  }
+
+  /* ===== MODAL ===== */
+  .mbg {
+    position: fixed; inset: 0;
+    background: rgba(29,43,48,.55);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+  }
+  .mbg.show { display: flex; }
+  .modal {
+    background: var(--crema);
+    width: 100%;
+    max-width: 600px;
+    border-radius: 22px 22px 0 0;
+    padding: 22px 18px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 21px;
+    color: var(--azul);
+  }
+  .modal .msub { font-size: 13px; color: var(--gris); margin: 3px 0 14px; }
+  .srow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px;
+    background: #fff;
+    border: 1px solid var(--linea);
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .srow img { width: 46px; height: 46px; border-radius: 9px; object-fit: cover; background: var(--avena); }
+  .srow .sn { flex: 1; font-size: 13.5px; font-weight: 500; }
+  .mcount {
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+    color: var(--azul);
+    margin: 10px 0;
+  }
+  .mcount b { font-size: 20px; }
+
+  .toast {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%) translateY(90px);
+    background: var(--tinta);
+    color: var(--crema);
+    padding: 13px 22px;
+    border-radius: 100px;
+    font-size: 13.5px;
+    font-weight: 500;
+    z-index: 200;
+    transition: transform .3s;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .loading {
+    text-align: center;
+    padding: 70px 20px;
+    color: var(--gris);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <img class="top-logo" id="logoImg"
+       src="https://drive.google.com/thumbnail?id=1Xxv3pBkyW-3mi8oczFy_QEqx0yoKBUlD&sz=w1000"
+       alt="Blu Bakery"
+       onerror="this.outerHTML='<div class=&quot;top-logo-fallback&quot;>BLU BAKERY</div>'">
+  <div class="top-links">
+    <a href="https://wa.me/5492284353970" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.5 2.6 1.6.3.1.5.1.7-.1l.8-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>
+      2284 35-3970
+    </a>
+    <a href="https://instagram.com/blubakery.bb" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.5-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-3.2-.1-4.8-1.7-4.9-4.9C2.1 15.5 2.1 15.2 2.1 12s0-3.5.1-4.8C2.3 4 3.9 2.4 7.1 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 6.8a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg>
+      @blubakery.bb
+    </a>
+  </div>
+</header>
+
+<div class="marquee">
+  <span id="marqueeText"></span>
+</div>
+
+<div class="wrap" id="app">
+  <div class="loading">Horneando…</div>
+</div>
+
+<!-- MODAL BOX -->
+<div class="mbg" id="mbg">
+  <div class="modal">
+    <h3 id="mTitle">Armá tu Box</h3>
+    <div class="msub" id="mSub"></div>
+    <div id="mList"></div>
+    <div class="mcount">Elegiste <b id="mCount">0</b> de <span id="mMax">4</span></div>
+    <button class="cta" id="mConfirm">Confirmar Box</button>
+    <button class="cta ghost" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONFIG ===== */
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
+var SHEET_ID = "1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI";
+var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config";
+var WSP = "5492284353970";
+
+var CFG = {
+  productos: [],
+  box: { activo:true, nombre:"Box x 4", cant:4, precio:17200, pctSueltas:10, foto:"" },
+  box2: { activo:true, nombre:"Box x 6", cant:6, precio:25800, pctSueltas:10, foto:"" },
+  cookieDelMes: "nuevo_1777848533244",
+  cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
+  costoEnvio: 3000,
+  alias: "BLU.BAKERY",
+  banco: "Banco Galicia",
+  horasCorte: 24,
+  msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
+  msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
+  msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
+  msgEfectivo: "Por favor abonar con el importe justo.",
+  franjasDefault: ["15:00 - 17:00", "17:00 - 19:00"],
+  diasEntrega: [],
+  novedades: [
+    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
+    { emoji:"👔", titulo:"Box Día del Padre", desc:"Una edición especial para regalar. Pronto." },
+    { emoji:"⚽", titulo:"Algo se viene para el Mundial", desc:"Atentos: una caja pensada para los días de partido." }
+  ]
+};
+
+/* ===== ESTADO ===== */
+var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
+var ent = null, diaId = null, franja = null, pago = null, disp = [];
+
+function $(id){ return document.getElementById(id); }
+function fmt(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function driveImg(v){
+  if(!v) return "";
+  if(v.indexOf("http")===0){
+    var m = v.match(/[-\w]{25,}/);
+    return m ? "https://drive.google.com/thumbnail?id="+m[0]+"&sz=w1200" : v;
+  }
+  return "https://drive.google.com/thumbnail?id="+v+"&sz=w1200";
+}
+
+/* ===== CARGAR CONFIG ===== */
+(function(){
+  fetch(CONFIG_GVIZ)
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+      if(j.table.rows.length && j.table.rows[0].c[0]){
+        var d = JSON.parse(j.table.rows[0].c[0].v);
+        Object.keys(d).forEach(function(k){
+          if(d[k] !== undefined && d[k] !== null) CFG[k] = d[k];
+        });
+      }
+    })
+    .catch(function(e){ console.warn("Config:", e); })
+    .finally(function(){ init(); });
+})();
+
+function init(){
+  CFG.productos.forEach(function(p){ qty[p.id] = 0; });
+  // marquee
+  var mt = "Nuevas cookies todas las semanas <b>•</b> Hechas en el día <b>•</b> Ingredientes reales <b>•</b> Hecho a mano en Olavarría <b>•</b> ";
+  $("marqueeText").innerHTML = mt + mt;
+  render();
+}
+
+/* ===== RENDER ===== */
+function render(){
+  var app = $("app");
+  app.innerHTML = "";
+
+  // COOKIE DEL MES
+  var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
+  if(cdm) app.appendChild(renderCDM(cdm));
+
+  // COOKIES
+  app.appendChild(secHead("El menú", "Nuestras cookies"));
+  var grid = document.createElement("div");
+  grid.className = "grid";
+  CFG.productos.forEach(function(p){
+    if(p.activo) grid.appendChild(renderCookie(p));
+  });
+  app.appendChild(grid);
+
+  // BOXES
+  app.appendChild(secHead("Para compartir", "Armá tu box"));
+  if(CFG.box && CFG.box.activo) app.appendChild(renderBox(CFG.box, "box"));
+  if(CFG.box2 && CFG.box2.activo) app.appendChild(renderBox(CFG.box2, "box2"));
+
+  // ENTREGA
+  app.appendChild(secHead("Entrega", "¿Envío o retiro?"));
+  app.appendChild(renderEntrega());
+  var diaWrap = document.createElement("div"); diaWrap.id = "diaSec"; app.appendChild(diaWrap);
+  var frWrap = document.createElement("div"); frWrap.id = "frSec"; app.appendChild(frWrap);
+
+  // DATOS
+  app.appendChild(secHead("Tus datos", "¿Quién pide?"));
+  app.appendChild(renderDatos());
+
+  // PAGO
+  app.appendChild(secHead("Pago", "¿Cómo abonás?"));
+  app.appendChild(renderPago());
+
+  // RESUMEN
+  app.appendChild(secHead("Tu pedido", "Resumen"));
+  var resWrap = document.createElement("div"); resWrap.id = "resSec"; app.appendChild(resWrap);
+  var cta = document.createElement("button");
+  cta.className = "cta"; cta.id = "btnGo"; cta.textContent = "Confirmar pedido";
+  cta.onclick = confirmar;
+  app.appendChild(cta);
+
+  // NOVEDADES + EVENTOS + CONTACTO (con aire arriba)
+  var spacer = document.createElement("div");
+  spacer.style.height = "26px";
+  app.appendChild(spacer);
+  app.appendChild(renderNov());
+  app.appendChild(renderEventos());
+  app.appendChild(renderContacto());
+
+  var fe = document.createElement("div");
+  fe.className = "footer-end";
+  fe.innerHTML = "Blu Bakery · Olavarría · Hecho a mano 🤍";
+  app.appendChild(fe);
+
+  renderDias();
+  renderResumen();
+  iniciarCarrusel();
+}
+
+function secHead(eyebrow, titulo){
+  var d = document.createElement("div");
+  d.className = "sec-head";
+  d.innerHTML = '<div class="eyebrow">'+esc(eyebrow)+'</div><h2>'+esc(titulo)+'</h2>';
+  return d;
+}
+
+/* ===== COOKIE DEL MES ===== */
+function renderCDM(p){
+  var d = document.createElement("div");
+  d.className = "cdm";
+  var out = (parseInt(p.stock)||0) <= 0;
+  d.innerHTML =
+    '<div class="cdm-inner">' +
+      '<span class="cdm-tag"><span class="dot"></span>Cookie del mes</span>' +
+      '<img class="cdm-photo" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.25">' +
+      '<h3>'+esc(p.nombre)+'</h3>' +
+      '<div class="cdm-desc">'+esc(CFG.cookieDelMesFrase)+'</div>' +
+      '<div class="cdm-buy">' +
+        '<span class="cdm-price">'+fmt(p.precio)+'</span>' +
+        (out
+          ? '<button class="cdm-btn" onclick="avisar(\''+p.id+'\')">Avisame cuando vuelva</button>'
+          : '<button class="cdm-btn" id="cdmBtn-'+p.id+'" onclick="addCDM(\''+p.id+'\')">Sumar al pedido</button>') +
+      '</div>' +
+    '</div>';
+  return d;
+}
+function addCDM(id){
+  var p = CFG.productos.find(function(x){ return x.id===id; });
+  if(qty[id] >= dispo(id)){ toast("Sin más stock"); return; }
+  qty[id]++;
+  var b = $("cdmBtn-"+id);
+  if(b){ b.textContent = "Agregada ✓ ("+qty[id]+")"; b.classList.add("added"); }
+  syncCookie(id);
+  renderResumen();
+  toast(p.nombre + " sumada 🍪");
+}
+
+/* ===== COOKIE CARD ===== */
+function renderCookie(p){
+  var d = document.createElement("div");
+  d.className = "ck";
+  d.id = "ck-"+p.id;
+  var stock = parseInt(p.stock)||0;
+  var out = stock <= 0;
+  if(out) d.classList.add("out");
+  var nueva = (p.descripcion||"").toUpperCase().indexOf("NUEVA")===0;
+  var badge = "";
+  if(out) badge = '<span class="ck-badge agot">Agotada</span>';
+  else if(stock<=3) badge = '<span class="ck-badge pocas">Últimas '+stock+'</span>';
+  else if(nueva) badge = '<span class="ck-badge nueva">Nueva</span>';
+  var desc = (p.descripcion||"").replace(/^NUEVA\s*[-–]\s*/i,"");
+
+  var foot = out
+    ? '<button class="avisar" onclick="avisar(\''+p.id+'\')">🔔 Avisame cuando vuelva</button>'
+    : '<div class="ck-foot">' +
+        '<span class="ck-price">'+fmt(p.precio)+'</span>' +
+        '<div id="ckctrl-'+p.id+'">' + ctrlHtml(p.id) + '</div>' +
+      '</div>';
+
+  d.innerHTML =
+    '<div class="ck-imgwrap">'+badge+
+      '<img class="ck-img" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.3">' +
+    '</div>' +
+    '<div class="ck-body">' +
+      '<div class="ck-name">'+esc(p.nombre)+'</div>' +
+      '<div class="ck-desc">'+esc(desc)+'</div>' +
+      foot +
+    '</div>';
+  return d;
+}
+function ctrlHtml(id){
+  if((qty[id]||0) > 0){
+    return '<div class="stepper">' +
+      '<button class="step-btn" onclick="chCookie(\''+id+'\',-1)">−</button>' +
+      '<span class="step-num">'+qty[id]+'</span>' +
+      '<button class="step-btn" onclick="chCookie(\''+id+'\',1)">+</button>' +
+    '</div>';
+  }
+  return '<button class="add-btn" onclick="chCookie(\''+id+'\',1)">+</button>';
+}
+function dispo(id){
+  var p = CFG.productos.find(function(x){ return x.id===id; });
+  return (parseInt(p.stock)||0) - (boxFill[id]||0) - (box2Fill[id]||0);
+}
+function chCookie(id, delta){
+  var p = CFG.productos.find(function(x){ return x.id===id; });
+  if(delta>0){
+    if((qty[id]||0) >= dispo(id)){ toast("Sin más stock de "+p.nombre); return; }
+    qty[id] = (qty[id]||0)+1;
+  } else if((qty[id]||0)>0){
+    qty[id]--;
+  }
+  syncCookie(id);
+  renderResumen();
+}
+function syncCookie(id){
+  var c = $("ckctrl-"+id);
+  if(c) c.innerHTML = ctrlHtml(id);
+}
+
+/* ===== AVISAR ===== */
+function avisar(id){
+  var p = CFG.productos.find(function(x){ return x.id===id; });
+  var m = "Hola Blu Bakery! Quiero que me avisen cuando vuelva la cookie "+(p?p.nombre:"")+" 🍪";
+  window.open("https://wa.me/"+WSP+"?text="+encodeURIComponent(m), "_blank");
+}
+
+/* ===== BOX ===== */
+function renderBox(box, tipo){
+  var d = document.createElement("div");
+  d.className = "box" + (tipo==="box2" ? " lav" : "");
+  var cant = tipo==="box" ? boxQty : box2Qty;
+  d.innerHTML =
+    '<img class="box-img" src="'+driveImg(box.foto)+'" alt="Box" onerror="this.style.opacity=.3">' +
+    '<div class="box-txt">' +
+      '<h3>'+esc(box.nombre)+'</h3>' +
+      '<div class="box-sub">Elegí '+box.cant+' sabores a gusto</div>' +
+      '<div class="box-price">'+fmt(box.precio)+' <span class="box-especial">Precio especial</span></div>' +
+    '</div>' +
+    '<div class="stepper">' +
+      '<button class="step-btn" onclick="chBox(\''+tipo+'\',-1)">−</button>' +
+      '<span class="step-num" id="bn-'+tipo+'">'+cant+'</span>' +
+      '<button class="step-btn" onclick="chBox(\''+tipo+'\',1)">+</button>' +
+    '</div>';
+  return d;
+}
+function chBox(tipo, delta){
+  if(delta>0){ openModal(tipo); return; }
+  if(tipo==="box" && boxQty>0){ boxQty--; if(boxQty===0) boxFill={}; }
+  if(tipo==="box2" && box2Qty>0){ box2Qty--; if(box2Qty===0) box2Fill={}; }
+  $("bn-"+tipo).textContent = tipo==="box" ? boxQty : box2Qty;
+  renderResumen();
+}
+
+/* ===== MODAL ===== */
+function openModal(tipo){
+  var box = tipo==="box" ? CFG.box : CFG.box2;
+  window._mt = tipo; window._mb = box; window._mf = {};
+  CFG.productos.forEach(function(p){ window._mf[p.id]=0; });
+  $("mTitle").textContent = "Armá tu " + box.nombre;
+  $("mSub").textContent = "Elegí " + box.cant + " cookies (podés repetir)";
+  $("mMax").textContent = box.cant;
+  $("mCount").textContent = "0";
+  var list = $("mList");
+  list.innerHTML = "";
+  CFG.productos.forEach(function(p){
+    if(!p.activo) return;
+    var r = document.createElement("div");
+    r.className = "srow";
+    r.innerHTML =
+      '<img src="'+driveImg(p.foto)+'" onerror="this.style.opacity=.3">' +
+      '<span class="sn">'+esc(p.nombre)+'</span>' +
+      '<div class="stepper">' +
+        '<button class="step-btn" onclick="mSabor(\''+p.id+'\',-1)">−</button>' +
+        '<span class="step-num" id="ms-'+p.id+'">0</span>' +
+        '<button class="step-btn" onclick="mSabor(\''+p.id+'\',1)">+</button>' +
+      '</div>';
+    list.appendChild(r);
+  });
+  $("mbg").classList.add("show");
+}
+function mSabor(id, delta){
+  var box = window._mb, f = window._mf;
+  var tot = 0; Object.keys(f).forEach(function(k){ tot+=f[k]; });
+  if(delta>0){
+    if(tot >= box.cant){ toast("Ya elegiste "+box.cant); return; }
+    var p = CFG.productos.find(function(x){ return x.id===id; });
+    var usado = (qty[id]||0)+(boxFill[id]||0)+(box2Fill[id]||0)+f[id];
+    if(usado >= (parseInt(p.stock)||0)){ toast("Sin stock de "+p.nombre); return; }
+    f[id]++;
+  } else if(f[id]>0){ f[id]--; }
+  $("ms-"+id).textContent = f[id];
+  var nt = 0; Object.keys(f).forEach(function(k){ nt+=f[k]; });
+  $("mCount").textContent = nt;
+}
+$("mConfirm").onclick = function(){
+  var box = window._mb, f = window._mf, tipo = window._mt;
+  var tot = 0; Object.keys(f).forEach(function(k){ tot+=f[k]; });
+  if(tot !== box.cant){ toast("Elegí exactamente "+box.cant+" cookies"); return; }
+  if(tipo==="box"){
+    boxQty++;
+    Object.keys(f).forEach(function(k){ boxFill[k]=(boxFill[k]||0)+f[k]; });
+    $("bn-box").textContent = boxQty;
+  } else {
+    box2Qty++;
+    Object.keys(f).forEach(function(k){ box2Fill[k]=(box2Fill[k]||0)+f[k]; });
+    $("bn-box2").textContent = box2Qty;
+  }
+  closeModal();
+  renderResumen();
+  toast("Box agregada ✓");
+};
+function closeModal(){ $("mbg").classList.remove("show"); }
+
+/* ===== ENTREGA ===== */
+function renderEntrega(){
+  var d = document.createElement("div");
+  var p = document.createElement("div");
+  p.className = "pills";
+  p.innerHTML =
+    '<button class="pill" id="pEnvio" onclick="setEnt(\'envio\')">🚚 Envío<span class="s">'+fmt(CFG.costoEnvio)+'</span></button>' +
+    '<button class="pill" id="pRetiro" onclick="setEnt(\'retiro\')">🏠 Retiro<span class="s">Sin costo</span></button>';
+  d.appendChild(p);
+  var i = document.createElement("div"); i.id = "entInfo"; d.appendChild(i);
+  return d;
+}
+function setEnt(t){
+  ent = t;
+  $("pEnvio").classList.toggle("on", t==="envio");
+  $("pRetiro").classList.toggle("on", t==="retiro");
+  $("entInfo").innerHTML = '<div class="note"><b>'+(t==="envio"?"Envío a domicilio.":"Retiro.")+'</b> '+esc(t==="envio"?CFG.msgEnvio:CFG.msgRetiro)+'</div>';
+  var dir = $("campoDir");
+  if(dir) dir.style.display = t==="envio" ? "block" : "none";
+  renderResumen();
+}
+
+/* ===== DÍAS ===== */
+function renderDias(){
+  var wrap = $("diaSec");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  if(!CFG.diasEntrega.length) return;
+  wrap.appendChild(secHead("Día", "¿Cuándo lo querés?"));
+
+  var now = new Date();
+  var minH = CFG.horasCorte || 24;
+  function parseFecha(d){
+    var mf = (d.label||"").match(/(\d{1,2})\/(\d{1,2})/);
+    if(!mf) return null;
+    var hs = (d.horario || (d.franjas&&d.franjas[0]) || "15:00");
+    var mh = hs.match(/(\d{1,2})[:.]?(\d{0,2})/);
+    var f = new Date(now.getFullYear(), parseInt(mf[2])-1, parseInt(mf[1]),
+                     mh?parseInt(mh[1]):15, (mh&&mh[2])?parseInt(mh[2]):0, 0);
+    if(f < now && (now.getMonth()-(parseInt(mf[2])-1) > 6))
+      f = new Date(now.getFullYear()+1, parseInt(mf[2])-1, parseInt(mf[1]), 15, 0, 0);
+    return f;
+  }
+  disp = CFG.diasEntrega.map(function(d){
+    var f = parseFecha(d);
+    if(!f) return { dia:d, ok:true };
+    return { dia:d, ok: (f-now)/3600000 >= minH };
+  });
+  var oks = disp.filter(function(x){ return x.ok; });
+  if(!oks.length){
+    var w = document.createElement("div");
+    w.className = "warn";
+    w.textContent = "⚠ Los días disponibles ya cerraron (mínimo "+minH+"hs de anticipación). Volvé cuando carguemos nuevas fechas.";
+    wrap.appendChild(w);
+  }
+  var row = document.createElement("div");
+  row.className = "pills";
+  disp.forEach(function(it){
+    var b = document.createElement("button");
+    if(it.ok){
+      b.className = "pill"; b.id = "d-"+it.dia.id;
+      b.textContent = it.dia.label;
+      b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
+    } else {
+      b.className = "pill off";
+      b.textContent = it.dia.label + " · cerrado";
+      b.onclick = function(){ toast("Ese día ya cerró. Mínimo "+minH+"hs antes."); };
+    }
+    row.appendChild(b);
+  });
+  wrap.appendChild(row);
+  if(oks.length){
+    diaId = oks[0].dia.id;
+    var fb = $("d-"+diaId); if(fb) fb.classList.add("on");
+    renderFranjas();
+  } else {
+    diaId = null;
+    $("frSec").innerHTML = "";
+  }
+}
+function setDia(id){
+  diaId = id;
+  disp.forEach(function(it){
+    if(it.ok){ var b = $("d-"+it.dia.id); if(b) b.classList.toggle("on", it.dia.id===id); }
+  });
+  renderFranjas();
+}
+function renderFranjas(){
+  var wrap = $("frSec");
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  var d = CFG.diasEntrega.find(function(x){ return x.id===diaId; });
+  var fr = [];
+  if(d && d.franjas && d.franjas.length) fr = d.franjas;
+  else if(d && d.horario) fr = [d.horario];
+  else fr = CFG.franjasDefault || [];
+  if(!fr.length){ franja = null; return; }
+  wrap.appendChild(secHead("Horario", "¿A qué hora?"));
+  var row = document.createElement("div");
+  row.className = "pills";
+  fr.forEach(function(f, i){
+    var b = document.createElement("button");
+    b.className = "pill" + (i===0?" on":"");
+    b.textContent = f;
+    b.onclick = (function(val, el){
+      return function(){
+        row.querySelectorAll(".pill").forEach(function(x){ x.classList.remove("on"); });
+        el.classList.add("on"); franja = val;
+      };
+    })(f, b);
+    row.appendChild(b);
+  });
+  wrap.appendChild(row);
+  franja = fr[0];
+}
+
+/* ===== DATOS ===== */
+function renderDatos(){
+  var d = document.createElement("div");
+  d.className = "panel";
+  d.innerHTML =
+    '<label>Nombre completo</label><input type="text" id="iNom" placeholder="María García">' +
+    '<label>Teléfono (WhatsApp)</label><input type="tel" id="iTel" placeholder="2284 000000">' +
+    '<label>Email (opcional)</label><input type="email" id="iMail" placeholder="tu@email.com">' +
+    '<div id="campoDir" style="display:none"><label>Dirección</label><input type="text" id="iDir" placeholder="Calle y número, barrio"></div>' +
+    '<label>Aclaraciones (opcional)</label><textarea id="iNotas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
+  return d;
+}
+
+/* ===== PAGO ===== */
+function renderPago(){
+  var d = document.createElement("div");
+  var p = document.createElement("div");
+  p.className = "pills";
+  p.innerHTML =
+    '<button class="pill" id="pTransf" onclick="setPago(\'transferencia\')">💳 Transferencia</button>' +
+    '<button class="pill" id="pEfec" onclick="setPago(\'efectivo\')">💵 Efectivo</button>';
+  d.appendChild(p);
+  var i = document.createElement("div"); i.id = "pagoInfo"; d.appendChild(i);
+  return d;
+}
+function setPago(t){
+  pago = t;
+  $("pTransf").classList.toggle("on", t==="transferencia");
+  $("pEfec").classList.toggle("on", t==="efectivo");
+  if(t==="transferencia"){
+    $("pagoInfo").innerHTML =
+      '<div class="note">' +
+        '<div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);font-family:Bricolage Grotesque,sans-serif;font-weight:600">Transferí al confirmar</div>' +
+        '<div class="display" style="font-weight:700;font-size:21px;color:var(--azul);margin-top:2px">'+esc(CFG.alias)+'</div>' +
+        '<div style="font-size:13px;color:var(--gris)">'+esc(CFG.banco)+'</div>' +
+        '<div style="margin-top:8px;font-size:13px">'+esc(CFG.msgTransferencia)+'</div>' +
+      '</div>';
+  } else {
+    $("pagoInfo").innerHTML = '<div class="note">'+esc(CFG.msgEfectivo)+'</div>';
+  }
+  renderResumen();
+}
+
+/* ===== NOVEDADES — BANNER ROTATIVO ===== */
+function renderNov(){
+  var d = document.createElement("div");
+  d.className = "nov-banner";
+  var slides = CFG.novedades.map(function(n, i){
+    return '<div class="nov-slide'+(i===0?' active':'')+'" data-i="'+i+'">' +
+      '<span class="nov-em">'+esc(n.emoji||"✨")+'</span>' +
+      '<div class="nov-tt">'+esc(n.titulo)+'</div>' +
+      '<div class="nov-dd">'+esc(n.desc)+'</div>' +
+    '</div>';
+  }).join("");
+  var dots = CFG.novedades.map(function(n, i){
+    return '<span class="nov-dot'+(i===0?' on':'')+'" data-i="'+i+'"></span>';
+  }).join("");
+  d.innerHTML =
+    '<div class="nov-eyebrow">Novedades · pronto</div>' +
+    '<div class="nov-stage" id="novStage">'+slides+'</div>' +
+    '<div class="nov-dots" id="novDots">'+dots+'</div>';
+  return d;
+}
+var carruselTimer;
+function iniciarCarrusel(){
+  clearInterval(carruselTimer);
+  var slides = document.querySelectorAll(".nov-slide");
+  var dots = document.querySelectorAll(".nov-dot");
+  if(slides.length <= 1) return;
+  var actual = 0;
+  carruselTimer = setInterval(function(){
+    slides[actual].classList.remove("active");
+    dots[actual].classList.remove("on");
+    actual = (actual + 1) % slides.length;
+    slides[actual].classList.add("active");
+    dots[actual].classList.add("on");
+  }, 3200);
+}
+
+/* ===== EVENTOS ===== */
+function renderEventos(){
+  var d = document.createElement("div");
+  d.className = "block eventos";
+  d.innerHTML =
+    '<div class="block-eyebrow">Eventos</div>' +
+    '<h3>¿Festejás algo?</h3>' +
+    '<p>Llevamos Blu a tu evento: souvenirs, cookies para compartir, o nuestra mesa dulce en tu fiesta.</p>' +
+    '<a class="block-btn" href="'+eventoWsp()+'" target="_blank" rel="noopener">💬 Consultar por WhatsApp</a>';
+  return d;
+}
+function eventoWsp(){
+  var m =
+    "Hola Blu Bakery! Quiero hacer una consulta para un evento 🎉\n\n" +
+    "Les paso algunos datos:\n" +
+    "• Tipo de evento: \n" +
+    "• Fecha aproximada: \n" +
+    "• Cookies grandes o mini: \n" +
+    "• Cantidad aproximada (o si prefiero charlarlo con ustedes): \n" +
+    "• Las quiero para: ofrecer en el evento / souvenir / que Blu esté presente sirviendo\n\n" +
+    "¡Gracias! Quedo atenta/o 💛";
+  return "https://wa.me/"+WSP+"?text="+encodeURIComponent(m);
+}
+
+/* ===== CONTACTO ===== */
+function renderContacto(){
+  var d = document.createElement("div");
+  d.className = "block contacto";
+  d.innerHTML =
+    '<div class="block-eyebrow">Contacto</div>' +
+    '<h3>¿Tenés una consulta?</h3>' +
+    '<p>Escribinos por WhatsApp, te respondemos a la brevedad.</p>' +
+    '<a class="block-btn" href="https://wa.me/'+WSP+'?text='+encodeURIComponent("Hola Blu Bakery! Tengo una consulta 🍪")+'" target="_blank" rel="noopener">💬 Contactanos</a>';
+  return d;
+}
+
+/* ===== RESUMEN ===== */
+function totales(){
+  var sueltas = 0, items = [];
+  CFG.productos.forEach(function(p){
+    if(qty[p.id]>0){
+      sueltas += qty[p.id]*p.precio;
+      items.push({ nombre:p.nombre, cant:qty[p.id] });
+    }
+  });
+  var boxes = boxQty*(CFG.box.precio||0) + box2Qty*(CFG.box2.precio||0);
+  var hayBox = (boxQty+box2Qty)>0;
+  var pct = CFG.box.pctSueltas||0;
+  var desc = (hayBox && pct>0) ? sueltas*(pct/100) : 0;
+  return { sueltas:sueltas, boxes:boxes, desc:desc, total:boxes+sueltas-desc, items:items, hayBox:hayBox };
+}
+function renderResumen(){
+  var wrap = $("resSec");
+  if(!wrap) return;
+  var t = totales();
+  var hay = t.hayBox || t.items.length>0;
+  var h = '<div class="panel">';
+  if(!hay){
+    h += '<div class="res-empty">Todavía no elegiste cookies</div>';
+  } else {
+    if(boxQty>0){
+      h += row(CFG.box.nombre+" ×"+boxQty, fmt(boxQty*CFG.box.precio));
+      h += fillDet(boxFill);
+    }
+    if(box2Qty>0){
+      h += row(CFG.box2.nombre+" ×"+box2Qty, fmt(box2Qty*CFG.box2.precio));
+      h += fillDet(box2Fill);
+    }
+    t.items.forEach(function(it){ h += row(it.nombre+" ×"+it.cant, ""); });
+    if(t.desc>0) h += row("Descuento sueltas ("+CFG.box.pctSueltas+"%)", "−"+fmt(t.desc));
+    h += '<div class="res-total"><span>Total</span><span>'+fmt(t.total)+'</span></div>';
+    if(ent==="envio") h += '<div style="font-size:12px;color:var(--gris);margin-top:8px">+ Envío '+fmt(CFG.costoEnvio)+' (se abona al recibir)</div>';
+  }
+  h += '</div>';
+  wrap.innerHTML = h;
+  var btn = $("btnGo");
+  if(btn) btn.disabled = !hay;
+}
+function row(l, v){ return '<div class="res-row"><span>'+esc(l)+'</span><span>'+v+'</span></div>'; }
+function fillDet(f){
+  var ps = [];
+  Object.keys(f).forEach(function(k){
+    if(f[k]>0){
+      var p = CFG.productos.find(function(x){ return x.id===k; });
+      if(p) ps.push(f[k]+" "+p.nombre);
+    }
+  });
+  return ps.length ? '<div class="res-sub">↳ '+esc(ps.join(" · "))+'</div>' : "";
+}
+
+/* ===== CONFIRMAR ===== */
+function confirmar(){
+  var t = totales();
+  if(!t.hayBox && !t.items.length){ toast("Elegí al menos una cookie"); return; }
+  var nom = $("iNom").value.trim(), tel = $("iTel").value.trim();
+  if(!nom){ toast("Completá tu nombre"); return; }
+  if(!tel){ toast("Completá tu teléfono"); return; }
+  if(!ent){ toast("Elegí envío o retiro"); return; }
+  if(ent==="envio" && !$("iDir").value.trim()){ toast("Completá la dirección"); return; }
+  if(!diaId){ toast("Elegí un día"); return; }
+  if(!pago){ toast("Elegí forma de pago"); return; }
+
+  var dia = CFG.diasEntrega.find(function(d){ return d.id===diaId; });
+  var ck = [];
+  if(boxQty>0){
+    var bf = [];
+    Object.keys(boxFill).forEach(function(k){
+      if(boxFill[k]>0){ var p=CFG.productos.find(function(x){return x.id===k;}); if(p) bf.push(boxFill[k]+" "+p.nombre); }
+    });
+    ck.push(CFG.box.nombre+" x"+boxQty+" ("+bf.join(" + ")+")");
+  }
+  if(box2Qty>0){
+    var bf2 = [];
+    Object.keys(box2Fill).forEach(function(k){
+      if(box2Fill[k]>0){ var p=CFG.productos.find(function(x){return x.id===k;}); if(p) bf2.push(box2Fill[k]+" "+p.nombre); }
+    });
+    ck.push(CFG.box2.nombre+" x"+box2Qty+" ("+bf2.join(" + ")+")");
+  }
+  CFG.productos.forEach(function(p){ if(qty[p.id]>0) ck.push(p.nombre+" x"+qty[p.id]); });
+
+  var unidades = boxQty*CFG.box.cant + box2Qty*CFG.box2.cant;
+  CFG.productos.forEach(function(p){ unidades += qty[p.id]||0; });
+
+  var stockChanges = {};
+  CFG.productos.forEach(function(p){
+    var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0);
+    if(u>0) stockChanges[p.id] = u;
+  });
+  var packTxt = [];
+  if(boxQty>0) packTxt.push("Box4 x"+boxQty);
+  if(box2Qty>0) packTxt.push("Box6 x"+box2Qty);
+
+  var payload = {
+    tipo:"pedido", fecha:hoy(), hora:hora(), nro_orden:"",
+    nombre:nom, telefono:tel, email:$("iMail").value.trim(),
+    cookies:ck.join(" | "), unidades:unidades,
+    pack: packTxt.length?packTxt.join(", "):"No",
+    subtotal:t.total, entrega: ent==="envio"?"Envio":"Retiro",
+    direccion: ent==="envio"?$("iDir").value.trim():"Retiro en domicilio",
+    dia_entrega: dia?dia.label:"", horario: franja||"",
+    costo_envio: ent==="envio"?CFG.costoEnvio:0,
+    total:t.total, pago: pago==="transferencia"?"Transferencia":"Efectivo",
+    notas:$("iNotas").value.trim(), estado:"Pendiente",
+    stockChanges:stockChanges
+  };
+
+  var btn = $("btnGo");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+  fetch(APPS_SCRIPT_URL, {
+    method:"POST", mode:"no-cors",
+    headers:{ "Content-Type":"text/plain;charset=utf-8" },
+    body:JSON.stringify(payload)
+  }).then(function(){ exito(payload); }).catch(function(){ exito(payload); });
+}
+function exito(p){
+  var msg = "Hola Blu Bakery! Hice un pedido 🍪\n\n" +
+    "Nombre: "+p.nombre+"\nPedido: "+p.cookies+"\nTotal: "+fmt(p.total)+"\n" +
+    "Entrega: "+p.entrega+" · "+p.dia_entrega+" "+p.horario+"\nPago: "+p.pago +
+    (p.pago==="Transferencia"?"\n\n(Adjunto comprobante)":"");
+  $("app").innerHTML =
+    '<div class="panel" style="text-align:center;padding:40px 22px;margin-top:24px">' +
+      '<div style="font-size:48px">🍪</div>' +
+      '<h2 class="display" style="color:var(--azul);font-size:27px;margin:10px 0 6px;font-weight:800">¡Pedido recibido!</h2>' +
+      '<p style="color:var(--gris);font-size:14px">Gracias '+esc(p.nombre)+' 💛</p>' +
+      '<p style="font-size:14px;margin-top:10px">Para confirmar' +
+        (p.pago==="Transferencia"?" y enviar el comprobante":"") +
+        ', escribinos por WhatsApp:</p>' +
+      '<a class="fbtn" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:13px 22px;border-radius:100px;font-family:Bricolage Grotesque,sans-serif;font-weight:700;text-decoration:none" href="https://wa.me/'+WSP+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener">💬 Confirmar por WhatsApp</a>' +
+      '<div style="margin-top:20px"><a href="#" onclick="location.reload()" style="color:var(--azul);font-size:13px">Hacer otro pedido</a></div>' +
+    '</div>';
+  window.scrollTo(0,0);
+}
+
+/* ===== HELPERS ===== */
+function hoy(){ var d=new Date(); return d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear(); }
+function hora(){
+  var d=new Date(), h=d.getHours(), m=("0"+d.getMinutes()).slice(-2);
+  var ap=h>=12?"p. m.":"a. m.", h12=h%12; if(h12===0) h12=12;
+  return ("0"+h12).slice(-2)+":"+m+" "+ap;
+}
+var tmr;
+function toast(msg){
+  var el=$("toast");
+  el.textContent=msg;
+  el.classList.add("show");
+  clearTimeout(tmr);
+  tmr=setTimeout(function(){ el.classList.remove("show"); }, 2600);
+}
+</script>
+</body>
+</html>
