@@ -162,6 +162,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="resumen">Resumen</div>
   <div class="tab" data-tab="recetas">Recetas</div>
+  <div class="tab" data-tab="boxes">Boxes</div>
   <div class="tab" data-tab="subrecetas">Sub-recetas</div>
   <div class="tab" data-tab="ingredientes">Ingredientes</div>
   <div class="tab" data-tab="packaging">Packaging</div>
@@ -210,6 +211,20 @@
         <button class="btn" onclick="nuevaSubreceta()">+ Nueva sub-receta</button>
       </div>
       <div id="subrecetasContent"></div>
+    </div>
+  </div>
+
+  <!-- BOXES -->
+  <div class="view hidden" id="view-boxes">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Boxes / Productos armados</div>
+          <div class="panel-subtitle">Armá cajas combinando cookies (con su peso), dips y packaging. El sistema calcula el costo total y sugiere un precio de venta.</div>
+        </div>
+        <button class="btn" onclick="nuevaBox()">+ Nueva box</button>
+      </div>
+      <div id="boxesContent"></div>
     </div>
   </div>
 
@@ -280,7 +295,8 @@ const CELLS = {
   packaging:    'Packaging!A1',
   fijos:        'CostosFijos!A1',
   recetas:      'Recetas!A1',
-  subrecetas:   'SubRecetas!A1'
+  subrecetas:   'SubRecetas!A1',
+  boxes:        'Boxes!A1'
 };
 
 /* ========== ESTADO ========== */
@@ -290,6 +306,7 @@ let state = {
   fijos: [],
   recetas: [],
   subrecetas: [],
+  boxes: [],
   cookiesPorTanda: 12,  // default global
   pesoGlobalSim: 0,     // peso simulado en el resumen (no se guarda)
   dirty: false,
@@ -393,6 +410,9 @@ async function cargarDatos(){
         r.pesoBasePorCookie = 130;
       }
     });
+
+    // Asegurar que boxes sea un array
+    if (!Array.isArray(state.boxes)) state.boxes = [];
 
     state.loaded = true;
     render();
@@ -754,6 +774,7 @@ function render(){
   renderResumen();
   renderRecetas();
   renderSubrecetas();
+  renderBoxes();
   renderIngredientes();
   renderPackaging();
   renderFijos();
@@ -1001,6 +1022,305 @@ function renderFijos(){
   });
   html += '</tbody></table>';
   container.innerHTML = html;
+}
+
+/* ========== BOXES ========== */
+/*
+  Una box combina:
+  - items de cookies: { recetaId, peso, cantidad }  -> peso por cookie configurable
+  - items de dips:    { subrecetaId, gramos, cantidad } -> gramos por pote × cantidad de potes
+  - items de packaging: { packagingId, cantidad }
+  El costo de cada cookie mini se calcula con la regla de simulación de peso:
+  misma masa, distinto peso => costo unitario proporcional.
+*/
+function costoBox(box){
+  let total = 0;
+  let advertencias = [];
+  const detalle = { cookies: [], dips: [], packaging: [] };
+
+  // Cookies
+  (box.cookies || []).forEach(item => {
+    const receta = state.recetas.find(r => r.id === item.recetaId);
+    if (!receta) { advertencias.push('Receta no encontrada'); return; }
+    const peso = parseFloat(item.peso) || 0;
+    const cant = parseInt(item.cantidad) || 0;
+    let costoUnit = 0;
+    if (peso > 0) {
+      const sim = simularConPeso(receta, peso);
+      // Para la box NO contamos el packaging individual de la cookie (la box tiene su propio packaging)
+      costoUnit = sim ? (sim.costoIngUnit + sim.costoFijoUnit) : 0;
+    } else {
+      const c = costoReceta(receta);
+      costoUnit = c.costoIngUnit + c.costoFijoUnit;
+    }
+    const subtotal = costoUnit * cant;
+    total += subtotal;
+    detalle.cookies.push({ nombre: receta.nombre, peso, cant, costoUnit, subtotal });
+  });
+
+  // Dips (sub-recetas) — gramos por pote × cantidad de potes
+  (box.dips || []).forEach(item => {
+    const sub = state.subrecetas.find(s => s.id === item.subrecetaId);
+    if (!sub) { advertencias.push('Dip no encontrado'); return; }
+    const info = costoSubreceta(sub);
+    if (info.advertencias.length) advertencias.push(...info.advertencias);
+    const gramos = parseFloat(item.gramos) || 0;
+    const cant = parseInt(item.cantidad) || 0;
+    const costoUnit = info.costoPorUnidad * gramos; // costo de un pote
+    const subtotal = costoUnit * cant;
+    total += subtotal;
+    detalle.dips.push({ nombre: sub.nombre, gramos, cant, costoUnit, subtotal });
+  });
+
+  // Packaging
+  (box.packaging || []).forEach(item => {
+    const pack = state.packaging.find(p => p.id === item.packagingId);
+    if (!pack) { advertencias.push('Packaging no encontrado'); return; }
+    const cant = parseInt(item.cantidad) || 0;
+    const costoUnit = pack.precio || 0;
+    const subtotal = costoUnit * cant;
+    total += subtotal;
+    detalle.packaging.push({ nombre: pack.nombre, cant, costoUnit, subtotal });
+  });
+
+  // Precio sugerido según food cost de pastelería (Argentina)
+  // food cost = costo / precio. Pastelería suele trabajar 25%-35%.
+  const sugeridos = {
+    fc35: total / 0.35,  // food cost 35% (precio más bajo)
+    fc30: total / 0.30,  // food cost 30% (sugerido)
+    fc25: total / 0.25   // food cost 25% (precio más alto / premium)
+  };
+
+  return { costoTotal: total, detalle, sugeridos, advertencias: [...new Set(advertencias)] };
+}
+
+function renderBoxes(){
+  const container = document.getElementById('boxesContent');
+  if (!container) return;
+  if (!state.boxes.length) {
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay boxes creadas. Tocá "+ Nueva box" para armar una.</div>';
+    return;
+  }
+  let html = '';
+  state.boxes.forEach(box => {
+    const c = costoBox(box);
+    const totalCookies = (box.cookies || []).reduce((s, it) => s + (parseInt(it.cantidad) || 0), 0);
+    const totalDips = (box.dips || []).reduce((s, it) => s + (parseInt(it.cantidad) || 0), 0);
+    html += `<div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--teal)">${escape(box.nombre)}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${totalCookies} cookies · ${totalDips} dips</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Costo total</div>
+          <div style="font-size:24px;font-weight:600;color:var(--teal)">${formatAR(c.costoTotal)}</div>
+        </div>
+      </div>
+      ${c.advertencias.length ? `<div style="color:#b8860b;font-size:12px;margin-top:6px">⚠ Falta precio: ${escape(c.advertencias.join(', '))}</div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="editarBox('${box.id}')">Editar</button>
+        <button class="btn btn-sm btn-outline" onclick="duplicarBox('${box.id}')">Duplicar</button>
+        <button class="btn btn-sm btn-ghost" onclick="borrarBox('${box.id}')">×</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function nuevaBox(){
+  state.boxes.push({
+    id: 'box_' + Date.now(),
+    nombre: 'Nueva box',
+    cookies: [],
+    dips: [],
+    packaging: []
+  });
+  markDirty();
+  renderBoxes();
+  editarBox(state.boxes[state.boxes.length - 1].id);
+}
+
+function duplicarBox(id){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  const copia = JSON.parse(JSON.stringify(box));
+  copia.id = 'box_' + Date.now();
+  copia.nombre = box.nombre + ' (copia)';
+  state.boxes.push(copia);
+  markDirty();
+  renderBoxes();
+}
+
+function borrarBox(id){
+  if (!confirm('¿Eliminar esta box?')) return;
+  state.boxes = state.boxes.filter(b => b.id !== id);
+  markDirty();
+  renderBoxes();
+}
+
+function editarBox(id){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  const c = costoBox(box);
+
+  // Opciones de recetas, dips y packaging
+  const optRecetas = state.recetas.map(r => `<option value="${r.id}">${escape(r.nombre)}</option>`).join('');
+  const optDips = state.subrecetas.map(s => `<option value="${s.id}">${escape(s.nombre)}</option>`).join('');
+  const optPack = state.packaging.map(p => `<option value="${p.id}">${escape(p.nombre)}</option>`).join('');
+
+  // Filas de cookies
+  let filasCookies = (box.cookies || []).map((it, idx) => `
+    <div class="ingr-row" style="display:grid;grid-template-columns:1fr 70px 60px auto;gap:6px;align-items:center;margin-bottom:6px">
+      <select class="inline" onchange="actBoxCookie('${box.id}',${idx},'recetaId',this.value)">
+        <option value="">— Elegí cookie —</option>
+        ${state.recetas.map(r => `<option value="${r.id}" ${r.id===it.recetaId?'selected':''}>${escape(r.nombre)}</option>`).join('')}
+      </select>
+      <input class="inline-sm" type="number" value="${it.peso||''}" placeholder="peso g" onchange="actBoxCookie('${box.id}',${idx},'peso',parseFloat(this.value)||0)">
+      <input class="inline-sm" type="number" value="${it.cantidad||''}" placeholder="cant" onchange="actBoxCookie('${box.id}',${idx},'cantidad',parseInt(this.value)||0)">
+      <button class="btn btn-sm btn-ghost" onclick="quitarBoxCookie('${box.id}',${idx})">×</button>
+    </div>`).join('');
+
+  // Filas de dips
+  let filasDips = (box.dips || []).map((it, idx) => `
+    <div class="ingr-row" style="display:grid;grid-template-columns:1fr 70px 60px auto;gap:6px;align-items:center;margin-bottom:6px">
+      <select class="inline" onchange="actBoxDip('${box.id}',${idx},'subrecetaId',this.value)">
+        <option value="">— Elegí dip —</option>
+        ${state.subrecetas.map(s => `<option value="${s.id}" ${s.id===it.subrecetaId?'selected':''}>${escape(s.nombre)}</option>`).join('')}
+      </select>
+      <input class="inline-sm" type="number" value="${it.gramos||''}" placeholder="g/pote" onchange="actBoxDip('${box.id}',${idx},'gramos',parseFloat(this.value)||0)">
+      <input class="inline-sm" type="number" value="${it.cantidad||''}" placeholder="potes" onchange="actBoxDip('${box.id}',${idx},'cantidad',parseInt(this.value)||0)">
+      <button class="btn btn-sm btn-ghost" onclick="quitarBoxDip('${box.id}',${idx})">×</button>
+    </div>`).join('');
+
+  // Filas de packaging
+  let filasPack = (box.packaging || []).map((it, idx) => `
+    <div class="ingr-row" style="display:grid;grid-template-columns:1fr 60px auto;gap:6px;align-items:center;margin-bottom:6px">
+      <select class="inline" onchange="actBoxPack('${box.id}',${idx},'packagingId',this.value)">
+        <option value="">— Elegí packaging —</option>
+        ${state.packaging.map(p => `<option value="${p.id}" ${p.id===it.packagingId?'selected':''}>${escape(p.nombre)}</option>`).join('')}
+      </select>
+      <input class="inline-sm" type="number" value="${it.cantidad||''}" placeholder="cant" onchange="actBoxPack('${box.id}',${idx},'cantidad',parseInt(this.value)||0)">
+      <button class="btn btn-sm btn-ghost" onclick="quitarBoxPack('${box.id}',${idx})">×</button>
+    </div>`).join('');
+
+  const html = `
+    <div class="modal-title">Editar box</div>
+    <label style="font-size:12px;color:var(--muted)">Nombre de la box</label>
+    <input class="inline" style="width:100%;margin-bottom:16px" type="text" value="${escape(box.nombre)}" onchange="actBox('${box.id}','nombre',this.value)">
+
+    <div style="font-weight:600;color:var(--teal);margin-bottom:6px">🍪 Cookies</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Elegí la cookie, el peso por unidad (g) y cuántas van.</div>
+    ${filasCookies || '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Sin cookies todavía.</div>'}
+    <button class="btn btn-sm btn-outline" onclick="agregarBoxCookie('${box.id}')">+ Agregar cookie</button>
+
+    <div style="font-weight:600;color:var(--teal);margin:16px 0 6px">🥄 Dips</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Elegí el dip (sub-receta), los gramos por pote y cuántos potes.</div>
+    ${filasDips || '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Sin dips todavía.</div>'}
+    <button class="btn btn-sm btn-outline" onclick="agregarBoxDip('${box.id}')">+ Agregar dip</button>
+
+    <div style="font-weight:600;color:var(--teal);margin:16px 0 6px">📦 Packaging</div>
+    ${filasPack || '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">Sin packaging todavía.</div>'}
+    <button class="btn btn-sm btn-outline" onclick="agregarBoxPack('${box.id}')">+ Agregar packaging</button>
+
+    <div style="background:var(--cream-dark);border-radius:8px;padding:14px;margin-top:18px">
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px">
+        <span>Costo total de la box</span>
+        <span style="font-weight:600;color:var(--teal);font-size:18px">${formatAR(c.costoTotal)}</span>
+      </div>
+      ${c.advertencias.length ? `<div style="color:#b8860b;font-size:12px;margin-top:6px">⚠ Falta precio: ${escape(c.advertencias.join(', '))}</div>` : ''}
+    </div>
+
+    <div style="background:#eef6f0;border-radius:8px;padding:14px;margin-top:12px">
+      <div style="font-weight:600;color:var(--teal);margin-bottom:8px">💰 Precio sugerido de venta</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">Calculado según el food cost típico de pastelería en Argentina. El del medio es el recomendado.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center">
+        <div style="background:#fff;padding:8px;border-radius:6px">
+          <div style="font-size:10px;color:var(--muted)">ECONÓMICO (fc 35%)</div>
+          <div style="font-size:16px;font-weight:600;color:var(--teal)">${formatAR(c.sugeridos.fc35)}</div>
+        </div>
+        <div style="background:var(--teal);padding:8px;border-radius:6px">
+          <div style="font-size:10px;color:#cfe5ea">SUGERIDO (fc 30%)</div>
+          <div style="font-size:18px;font-weight:700;color:#fff">${formatAR(c.sugeridos.fc30)}</div>
+        </div>
+        <div style="background:#fff;padding:8px;border-radius:6px">
+          <div style="font-size:10px;color:var(--muted)">PREMIUM (fc 25%)</div>
+          <div style="font-size:16px;font-weight:600;color:var(--teal)">${formatAR(c.sugeridos.fc25)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:18px">
+      <button class="btn btn-outline" style="flex:1" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  `;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function actBox(id, key, val){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  box[key] = val;
+  markDirty();
+  renderBoxes();
+}
+function agregarBoxCookie(id){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  if (!box.cookies) box.cookies = [];
+  box.cookies.push({ recetaId:'', peso:20, cantidad:1 });
+  markDirty(); editarBox(id); renderBoxes();
+}
+function actBoxCookie(id, idx, key, val){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box || !box.cookies[idx]) return;
+  box.cookies[idx][key] = val;
+  markDirty(); editarBox(id); renderBoxes();
+}
+function quitarBoxCookie(id, idx){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  box.cookies.splice(idx, 1);
+  markDirty(); editarBox(id); renderBoxes();
+}
+function agregarBoxDip(id){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  if (!box.dips) box.dips = [];
+  box.dips.push({ subrecetaId:'', gramos:60, cantidad:1 });
+  markDirty(); editarBox(id); renderBoxes();
+}
+function actBoxDip(id, idx, key, val){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box || !box.dips[idx]) return;
+  box.dips[idx][key] = val;
+  markDirty(); editarBox(id); renderBoxes();
+}
+function quitarBoxDip(id, idx){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  box.dips.splice(idx, 1);
+  markDirty(); editarBox(id); renderBoxes();
+}
+function agregarBoxPack(id){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  if (!box.packaging) box.packaging = [];
+  box.packaging.push({ packagingId:'', cantidad:1 });
+  markDirty(); editarBox(id); renderBoxes();
+}
+function actBoxPack(id, idx, key, val){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box || !box.packaging[idx]) return;
+  box.packaging[idx][key] = val;
+  markDirty(); editarBox(id); renderBoxes();
+}
+function quitarBoxPack(id, idx){
+  const box = state.boxes.find(b => b.id === id);
+  if (!box) return;
+  box.packaging.splice(idx, 1);
+  markDirty(); editarBox(id); renderBoxes();
 }
 
 /* ========== ACTUALIZADORES ========== */
