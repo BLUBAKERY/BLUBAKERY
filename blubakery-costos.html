@@ -162,7 +162,7 @@
 <div class="tabs">
   <div class="tab active" data-tab="resumen">Resumen</div>
   <div class="tab" data-tab="recetas">Recetas</div>
-  <div class="tab" data-tab="boxes">Boxes</div>
+  <div class="tab" data-tab="boxes">Productos</div>
   <div class="tab" data-tab="subrecetas">Sub-recetas</div>
   <div class="tab" data-tab="ingredientes">Ingredientes</div>
   <div class="tab" data-tab="packaging">Packaging</div>
@@ -178,7 +178,7 @@
       <div class="panel-header">
         <div>
           <div class="panel-title">Resumen de costos por cookie</div>
-          <div class="panel-subtitle">Costo unitario calculado sobre una tanda. Incluye ingredientes, packaging y costos fijos.</div>
+          <div class="panel-subtitle">Costo de producir cada cookie (ingredientes + costos fijos). El packaging se suma al armar cada producto.</div>
         </div>
         <button class="btn btn-outline btn-sm" onclick="recalcularTodo()">↻ Recalcular</button>
       </div>
@@ -214,15 +214,15 @@
     </div>
   </div>
 
-  <!-- BOXES -->
+  <!-- BOXES / PRODUCTOS -->
   <div class="view hidden" id="view-boxes">
     <div class="panel">
       <div class="panel-header">
         <div>
-          <div class="panel-title">Boxes / Productos armados</div>
-          <div class="panel-subtitle">Armá cajas combinando cookies (con su peso), dips y packaging. El sistema calcula el costo total y sugiere un precio de venta.</div>
+          <div class="panel-title">Productos</div>
+          <div class="panel-subtitle">Armá todo lo que vendés: cookie suelta, caja x4, x6, box degustación. Elegís las cookies, los dips y el packaging. El packaging se reparte solo entre lo que lleva el producto.</div>
         </div>
-        <button class="btn" onclick="nuevaBox()">+ Nueva box</button>
+        <button class="btn" onclick="nuevaBox()">+ Nuevo producto</button>
       </div>
       <div id="boxesContent"></div>
     </div>
@@ -694,10 +694,8 @@ function costoReceta(receta){
     costoIngTanda += costoUsoIngrediente(item.ingredienteId, item.cantidad || 0);
   });
 
-  // Packaging: solo si la receta NO está marcada como "sin packaging"
-  const costoPackaging = receta.sinPackaging
-    ? 0
-    : state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
+  // Las recetas NO llevan packaging. El packaging se define a nivel de Producto.
+  const costoPackaging = 0;
 
   // Costo fijo prorrateado por la cantidad de cookies que efectivamente salen (al peso base)
   const cookiesBase = receta.cookiesPorTanda || 12;
@@ -800,7 +798,7 @@ function renderResumen(){
       <div class="stat"><div class="stat-label">Recetas</div><div class="stat-value">${state.recetas.length}</div></div>
       <div class="stat"><div class="stat-label">Ingredientes</div><div class="stat-value">${totalIng}</div></div>
       <div class="stat"><div class="stat-label">Sin precio cargado</div><div class="stat-value" style="color:${ingSinPrecio > 0 ? 'var(--warning)' : 'var(--success)'}">${ingSinPrecio}</div></div>
-      <div class="stat"><div class="stat-label">Packaging por cookie</div><div class="stat-value">${formatAR(packTotal)}</div></div>
+      <div class="stat"><div class="stat-label">Productos armados</div><div class="stat-value">${(state.boxes||[]).length}</div></div>
     </div>
   `;
 
@@ -832,7 +830,7 @@ function renderResumen(){
     const sim = haySim ? simularConPeso(r, state.pesoGlobalSim) : null;
 
     html += `<tr>
-      <td><strong>${escape(r.nombre)}</strong>${r.sinPackaging ? ' <span style="font-size:10px;background:#eef6f0;color:var(--teal);padding:1px 6px;border-radius:8px">sin packaging</span>' : ''}${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
+      <td><strong>${escape(r.nombre)}</strong>${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
       <td class="t-center">${c.pesoBase}g</td>
       <td class="t-center">${c.cookies}</td>
       <td class="t-num" style="font-weight:600;color:var(--teal);font-size:15px">${formatAR(c.costoTotalUnit)}</td>
@@ -1101,7 +1099,7 @@ function renderBoxes(){
   const container = document.getElementById('boxesContent');
   if (!container) return;
   if (!state.boxes.length) {
-    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay boxes creadas. Tocá "+ Nueva box" para armar una.</div>';
+    container.innerHTML = '<div class="empty"><div class="empty-icon">○</div>No hay productos creados. Tocá "+ Nuevo producto" para armar uno.</div>';
     return;
   }
   let html = '';
@@ -1134,7 +1132,7 @@ function renderBoxes(){
 function nuevaBox(){
   state.boxes.push({
     id: 'box_' + Date.now(),
-    nombre: 'Nueva box',
+    nombre: 'Nuevo producto',
     cookies: [],
     dips: [],
     packaging: []
@@ -1156,7 +1154,7 @@ function duplicarBox(id){
 }
 
 function borrarBox(id){
-  if (!confirm('¿Eliminar esta box?')) return;
+  if (!confirm('¿Eliminar este producto?')) return;
   state.boxes = state.boxes.filter(b => b.id !== id);
   markDirty();
   renderBoxes();
@@ -1208,8 +1206,8 @@ function editarBox(id){
     </div>`).join('');
 
   const html = `
-    <div class="modal-title">Editar box</div>
-    <label style="font-size:12px;color:var(--muted)">Nombre de la box</label>
+    <div class="modal-title">Editar producto</div>
+    <label style="font-size:12px;color:var(--muted)">Nombre del producto</label>
     <input class="inline" style="width:100%;margin-bottom:16px" type="text" value="${escape(box.nombre)}" onchange="actBox('${box.id}','nombre',this.value)">
 
     <div style="font-weight:600;color:var(--teal);margin-bottom:6px">🍪 Cookies</div>
@@ -1228,7 +1226,7 @@ function editarBox(id){
 
     <div style="background:var(--cream-dark);border-radius:8px;padding:14px;margin-top:18px">
       <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px">
-        <span>Costo total de la box</span>
+        <span>Costo total del producto</span>
         <span style="font-weight:600;color:var(--teal);font-size:18px">${formatAR(c.costoTotal)}</span>
       </div>
       ${c.advertencias.length ? `<div style="color:#b8860b;font-size:12px;margin-top:6px">⚠ Falta precio: ${escape(c.advertencias.join(', '))}</div>` : ''}
@@ -1488,13 +1486,8 @@ function editarReceta(id){
       </div>
     </div>
 
-    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;font-size:13px">
-      <input type="checkbox" ${r.sinPackaging ? 'checked' : ''} onchange="actReceta('${r.id}','sinPackaging',this.checked)" style="width:auto;margin:0">
-      <span>Esta receta NO lleva packaging <span class="t-muted">(marcala para cookies que van adentro de una box)</span></span>
-    </label>
-
-    <div style="background:#f5efd7;padding:8px 12px;border-radius:var(--radius);margin-top:10px;font-size:12px;color:var(--muted)">
-      💡 La masa completa cuesta <strong style="color:var(--teal)">${formatAR(c.costoIngTanda + c.costoFijoTanda)}</strong> (ingredientes + fijos) y rinde ${c.cookies} cookies de ${c.pesoBase}g. Si pesás distinto, salen más o menos cookies pero el costo de la masa no cambia. ${r.sinPackaging ? 'Esta receta está marcada <strong>sin packaging</strong>.' : 'El packaging (' + formatAR(c.costoPackaging) + ') se suma por cookie.'}
+    <div style="background:#f5efd7;padding:8px 12px;border-radius:var(--radius);margin-top:12px;font-size:12px;color:var(--muted)">
+      💡 La masa completa cuesta <strong style="color:var(--teal)">${formatAR(c.costoIngTanda + c.costoFijoTanda)}</strong> (ingredientes + fijos) y rinde ${c.cookies} cookies de ${c.pesoBase}g. Este es el costo de <strong>producir</strong> la cookie. El packaging se agrega después, al armar cada producto en la pestaña Productos.
     </div>
 
     <!-- SIMULADOR DE PESO -->
