@@ -694,7 +694,10 @@ function costoReceta(receta){
     costoIngTanda += costoUsoIngrediente(item.ingredienteId, item.cantidad || 0);
   });
 
-  const costoPackaging = state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
+  // Packaging: solo si la receta NO está marcada como "sin packaging"
+  const costoPackaging = receta.sinPackaging
+    ? 0
+    : state.packaging.reduce((s, p) => s + (p.precio || 0), 0);
 
   // Costo fijo prorrateado por la cantidad de cookies que efectivamente salen (al peso base)
   const cookiesBase = receta.cookiesPorTanda || 12;
@@ -829,7 +832,7 @@ function renderResumen(){
     const sim = haySim ? simularConPeso(r, state.pesoGlobalSim) : null;
 
     html += `<tr>
-      <td><strong>${escape(r.nombre)}</strong>${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
+      <td><strong>${escape(r.nombre)}</strong>${r.sinPackaging ? ' <span style="font-size:10px;background:#eef6f0;color:var(--teal);padding:1px 6px;border-radius:8px">sin packaging</span>' : ''}${warn ? '<br><span class="t-muted" style="color:var(--warning)">⚠ Falta precio: ' + c.advertencias.slice(0,2).join(', ') + (c.advertencias.length > 2 ? ` y ${c.advertencias.length-2} más` : '') + '</span>' : ''}</td>
       <td class="t-center">${c.pesoBase}g</td>
       <td class="t-center">${c.cookies}</td>
       <td class="t-num" style="font-weight:600;color:var(--teal);font-size:15px">${formatAR(c.costoTotalUnit)}</td>
@@ -1485,8 +1488,13 @@ function editarReceta(id){
       </div>
     </div>
 
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;font-size:13px">
+      <input type="checkbox" ${r.sinPackaging ? 'checked' : ''} onchange="actReceta('${r.id}','sinPackaging',this.checked)" style="width:auto;margin:0">
+      <span>Esta receta NO lleva packaging <span class="t-muted">(marcala para cookies que van adentro de una box)</span></span>
+    </label>
+
     <div style="background:#f5efd7;padding:8px 12px;border-radius:var(--radius);margin-top:10px;font-size:12px;color:var(--muted)">
-      💡 La masa completa cuesta <strong style="color:var(--teal)">${formatAR(c.costoIngTanda + c.costoFijoTanda)}</strong> (ingredientes + fijos) y rinde ${c.cookies} cookies de ${c.pesoBase}g. Si pesás distinto, salen más o menos cookies pero el costo de la masa no cambia. El packaging (${formatAR(c.costoPackaging)}) se suma por cookie.
+      💡 La masa completa cuesta <strong style="color:var(--teal)">${formatAR(c.costoIngTanda + c.costoFijoTanda)}</strong> (ingredientes + fijos) y rinde ${c.cookies} cookies de ${c.pesoBase}g. Si pesás distinto, salen más o menos cookies pero el costo de la masa no cambia. ${r.sinPackaging ? 'Esta receta está marcada <strong>sin packaging</strong>.' : 'El packaging (' + formatAR(c.costoPackaging) + ') se suma por cookie.'}
     </div>
 
     <!-- SIMULADOR DE PESO -->
