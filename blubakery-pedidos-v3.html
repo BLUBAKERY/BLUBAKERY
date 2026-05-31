@@ -426,6 +426,89 @@
   input:focus, textarea:focus { outline: none; border-color: var(--azul); }
 
   .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Aviso destacado de envío gratis */
+  .aviso-envio-gratis {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, var(--azul) 0%, #003a4d 100%);
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 14px;
+    margin: 18px 0 8px;
+    box-shadow: 0 4px 14px rgba(0,78,100,0.18);
+    border: 1.5px solid var(--mostaza);
+    position: relative;
+    overflow: hidden;
+  }
+  .aviso-envio-gratis::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(215,161,58,0.15), transparent);
+    animation: aeg-shine 3.5s ease-in-out infinite;
+  }
+  @keyframes aeg-shine {
+    0% { left: -100%; }
+    60%, 100% { left: 100%; }
+  }
+  .ae-icon { font-size: 24px; flex-shrink: 0; position: relative; z-index: 1; }
+  .ae-text { font-family: 'Bricolage Grotesque', sans-serif; font-size: 14.5px; line-height: 1.35; position: relative; z-index: 1; }
+  .ae-text b { color: var(--mostaza); font-weight: 700; }
+  @media (max-width: 520px){
+    .ae-text { font-size: 13.5px; }
+    .ae-icon { font-size: 22px; }
+  }
+
+  /* Reseñas */
+  .rv-track {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 6px 2px 14px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rv-track::-webkit-scrollbar { height: 0; }
+  .rv-card {
+    flex: 0 0 78%;
+    max-width: 320px;
+    background: var(--crema-card);
+    border: 1.5px solid rgba(0,78,100,0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  @media (min-width: 600px){
+    .rv-card { flex: 0 0 320px; }
+  }
+  .rv-stars { color: var(--mostaza); letter-spacing: 1px; font-size: 15px; }
+  .rv-text {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--azul);
+    font-style: italic;
+  }
+  .rv-foot {
+    font-size: 12px;
+    color: rgba(0,78,100,0.7);
+    border-top: 1px dashed rgba(0,78,100,0.18);
+    padding-top: 8px;
+    margin-top: auto;
+  }
+  .rv-foot b { color: var(--azul); }
+  .rv-foot span { font-style: italic; }
+  .pills-entrega .pill { flex: 1 1 calc(50% - 4px); min-width: 0; font-size: 13px; padding: 12px 6px; }
+  @media (max-width: 520px){
+    .pills-entrega { flex-direction: column; }
+    .pills-entrega .pill { flex: 1 1 auto; width: 100%; }
+  }
   .pill {
     flex: 1;
     min-width: 88px;
@@ -751,6 +834,7 @@
 var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
 var SHEET_ID = "1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI";
 var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config";
+var REVIEWS_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Reviews";
 var WSP = "5492284353970";
 
 var CFG = {
@@ -780,6 +864,7 @@ var CFG = {
 /* ===== ESTADO ===== */
 var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
+var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
 
 function $(id){ return document.getElementById(id); }
 function fmt(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
@@ -822,6 +907,53 @@ function init(){
   render();
 }
 
+/* ===== RESEÑAS (lee la pestaña Reviews del Sheet) ===== */
+function cargarReviews(){
+  var sec = $("reviewsSec");
+  if(!sec) return;
+  fetch(REVIEWS_GVIZ)
+    .then(function(r){ return r.text(); })
+    .then(function(t){
+      var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+      var rows = (j.table && j.table.rows) || [];
+      // Columnas esperadas: Fecha · Hora · Nombre · Producto · Estrellas · Comentario · Origen
+      var reviews = [];
+      rows.forEach(function(row){
+        if(!row || !row.c) return;
+        var get = function(i){ return row.c[i] ? (row.c[i].f || row.c[i].v) : ""; };
+        var nombre = (get(2)||"").toString().trim();
+        var producto = (get(3)||"").toString().trim();
+        var estrellas = parseInt(get(4)) || 0;
+        var comentario = (get(5)||"").toString().trim();
+        // Solo 4-5 estrellas, con comentario, con nombre
+        if(estrellas >= 4 && comentario && nombre){
+          reviews.push({ nombre: nombre, producto: producto, estrellas: estrellas, comentario: comentario });
+        }
+      });
+      renderReviews(reviews);
+    })
+    .catch(function(e){ console.warn("Reviews:", e); });
+}
+
+function renderReviews(reviews){
+  var sec = $("reviewsSec");
+  if(!sec || !reviews.length) return;
+  var spacer = '<div style="height:18px"></div>';
+  var head = '<div class="sec-head"><div class="eyebrow">Lo que dicen</div><h2>Reseñas</h2></div>';
+
+  var cards = reviews.map(function(r){
+    var stars = "";
+    for(var i=0;i<5;i++) stars += (i < r.estrellas ? '★' : '☆');
+    return '<div class="rv-card">'+
+      '<div class="rv-stars">'+stars+'</div>'+
+      '<div class="rv-text">"'+esc(r.comentario)+'"</div>'+
+      '<div class="rv-foot"><b>'+esc(r.nombre)+'</b>'+(r.producto?' · <span>'+esc(r.producto)+'</span>':'')+'</div>'+
+    '</div>';
+  }).join("");
+
+  sec.innerHTML = spacer + head + '<div class="rv-track">'+cards+'</div>';
+}
+
 /* ===== RENDER ===== */
 function render(){
   var app = $("app");
@@ -830,6 +962,15 @@ function render(){
   // COOKIE DEL MES
   var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
   if(cdm) app.appendChild(renderCDM(cdm));
+
+  // AVISO ENVÍO GRATIS (solo si hay umbral configurado)
+  var umbralEG = parseInt(CFG.envioGratisDesde) || 0;
+  if(umbralEG > 0){
+    var aviso = document.createElement("div");
+    aviso.className = "aviso-envio-gratis";
+    aviso.innerHTML = '<span class="ae-icon">🚚</span><span class="ae-text"><b>Envío gratis</b> en pedidos mayores a <b>'+fmt(umbralEG)+'</b></span>';
+    app.appendChild(aviso);
+  }
 
   // COOKIES
   app.appendChild(secHead("El menú", "Nuestras cookies"));
@@ -845,6 +986,10 @@ function render(){
   if(CFG.box && CFG.box.activo) app.appendChild(renderBox(CFG.box, "box"));
   if(CFG.box2 && CFG.box2.activo) app.appendChild(renderBox(CFG.box2, "box2"));
 
+  // RESUMEN (movido a justo después de las boxes)
+  app.appendChild(secHead("Tu pedido", "Resumen"));
+  var resWrap = document.createElement("div"); resWrap.id = "resSec"; app.appendChild(resWrap);
+
   // ENTREGA
   app.appendChild(secHead("Entrega", "¿Envío o retiro?"));
   app.appendChild(renderEntrega());
@@ -859,9 +1004,7 @@ function render(){
   app.appendChild(secHead("Pago", "¿Cómo abonás?"));
   app.appendChild(renderPago());
 
-  // RESUMEN
-  app.appendChild(secHead("Tu pedido", "Resumen"));
-  var resWrap = document.createElement("div"); resWrap.id = "resSec"; app.appendChild(resWrap);
+  // CTA Confirmar
   var cta = document.createElement("button");
   cta.className = "cta"; cta.id = "btnGo"; cta.textContent = "Confirmar pedido";
   cta.onclick = confirmar;
@@ -874,6 +1017,12 @@ function render(){
   app.appendChild(renderNov());
   app.appendChild(renderEventos());
   app.appendChild(renderContacto());
+
+  // RESEÑAS (lee de la pestaña Reviews del Sheet)
+  var resBox = document.createElement("div");
+  resBox.id = "reviewsSec";
+  app.appendChild(resBox);
+  cargarReviews();
 
   var fe = document.createElement("div");
   fe.className = "footer-end";
@@ -1084,18 +1233,21 @@ function closeModal(){ $("mbg").classList.remove("show"); }
 function renderEntrega(){
   var d = document.createElement("div");
   var p = document.createElement("div");
-  p.className = "pills";
+  p.className = "pills pills-entrega";
   p.innerHTML =
     '<button class="pill" id="pEnvio" onclick="setEnt(\'envio\')">🚚 Envío<span class="s">'+fmt(CFG.costoEnvio)+'</span></button>' +
-    '<button class="pill" id="pRetiro" onclick="setEnt(\'retiro\')">🏠 Retiro<span class="s">Sin costo</span></button>';
+    '<button class="pill" id="pRetOla" onclick="setEnt(\'retiro\',\'olavarria\')">🏠 Retiro Olavarría<span class="s">Sin costo</span></button>' +
+    '<button class="pill" id="pRetLN" onclick="setEnt(\'retiro\',\'lomanegra\')">🏠 Retiro Loma Negra<span class="s">Sin costo</span></button>';
   d.appendChild(p);
   var i = document.createElement("div"); i.id = "entInfo"; d.appendChild(i);
   return d;
 }
-function setEnt(t){
+function setEnt(t, punto){
   ent = t;
+  puntoRetiro = (t === "retiro") ? (punto || "olavarria") : null;
   $("pEnvio").classList.toggle("on", t==="envio");
-  $("pRetiro").classList.toggle("on", t==="retiro");
+  $("pRetOla").classList.toggle("on", t==="retiro" && puntoRetiro==="olavarria");
+  $("pRetLN").classList.toggle("on", t==="retiro" && puntoRetiro==="lomanegra");
   $("entInfo").innerHTML = '<div class="note"><b>'+(t==="envio"?"Envío a domicilio.":"Retiro.")+'</b> '+esc(t==="envio"?CFG.msgEnvio:CFG.msgRetiro)+'</div>';
   var dir = $("campoDir");
   if(dir) dir.style.display = t==="envio" ? "block" : "none";
@@ -1385,6 +1537,7 @@ function confirmar(){
   if(!nom){ toast("Completá tu nombre"); return; }
   if(!tel){ toast("Completá tu teléfono"); return; }
   if(!ent){ toast("Elegí envío o retiro"); return; }
+  if(ent==="retiro" && !puntoRetiro){ toast("Elegí dónde retirar"); return; }
   if(ent==="envio" && !$("iDir").value.trim()){ toast("Completá la dirección"); return; }
   if(!diaId){ toast("Elegí un día"); return; }
   if(!pago){ toast("Elegí forma de pago"); return; }
@@ -1425,7 +1578,7 @@ function confirmar(){
     cookies:ck.join(" | "), unidades:unidades,
     pack: packTxt.length?packTxt.join(", "):"No",
     subtotal:t.total, entrega: ent==="envio"?"Envio":"Retiro",
-    direccion: ent==="envio"?$("iDir").value.trim():"Retiro en domicilio",
+    direccion: ent==="envio" ? $("iDir").value.trim() : (puntoRetiro==="lomanegra" ? "Retiro Loma Negra" : "Retiro Olavarría"),
     dia_entrega: dia?dia.label:"", horario: franja||"",
     costo_envio: (function(){
       if(ent!=="envio") return 0;
