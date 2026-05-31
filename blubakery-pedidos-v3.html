@@ -936,7 +936,7 @@ function renderReviews(reviews){
   var sec = $("reviewsSec");
   if(!sec || !reviews.length) return;
   var spacer = '<div style="height:18px"></div>';
-  var head = '<div class="sec-head"><div class="eyebrow">Lo que dicen</div><h2>Reseñas</h2></div>';
+  var head = '<div class="sec-head"><div class="eyebrow">Reseñas</div><h2>La gente anda diciendo</h2></div>';
 
   var cards = reviews.map(function(r){
     var stars = "";
@@ -948,7 +948,30 @@ function renderReviews(reviews){
     '</div>';
   }).join("");
 
-  sec.innerHTML = spacer + head + '<div class="rv-track">'+cards+'</div>';
+  sec.innerHTML = spacer + head + '<div class="rv-track" id="rvTrack">'+cards+'</div>';
+
+  // Auto-scroll: avanza una tarjeta cada 4.5s, vuelve al inicio al llegar al final
+  var track = document.getElementById("rvTrack");
+  if(!track || reviews.length < 2) return;
+  var pausado = false;
+  // Pausar al tocar/hover (para que el usuario pueda leer)
+  track.addEventListener("mouseenter", function(){ pausado = true; });
+  track.addEventListener("mouseleave", function(){ pausado = false; });
+  track.addEventListener("touchstart", function(){ pausado = true; }, {passive:true});
+  track.addEventListener("touchend", function(){ setTimeout(function(){ pausado = false; }, 2500); }, {passive:true});
+
+  setInterval(function(){
+    if(pausado) return;
+    var card = track.querySelector(".rv-card");
+    if(!card) return;
+    var stepWidth = card.offsetWidth + 12; // ancho de tarjeta + gap
+    var maxScroll = track.scrollWidth - track.clientWidth;
+    if(track.scrollLeft + stepWidth >= maxScroll - 4){
+      track.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      track.scrollBy({ left: stepWidth, behavior: "smooth" });
+    }
+  }, 4500);
 }
 
 /* ===== RENDER ===== */
