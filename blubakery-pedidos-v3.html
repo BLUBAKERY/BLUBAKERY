@@ -427,39 +427,36 @@
 
   .pills { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  /* Aviso destacado de envío gratis */
+  /* Aviso destacado de envío gratis (Opción B - banner bordó) */
   .aviso-envio-gratis {
+    background: var(--bordo);
+    color: var(--crema);
+    border-radius: 12px;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
-    gap: 12px;
-    background: linear-gradient(135deg, var(--azul) 0%, #003a4d 100%);
-    color: #fff;
-    padding: 14px 18px;
-    border-radius: 14px;
-    margin: 18px 0 8px;
-    box-shadow: 0 4px 14px rgba(0,78,100,0.18);
-    border: 1.5px solid var(--mostaza);
-    position: relative;
-    overflow: hidden;
+    gap: 14px;
+    border: 2px solid var(--mostaza);
+    margin: 12px 0 4px;
+    box-shadow: 0 3px 10px rgba(126,31,45,0.18);
   }
-  .aviso-envio-gratis::before {
-    content: "";
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(215,161,58,0.15), transparent);
-    animation: aeg-shine 3.5s ease-in-out infinite;
+  .aeg-icon { font-size: 30px; flex-shrink: 0; line-height: 1; }
+  .aeg-text { flex: 1; line-height: 1.3; }
+  .aeg-top {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--mostaza);
+    letter-spacing: 0.5px;
+    line-height: 1;
   }
-  @keyframes aeg-shine {
-    0% { left: -100%; }
-    60%, 100% { left: 100%; }
-  }
-  .ae-icon { font-size: 24px; flex-shrink: 0; position: relative; z-index: 1; }
-  .ae-text { font-family: 'Bricolage Grotesque', sans-serif; font-size: 14.5px; line-height: 1.35; position: relative; z-index: 1; }
-  .ae-text b { color: var(--mostaza); font-weight: 700; }
+  .aeg-bot { font-family: 'Bricolage Grotesque', sans-serif; font-size: 13px; color: var(--crema); margin-top: 4px; }
+  .aeg-bot b { color: #fff; font-weight: 700; }
   @media (max-width: 520px){
-    .ae-text { font-size: 13.5px; }
-    .ae-icon { font-size: 22px; }
+    .aviso-envio-gratis { padding: 12px 14px; gap: 12px; }
+    .aeg-icon { font-size: 26px; }
+    .aeg-top { font-size: 17px; }
+    .aeg-bot { font-size: 12.5px; }
   }
 
   /* Reseñas */
@@ -963,15 +960,6 @@ function render(){
   var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
   if(cdm) app.appendChild(renderCDM(cdm));
 
-  // AVISO ENVÍO GRATIS (solo si hay umbral configurado)
-  var umbralEG = parseInt(CFG.envioGratisDesde) || 0;
-  if(umbralEG > 0){
-    var aviso = document.createElement("div");
-    aviso.className = "aviso-envio-gratis";
-    aviso.innerHTML = '<span class="ae-icon">🚚</span><span class="ae-text"><b>Envío gratis</b> en pedidos mayores a <b>'+fmt(umbralEG)+'</b></span>';
-    app.appendChild(aviso);
-  }
-
   // COOKIES
   app.appendChild(secHead("El menú", "Nuestras cookies"));
   var grid = document.createElement("div");
@@ -1239,6 +1227,21 @@ function renderEntrega(){
     '<button class="pill" id="pRetOla" onclick="setEnt(\'retiro\',\'olavarria\')">🏠 Retiro Olavarría<span class="s">Sin costo</span></button>' +
     '<button class="pill" id="pRetLN" onclick="setEnt(\'retiro\',\'lomanegra\')">🏠 Retiro Loma Negra<span class="s">Sin costo</span></button>';
   d.appendChild(p);
+
+  // Aviso de envío gratis (solo si hay umbral configurado)
+  var umbralEG = parseInt(CFG.envioGratisDesde) || 0;
+  if(umbralEG > 0){
+    var aviso = document.createElement("div");
+    aviso.className = "aviso-envio-gratis";
+    aviso.innerHTML =
+      '<span class="aeg-icon">🚚</span>' +
+      '<div class="aeg-text">' +
+        '<div class="aeg-top">ENVÍO GRATIS</div>' +
+        '<div class="aeg-bot">en pedidos mayores a <b>'+fmt(umbralEG)+'</b></div>' +
+      '</div>';
+    d.appendChild(aviso);
+  }
+
   var i = document.createElement("div"); i.id = "entInfo"; d.appendChild(i);
   return d;
 }
