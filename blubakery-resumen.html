@@ -763,59 +763,89 @@ function parsearFechaDeLabel(label) {
 
 function renderResumenProduccion(peds) {
   const conteo = {};
-  let totalBoxes = 0;
+  const boxesCerradas = {};  // Boxes con sabores fijos (minis, día del padre, mundial, etc.)
+  let totalBoxesArmar = 0;   // Boxes "a elección" que hay que armar
+
+  // Normaliza el nombre de una cookie para unificar variaciones
+  // ("Choco chips" = "Choco chips, la clásica" = "Cookie Clásica" = todo lo mismo)
+  function normalizarNombreCookie(nombre){
+    if(!nombre) return "";
+    const n = String(nombre).toLowerCase().trim();
+    const esMini = /\bmini\b/.test(n);
+
+    let canonico = null;
+    if (n.includes("triple")) canonico = "Cookie Triple Chocolate";
+    else if (n.includes("toffee") || n.includes("salted caramel")) canonico = "Cookie Toffee";
+    else if (n.includes("choco chips") || n.includes("clásica") || n.includes("clasica")) canonico = "Choco chips, la clásica";
+    else if (n.includes("limón") || n.includes("limon")) canonico = "Cookie Limón, choco blanco y Coco";
+    else if (n.includes("pistacho") || n.includes("pistachio")) canonico = "Cookie Pistacho";
+    else if (n.includes("castañ") || n.includes("arándan") || n.includes("arandan")) canonico = "Castañas caramelizadas, arándanos y choco blanco";
+    else if (n.includes("choco block") || (n.includes("block") && !n.includes("box"))) canonico = "Cookie Choco Block";
+    else if (n.includes("red velvet") || n.includes("velvet")) canonico = "Red Velvet";
+
+    if (!canonico) return nombre.trim();
+    return esMini ? canonico + " mini" : canonico;
+  }
 
   peds.forEach(p => {
     if (String(p.Estado || "").toLowerCase() === "cancelado") return;
     const cookiesStr = String(p.Cookies || "");
 
-    // 1) Buscar contenidos de Box: "Box x N cookies a elección xK (1 X + 2 Y + 1 Z)"
-    // Cada paréntesis después de un "Box" tiene los sabores que van adentro
-    const reBoxContent = /\(([^)]+)\)/g;
-    let mBox;
-    while ((mBox = reBoxContent.exec(cookiesStr)) !== null) {
-      const interior = mBox[1];
-      const items = interior.split(/\s*\+\s*/);
-      items.forEach(it => {
-        const m = it.trim().match(/^(\d+)\s+(.+)$/);
-        if (m) {
-          const cant = parseInt(m[1]);
-          const nombre = m[2].trim();
-          conteo[nombre] = (conteo[nombre] || 0) + cant;
+    // Dividir el pedido en partes por separadores
+    const partes = cookiesStr.split(/\s*\|\s*/);
+
+    partes.forEach(parte => {
+      const trim = parte.trim();
+      if (!trim) return;
+
+      // Detectar si es un BOX (empieza con "Box")
+      const esBox = /^\s*Box\b/i.test(trim);
+      const aEleccion = /a\s+elecci[oó]n/i.test(trim);
+
+      if (esBox && aEleccion) {
+        // BOX A ELECCIÓN: "Box x N cookies a elección xK (contenido)"
+        // Sumar cantidad de boxes a armar
+        const mCant = trim.match(/x\s*(\d+)\s*\(/i);
+        if (mCant) totalBoxesArmar += parseInt(mCant[1]);
+        // Extraer sabores del paréntesis
+        const reContent = /\(([^)]+)\)/g;
+        let mC;
+        while ((mC = reContent.exec(trim)) !== null) {
+          const items = mC[1].split(/\s*\+\s*/);
+          items.forEach(it => {
+            const m = it.trim().match(/^(\d+)\s+(.+)$/);
+            if (m) {
+              const cant = parseInt(m[1]);
+              const nombre = normalizarNombreCookie(m[2].trim());
+              if (nombre) conteo[nombre] = (conteo[nombre] || 0) + cant;
+            }
+          });
         }
-      });
-    }
-
-    // 2) Buscar boxes (cantidad de boxes a preparar): "Box x N cookies a elección xK"
-    const reBoxCant = /Box[^x]*x\s*\d+[^x]*x\s*(\d+)/gi;
-    let mBC;
-    while ((mBC = reBoxCant.exec(cookiesStr)) !== null) {
-      totalBoxes += parseInt(mBC[1]);
-    }
-
-    // 3) Cookies sueltas (sin paréntesis adelante): formato "N nombre" separadas por | o ,
-    // Quitamos primero los box completos para no contar dos veces
-    let restoSinBox = cookiesStr.replace(/Box[^|]+(\([^)]+\))?[^|]*/gi, "");
-    const sueltas = restoSinBox.split(/[|,;\n]/);
-    sueltas.forEach(s => {
-      const m = s.trim().match(/^(\d+)\s+(.+?)(?:\s+x\s*\d+)?$/);
-      if (m) {
-        const cant = parseInt(m[1]);
-        let nombre = m[2].trim();
-        // Si formato es "Nombre x2", extraer
-        const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
-        if (mX) {
-          nombre = mX[1].trim().replace(/^\d+\s+/, "");
-          conteo[nombre] = (conteo[nombre] || 0) + parseInt(mX[2]);
+      } else if (esBox) {
+        // BOX CERRADA (minis, día del padre, mundial, etc.): "Box ... xN"
+        const m = trim.match(/^(.+?)\s+x\s*(\d+)\s*$/i);
+        if (m) {
+          const nombreBox = m[1].trim();
+          const cant = parseInt(m[2]);
+          boxesCerradas[nombreBox] = (boxesCerradas[nombreBox] || 0) + cant;
         } else {
-          conteo[nombre] = (conteo[nombre] || 0) + cant;
+          // Sin formato "x N", contar como 1
+          boxesCerradas[trim] = (boxesCerradas[trim] || 0) + 1;
         }
       } else {
-        // Formato "Nombre x N"
-        const mX = s.trim().match(/^(.+?)\s+x\s*(\d+)$/i);
+        // COOKIE SUELTA: "Nombre xN" o "N Nombre"
+        const mX = trim.match(/^(.+?)\s+x\s*(\d+)\s*$/i);
         if (mX) {
-          const nombre = mX[1].trim();
-          conteo[nombre] = (conteo[nombre] || 0) + parseInt(mX[2]);
+          const nombre = normalizarNombreCookie(mX[1].trim());
+          const cant = parseInt(mX[2]);
+          if (nombre) conteo[nombre] = (conteo[nombre] || 0) + cant;
+        } else {
+          const mN = trim.match(/^(\d+)\s+(.+)$/);
+          if (mN) {
+            const cant = parseInt(mN[1]);
+            const nombre = normalizarNombreCookie(mN[2].trim());
+            if (nombre) conteo[nombre] = (conteo[nombre] || 0) + cant;
+          }
         }
       }
     });
@@ -826,10 +856,19 @@ function renderResumenProduccion(peds) {
     .sort((a, b) => b[1] - a[1])
     .map(([k, v]) => `<span class="item"><b>${v}</b> × ${escapeHtml(k)}</span>`);
 
-  if (items.length === 0 && totalBoxes === 0) return '';
+  const boxesCerradasList = Object.entries(boxesCerradas)
+    .filter(([k, v]) => v > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  if (items.length === 0 && totalBoxesArmar === 0 && boxesCerradasList.length === 0) return '';
 
   let html = '<div class="resumen-prod"><div class="label">📋 Para preparar</div>';
-  if (totalBoxes > 0) html += `<div class="item" style="margin-bottom:6px"><b>${totalBoxes}</b> Box${totalBoxes !== 1 ? "es" : ""} para armar</div>`;
+  if (totalBoxesArmar > 0) {
+    html += `<div class="item" style="margin-bottom:6px"><b>${totalBoxesArmar}</b> Box${totalBoxesArmar !== 1 ? "es" : ""} para armar</div>`;
+  }
+  boxesCerradasList.forEach(([nombre, cant]) => {
+    html += `<div class="item" style="margin-bottom:6px"><b>${cant}</b> × ${escapeHtml(nombre)}</div>`;
+  });
   html += items.join(" · ");
   html += '</div>';
   return html;
