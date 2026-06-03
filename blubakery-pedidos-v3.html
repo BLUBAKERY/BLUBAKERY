@@ -459,6 +459,261 @@
     .aeg-bot { font-size: 12.5px; }
   }
 
+  /* === BOXES ESPECIALES (LANZAMIENTOS) === */
+  .lanz-section { display: flex; flex-direction: column; gap: 18px; margin: 4px 0 24px; }
+
+  .be-card {
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* --- Estilo PADRE (cupón vintage bordó + crema) --- */
+  .be-padre {
+    background: #FBF6EC;
+    border: 2px solid #7E1F2D;
+  }
+  .be-padre .be-header {
+    background: #7E1F2D;
+    color: #FBF6EC;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .be-padre .be-mini {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #D7A13A;
+  }
+  .be-padre .be-fecha-tag {
+    background: #D7A13A;
+    color: #7E1F2D;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+  .be-padre .be-titulo {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--azul);
+  }
+  .be-padre .be-precio { color: #7E1F2D; }
+  .be-padre .be-step-btn {
+    background: #7E1F2D;
+    color: #FBF6EC;
+    border-color: #7E1F2D;
+  }
+
+  /* --- Estilo MUNDIAL (sol de mayo, celeste + crema) --- */
+  .be-mundial {
+    background: linear-gradient(180deg, #d9e9f5 0%, #f2e6d8 100%);
+    border: 1.5px solid rgba(0,78,100,0.18);
+  }
+  .be-mundial .be-header {
+    padding: 12px 18px 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+  }
+  .be-mundial .be-sol {
+    width: 36px;
+    height: 36px;
+    opacity: 0.55;
+  }
+  .be-mundial .be-mini {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--azul);
+  }
+  .be-mundial .be-titulo {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--azul);
+  }
+  .be-mundial .be-precio { color: var(--azul); }
+  .be-mundial .be-step-btn {
+    background: var(--azul);
+    color: #fff;
+    border-color: var(--azul);
+  }
+  .be-cintita {
+    display: flex;
+    gap: 3px;
+    margin: 4px 0 12px;
+  }
+  .be-cintita span {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+  }
+  .be-cintita span:nth-child(1){ background: #6CACE4; }
+  .be-cintita span:nth-child(2){ background: #fff; border: 1px solid rgba(11,35,69,0.15); }
+  .be-cintita span:nth-child(3){ background: #6CACE4; }
+
+  /* Carrusel de fotos */
+  .be-fotos-wrap {
+    position: relative;
+    overflow: hidden;
+    background: #ece1cb;
+    height: 220px;
+  }
+  .be-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s ease;
+  }
+  .be-slide {
+    flex: 0 0 100%;
+    background-size: cover;
+    background-position: center;
+    background-color: #ddd0b0;
+  }
+  .be-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 2;
+  }
+  .be-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(11,35,69,0.18);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .be-dot.on {
+    background: #fff;
+    transform: scale(1.3);
+  }
+
+  /* Body */
+  .be-body {
+    padding: 18px 22px 20px;
+  }
+  .be-titulo {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .be-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: var(--gris);
+    margin-bottom: 12px;
+  }
+  .be-desc-larga {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--tinta);
+    background: rgba(255,255,255,0.55);
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin: 10px 0 12px;
+  }
+  .be-trf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--azul);
+    color: #fff;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 11px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+  }
+  .be-precio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(11,35,69,0.2);
+  }
+  .be-precio-block { line-height: 1; }
+  .be-precio-mini {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gris);
+    margin-bottom: 4px;
+  }
+  .be-precio {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .be-stepper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(11,35,69,0.12);
+  }
+  .be-step-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .15s;
+  }
+  .be-step-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .be-cant {
+    min-width: 22px;
+    text-align: center;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--azul);
+  }
+  .be-agotado {
+    background: var(--gris);
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 520px) {
+    .be-fotos-wrap { height: 190px; }
+    .be-body { padding: 16px 18px 18px; }
+    .be-titulo { font-size: 21px; }
+    .be-precio { font-size: 26px; }
+  }
+
   /* Reseñas */
   .rv-track {
     display: flex;
@@ -862,6 +1117,7 @@ var CFG = {
 var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
+var beQty = {};  // cantidad de cada box especial { idBoxEsp: cant }
 
 function $(id){ return document.getElementById(id); }
 function fmt(n){ return "$" + Math.round(n).toLocaleString("es-AR"); }
@@ -898,6 +1154,9 @@ function driveImg(v){
 
 function init(){
   CFG.productos.forEach(function(p){ qty[p.id] = 0; });
+  // Inicializar boxes especiales
+  if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
+  CFG.boxesEspeciales.forEach(function(b){ beQty[b.id] = 0; });
   // marquee
   var mt = "Nuevas cookies todas las semanas <b>•</b> Hechas en el día <b>•</b> Ingredientes reales <b>•</b> Hecho a mano en Olavarría <b>•</b> ";
   $("marqueeText").innerHTML = mt + mt;
@@ -979,9 +1238,24 @@ function render(){
   var app = $("app");
   app.innerHTML = "";
 
-  // COOKIE DEL MES
-  var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
-  if(cdm) app.appendChild(renderCDM(cdm));
+  // LANZAMIENTOS / BOXES ESPECIALES (arriba de todo)
+  var lanzamientos = (CFG.boxesEspeciales || [])
+    .filter(function(b){ return b.activo; })
+    .sort(function(a,b){ return (a.orden||0) - (b.orden||0); });
+  if(lanzamientos.length > 0){
+    var lanzWrap = document.createElement("div");
+    lanzWrap.className = "lanz-section";
+    lanzamientos.forEach(function(b, idx){
+      lanzWrap.appendChild(renderBoxEspecial(b, idx));
+    });
+    app.appendChild(lanzWrap);
+  }
+
+  // COOKIE DEL MES (respeta toggle mostrarCDM)
+  if(CFG.mostrarCDM !== false){
+    var cdm = CFG.productos.find(function(p){ return p.id === CFG.cookieDelMes && p.activo; });
+    if(cdm) app.appendChild(renderCDM(cdm));
+  }
 
   // COOKIES
   app.appendChild(secHead("El menú", "Nuestras cookies"));
@@ -1053,6 +1327,158 @@ function secHead(eyebrow, titulo){
 }
 
 /* ===== COOKIE DEL MES ===== */
+/* ===== BOX ESPECIAL (LANZAMIENTO) ===== */
+function renderBoxEspecial(b, idx){
+  var d = document.createElement("div");
+  // Detectar estilo por palabras clave del nombre
+  var nombre = String(b.nombre||"").toLowerCase();
+  var esMundial = nombre.includes("mundial");
+  var esPadre = nombre.includes("padre") || nombre.includes("papá") || nombre.includes("papa");
+  // Default: estilo padre (cupón bordó). Si tiene "mundial" en el nombre → estilo mundial.
+  var estilo = esMundial ? "mundial" : "padre";
+  d.className = "be-card be-" + estilo;
+
+  var fotos = [];
+  if(b.foto) fotos.push(b.foto);
+  (b.fotosExtra || []).forEach(function(f){ if(f) fotos.push(f); });
+  var stockOut = (parseInt(b.stock)||0) <= 0;
+  var cant = beQty[b.id] || 0;
+
+  // Carrusel de fotos
+  var fotosHtml = "";
+  if(fotos.length > 0){
+    var slides = fotos.map(function(f, i){
+      return '<div class="be-slide" style="background-image:url(\''+driveImg(f)+'\')"></div>';
+    }).join("");
+    var dots = fotos.length > 1 ? '<div class="be-dots">' + fotos.map(function(_, i){
+      return '<span class="be-dot'+(i===0?' on':'')+'" data-i="'+i+'"></span>';
+    }).join("") + '</div>' : "";
+    fotosHtml = '<div class="be-fotos-wrap"><div class="be-track" id="beTrack-'+b.id+'">'+slides+'</div>'+dots+'</div>';
+  }
+
+  // Descripción larga: convertir saltos de línea a <br>
+  var descLargaHTML = esc(b.descripcionLarga || "").replace(/\n/g, '<br>');
+
+  // Header diferente según estilo
+  var header = "";
+  if(estilo === "padre"){
+    header =
+      '<div class="be-header">' +
+        '<div class="be-mini">★ Edición Día del Padre</div>' +
+        '<div class="be-fecha-tag">Preventa</div>' +
+      '</div>';
+  } else {
+    // Mundial
+    header =
+      '<div class="be-header">' +
+        '<svg class="be-sol" viewBox="0 0 100 100" aria-hidden="true">' +
+          '<circle cx="50" cy="50" r="14" fill="#D7A13A"/>' +
+          '<g stroke="#D7A13A" stroke-width="2" fill="none">' +
+            '<line x1="50" y1="20" x2="50" y2="30"/>' +
+            '<line x1="50" y1="70" x2="50" y2="80"/>' +
+            '<line x1="20" y1="50" x2="30" y2="50"/>' +
+            '<line x1="70" y1="50" x2="80" y2="50"/>' +
+            '<line x1="28" y1="28" x2="35" y2="35"/>' +
+            '<line x1="65" y1="35" x2="72" y2="28"/>' +
+            '<line x1="28" y1="72" x2="35" y2="65"/>' +
+            '<line x1="65" y1="65" x2="72" y2="72"/>' +
+          '</g>' +
+        '</svg>' +
+        '<div class="be-mini">⚽ Edición Mundial</div>' +
+      '</div>';
+  }
+
+  // Cintita decorativa (solo mundial)
+  var cintita = (estilo === "mundial") ? '<div class="be-cintita"><span></span><span></span><span></span></div>' : '';
+
+  // Badge solo transferencia
+  var badgeTrf = b.soloTransferencia ? '<div class="be-trf-badge">💳 Solo se reserva por transferencia</div>' : '';
+
+  // Stepper de cantidad
+  var stepper = stockOut ?
+    '<div class="be-agotado">Agotado</div>' :
+    '<div class="be-stepper">' +
+      '<button class="be-step-btn" onclick="beMenos(\''+b.id+'\')" '+(cant===0?'disabled':'')+'>−</button>' +
+      '<span class="be-cant" id="be-cant-'+b.id+'">'+cant+'</span>' +
+      '<button class="be-step-btn" onclick="beMas(\''+b.id+'\')">+</button>' +
+    '</div>';
+
+  d.innerHTML =
+    header +
+    fotosHtml +
+    '<div class="be-body">' +
+      '<div class="be-titulo">'+esc(b.nombre||"")+'</div>' +
+      (b.descripcion ? '<div class="be-sub">'+esc(b.descripcion)+'</div>' : '') +
+      cintita +
+      (descLargaHTML ? '<div class="be-desc-larga">'+descLargaHTML+'</div>' : '') +
+      badgeTrf +
+      '<div class="be-precio-row">' +
+        '<div class="be-precio-block">' +
+          '<div class="be-precio-mini">Precio</div>' +
+          '<div class="be-precio">'+fmt(b.precio||0)+'</div>' +
+        '</div>' +
+        stepper +
+      '</div>' +
+    '</div>';
+
+  // Inicializar carrusel después de insertar
+  if(fotos.length > 1){
+    setTimeout(function(){ iniciarCarruselBE(b.id); }, 50);
+  }
+
+  return d;
+}
+
+function beMas(id){
+  var b = (CFG.boxesEspeciales||[]).find(function(x){ return x.id === id; });
+  if(!b) return;
+  var stock = parseInt(b.stock) || 0;
+  if(beQty[id] >= stock){ toast("Sin stock"); return; }
+  beQty[id] = (beQty[id]||0) + 1;
+  var el = $("be-cant-"+id);
+  if(el) el.textContent = beQty[id];
+  renderResumen();
+}
+
+function beMenos(id){
+  if(!beQty[id]) return;
+  beQty[id]--;
+  var el = $("be-cant-"+id);
+  if(el) el.textContent = beQty[id];
+  renderResumen();
+}
+
+// Carrusel simple para cada box especial (auto-play + dots clickeables + swipe)
+function iniciarCarruselBE(id){
+  var track = document.getElementById("beTrack-"+id);
+  if(!track) return;
+  var wrap = track.parentElement;
+  var dots = wrap.querySelectorAll(".be-dot");
+  var slides = track.querySelectorAll(".be-slide");
+  var n = slides.length;
+  if(n < 2) return;
+  var idx = 0;
+  var moverA = function(i){
+    idx = (i+n) % n;
+    track.style.transform = "translateX(-"+(idx*100)+"%)";
+    dots.forEach(function(d,j){ d.classList.toggle("on", j===idx); });
+  };
+  dots.forEach(function(d, j){
+    d.addEventListener("click", function(){ moverA(j); pausa = true; });
+  });
+  // swipe
+  var startX = 0, dx = 0;
+  track.addEventListener("touchstart", function(e){ startX = e.touches[0].clientX; dx = 0; pausa = true; }, {passive:true});
+  track.addEventListener("touchmove", function(e){ dx = e.touches[0].clientX - startX; }, {passive:true});
+  track.addEventListener("touchend", function(){
+    if(Math.abs(dx) > 40) moverA(idx + (dx < 0 ? 1 : -1));
+    setTimeout(function(){ pausa = false; }, 3000);
+  }, {passive:true});
+  // auto
+  var pausa = false;
+  setInterval(function(){ if(!pausa) moverA(idx+1); }, 5000);
+}
+
 function renderCDM(p){
   var d = document.createElement("div");
   d.className = "cdm";
@@ -1502,17 +1928,39 @@ function totales(){
   var hayBox = (boxQty+box2Qty)>0;
   var pct = CFG.box.pctSueltas||0;
   var desc = (hayBox && pct>0) ? sueltas*(pct/100) : 0;
-  return { sueltas:sueltas, boxes:boxes, desc:desc, total:boxes+sueltas-desc, items:items, hayBox:hayBox };
+
+  // Boxes especiales
+  var bEsp = 0, itemsBE = [], requiereTrf = false;
+  (CFG.boxesEspeciales || []).forEach(function(b){
+    var c = beQty[b.id] || 0;
+    if(c > 0){
+      bEsp += c * (b.precio || 0);
+      itemsBE.push({ id:b.id, nombre:b.nombre, cant:c, precio:b.precio||0 });
+      if(b.soloTransferencia) requiereTrf = true;
+    }
+  });
+
+  var hayAlgo = hayBox || items.length>0 || itemsBE.length>0;
+  return {
+    sueltas:sueltas, boxes:boxes, desc:desc,
+    bEsp:bEsp, itemsBE:itemsBE, requiereTrf:requiereTrf,
+    total: boxes + sueltas - desc + bEsp,
+    items:items, hayBox:hayBox, hayAlgo:hayAlgo
+  };
 }
 function renderResumen(){
   var wrap = $("resSec");
   if(!wrap) return;
   var t = totales();
-  var hay = t.hayBox || t.items.length>0;
+  var hay = t.hayAlgo;
   var h = '<div class="panel">';
   if(!hay){
     h += '<div class="res-empty">Todavía no elegiste cookies</div>';
   } else {
+    // Boxes especiales arriba (son lanzamiento, llaman atención)
+    t.itemsBE.forEach(function(it){
+      h += row(it.nombre + " ×" + it.cant, fmt(it.cant * it.precio));
+    });
     if(boxQty>0){
       h += row(CFG.box.nombre+" ×"+boxQty, fmt(boxQty*CFG.box.precio));
       h += fillDet(boxFill);
@@ -1524,6 +1972,12 @@ function renderResumen(){
     t.items.forEach(function(it){ h += row(it.nombre+" ×"+it.cant, ""); });
     if(t.desc>0) h += row("Descuento sueltas ("+CFG.box.pctSueltas+"%)", "−"+fmt(t.desc));
     h += '<div class="res-total"><span>Total</span><span>'+fmt(t.total)+'</span></div>';
+
+    // Aviso de pago obligatorio por transferencia
+    if(t.requiereTrf){
+      h += '<div style="background:#eaf2f4;border:1px solid var(--azul);border-radius:10px;padding:9px 12px;margin-top:10px;font-size:12.5px;color:var(--azul);line-height:1.45"><b>💳 Reserva solo por transferencia.</b> Esta box se reserva pagando por transferencia. Tu reserva se confirma cuando recibimos el comprobante.</div>';
+    }
+
     if(ent==="envio"){
       var umbral = parseInt(CFG.envioGratisDesde) || 0;
       var gratis = umbral > 0 && t.total >= umbral;
@@ -1540,8 +1994,36 @@ function renderResumen(){
   }
   h += '</div>';
   wrap.innerHTML = h;
+
+  // Forzar transferencia si hay box especial que la requiere
+  aplicarReglaTransferencia(t.requiereTrf);
+
   var btn = $("btnGo");
   if(btn) btn.disabled = !hay;
+}
+
+// Si hay box especial que requiere transferencia: deshabilita efectivo y selecciona transferencia automáticamente
+function aplicarReglaTransferencia(requiere){
+  var btnEf = $("pEfec");
+  var btnTr = $("pTransf");
+  if(!btnEf || !btnTr) return;
+  if(requiere){
+    if(pago === "efectivo"){
+      // Cambiar automáticamente a transferencia
+      pago = "transferencia";
+      btnEf.classList.remove("on");
+      btnTr.classList.add("on");
+    }
+    btnEf.disabled = true;
+    btnEf.style.opacity = "0.4";
+    btnEf.style.cursor = "not-allowed";
+    btnEf.title = "Esta box es solo por transferencia";
+  } else {
+    btnEf.disabled = false;
+    btnEf.style.opacity = "";
+    btnEf.style.cursor = "";
+    btnEf.title = "";
+  }
 }
 function row(l, v){ return '<div class="res-row"><span>'+esc(l)+'</span><span>'+v+'</span></div>'; }
 function fillDet(f){
@@ -1558,7 +2040,7 @@ function fillDet(f){
 /* ===== CONFIRMAR ===== */
 function confirmar(){
   var t = totales();
-  if(!t.hayBox && !t.items.length){ toast("Elegí al menos una cookie"); return; }
+  if(!t.hayAlgo){ toast("Elegí al menos una cookie"); return; }
   var nom = $("iNom").value.trim(), tel = $("iTel").value.trim();
   if(!nom){ toast("Completá tu nombre"); return; }
   if(!tel){ toast("Completá tu teléfono"); return; }
@@ -1567,9 +2049,18 @@ function confirmar(){
   if(ent==="envio" && !$("iDir").value.trim()){ toast("Completá la dirección"); return; }
   if(!diaId){ toast("Elegí un día"); return; }
   if(!pago){ toast("Elegí forma de pago"); return; }
+  // Si hay box que requiere transferencia y eligió efectivo, no debería pasar (ya forzamos antes), pero por las dudas:
+  if(t.requiereTrf && pago !== "transferencia"){
+    toast("Esta box es solo por transferencia");
+    return;
+  }
 
   var dia = CFG.diasEntrega.find(function(d){ return d.id===diaId; });
   var ck = [];
+  // Boxes especiales primero
+  t.itemsBE.forEach(function(it){
+    ck.push(it.nombre + " x" + it.cant);
+  });
   if(boxQty>0){
     var bf = [];
     Object.keys(boxFill).forEach(function(k){
@@ -1594,9 +2085,13 @@ function confirmar(){
     var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0);
     if(u>0) stockChanges[p.id] = u;
   });
+  // Stock de boxes especiales (clave: be_<id>)
+  t.itemsBE.forEach(function(it){ stockChanges["be_"+it.id] = it.cant; });
+
   var packTxt = [];
   if(boxQty>0) packTxt.push("Box4 x"+boxQty);
   if(box2Qty>0) packTxt.push("Box6 x"+box2Qty);
+  t.itemsBE.forEach(function(it){ packTxt.push(it.nombre+" x"+it.cant); });
 
   var payload = {
     tipo:"pedido", fecha:hoy(), hora:hora(), nro_orden:"",
@@ -1614,7 +2109,8 @@ function confirmar(){
     })(),
     total:t.total, pago: pago==="transferencia"?"Transferencia":"Efectivo",
     notas:$("iNotas").value.trim(), estado:"Pendiente",
-    stockChanges:stockChanges
+    stockChanges:stockChanges,
+    esReserva: t.requiereTrf  // marca el pedido como reserva especial
   };
 
   var btn = $("btnGo");
@@ -1627,20 +2123,91 @@ function confirmar(){
   }).then(function(){ exito(payload); }).catch(function(){ exito(payload); });
 }
 function exito(p){
-  var msg = "Hola Blu Bakery! Hice un pedido 🍪\n\n" +
-    "Nombre: "+p.nombre+"\nPedido: "+p.cookies+"\nTotal: "+fmt(p.total)+"\n" +
-    "Entrega: "+p.entrega+" · "+p.dia_entrega+" "+p.horario+"\nPago: "+p.pago +
-    (p.pago==="Transferencia"?"\n\n(Adjunto comprobante)":"");
+  // Armar mensaje pre-cargado para WhatsApp con TODA la info
+  var lineas = [
+    "Hola Blu Bakery! 🍪",
+    "",
+    "Hice un pedido a través de la web:",
+    "",
+    "📋 Pedido: " + p.cookies,
+    "💰 Total: " + fmt(p.total),
+    "👤 Nombre: " + p.nombre,
+    "📞 Tel: " + p.telefono,
+    "📅 " + p.entrega + ": " + p.dia_entrega + " " + p.horario,
+    "🏠 " + p.direccion,
+    "💳 Pago: " + p.pago
+  ];
+  if(p.pago === "Transferencia"){
+    lineas.push("");
+    lineas.push("Adjunto el comprobante de transferencia 👇");
+  }
+  var msg = lineas.join("\n");
+
+  // Es reserva especial si el pedido marca esReserva (box con soloTransferencia)
+  var esReserva = !!p.esReserva;
+  var esTransf = p.pago === "Transferencia";
+
+  // Bloque de info de pago (solo si es transferencia)
+  var bloquePago = "";
+  if(esTransf){
+    var alias = CFG.alias || "BLU.BAKERY";
+    var banco = CFG.banco || "Banco Galicia";
+    bloquePago =
+      '<div style="background:#FBF6EC;border:1px dashed var(--azul);border-radius:12px;padding:14px 16px;margin:14px 0;text-align:left">' +
+        '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--azul);font-weight:700;margin-bottom:8px">Datos para transferir</div>' +
+        '<div style="font-size:13.5px;color:var(--tinta);line-height:1.7">' +
+          '<b>Monto:</b> '+fmt(p.total)+'<br>' +
+          '<b>Alias:</b> '+esc(alias)+'<br>' +
+          '<b>Banco:</b> '+esc(banco)+
+        '</div>' +
+      '</div>';
+  }
+
+  // Bloque rojo/destacado si es RESERVA (box con soloTransferencia)
+  var bloqueReserva = esReserva ?
+    '<div style="background:#7E1F2D;color:#FBF6EC;border-radius:12px;padding:14px 16px;margin:14px 0;text-align:left">' +
+      '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#D7A13A;font-weight:700;margin-bottom:6px">⚠️ Importante</div>' +
+      '<div style="font-size:13.5px;line-height:1.55">Tu reserva <b>se confirma cuando recibimos el comprobante de transferencia</b>. Hasta ese momento, la box no queda apartada.</div>' +
+    '</div>'
+    : "";
+
+  // Resumen de info del pedido (siempre)
+  var infoPedido =
+    '<div style="background:#fff;border:1px solid rgba(0,78,100,0.15);border-radius:12px;padding:16px;margin:14px 0;text-align:left">' +
+      '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--azul);font-weight:700;margin-bottom:10px">Tu reserva</div>' +
+      '<div style="font-size:13.5px;color:var(--tinta);line-height:1.7">' +
+        '<b>Pedido:</b> '+esc(p.cookies)+'<br>' +
+        '<b>Total:</b> '+fmt(p.total)+'<br>' +
+        '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+' '+esc(p.horario)+'<br>' +
+        '<b>'+(p.entrega==="Envio"?"Dirección":"Punto")+':</b> '+esc(p.direccion)+'<br>' +
+        '<b>Pago:</b> '+esc(p.pago)+
+      '</div>' +
+    '</div>';
+
+  // Mensaje de qué sigue
+  var queSigue =
+    '<div style="background:#eaf2f4;border-radius:12px;padding:14px 16px;margin:14px 0;text-align:left">' +
+      '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--azul);font-weight:700;margin-bottom:6px">¿Qué sigue?</div>' +
+      '<div style="font-size:13px;color:var(--tinta);line-height:1.6">' +
+        'Te vamos a contactar por WhatsApp para coordinar los detalles' +
+        (p.entrega==="Envio" ? '. <b>Si elegiste envío</b>, lo coordinamos con anticipación para acordar la dirección exacta y el horario.' : ' del retiro.') +
+        (esTransf ? ' <b>Mandanos el comprobante</b> de transferencia para confirmar tu pedido — usá el botón de abajo.' : '') +
+      '</div>' +
+    '</div>';
+
+  var ctaTexto = esTransf ? "📲 Enviar comprobante por WhatsApp" : "📲 Confirmar por WhatsApp";
+
   $("app").innerHTML =
-    '<div class="panel" style="text-align:center;padding:40px 22px;margin-top:24px">' +
+    '<div class="panel" style="text-align:center;padding:32px 22px;margin-top:20px;max-width:560px;margin-left:auto;margin-right:auto">' +
       '<div style="font-size:48px">🍪</div>' +
-      '<h2 class="display" style="color:var(--azul);font-size:27px;margin:10px 0 6px;font-weight:800">¡Pedido recibido!</h2>' +
-      '<p style="color:var(--gris);font-size:14px">Gracias '+esc(p.nombre)+' 💛</p>' +
-      '<p style="font-size:14px;margin-top:10px">Para confirmar' +
-        (p.pago==="Transferencia"?" y enviar el comprobante":"") +
-        ', escribinos por WhatsApp:</p>' +
-      '<a class="fbtn" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:7px;margin-top:16px;padding:13px 22px;border-radius:100px;font-family:Bricolage Grotesque,sans-serif;font-weight:700;text-decoration:none" href="https://wa.me/'+WSP+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener">💬 Confirmar por WhatsApp</a>' +
-      '<div style="margin-top:20px"><a href="#" onclick="location.reload()" style="color:var(--azul);font-size:13px">Hacer otro pedido</a></div>' +
+      '<h2 class="display" style="color:var(--azul);font-size:28px;margin:10px 0 4px;font-weight:800">¡Pedido recibido!</h2>' +
+      '<p style="color:var(--gris);font-size:14px;margin-bottom:8px">Gracias '+esc(p.nombre)+' 💛</p>' +
+      bloqueReserva +
+      infoPedido +
+      bloquePago +
+      queSigue +
+      '<a class="fbtn" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:14px 24px;border-radius:100px;font-family:Bricolage Grotesque,sans-serif;font-weight:700;font-size:14.5px;text-decoration:none;box-shadow:0 4px 12px rgba(37,211,102,0.25)" href="https://wa.me/'+WSP+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener">'+ctaTexto+'</a>' +
+      '<div style="margin-top:20px"><a href="#" onclick="location.reload();return false" style="color:var(--azul);font-size:13px">Hacer otro pedido</a></div>' +
     '</div>';
   window.scrollTo(0,0);
 }
