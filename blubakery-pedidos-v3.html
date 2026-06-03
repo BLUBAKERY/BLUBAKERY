@@ -560,12 +560,13 @@
   .be-cintita span:nth-child(2){ background: #fff; border: 1px solid rgba(11,35,69,0.15); }
   .be-cintita span:nth-child(3){ background: #6CACE4; }
 
-  /* Carrusel de fotos */
+  /* Carrusel de fotos (cuadrado 1:1) */
   .be-fotos-wrap {
     position: relative;
     overflow: hidden;
     background: #f2e6d8;
-    height: 360px;
+    aspect-ratio: 1 / 1;
+    width: 100%;
   }
   .be-track {
     display: flex;
@@ -574,7 +575,7 @@
   }
   .be-slide {
     flex: 0 0 100%;
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-color: #f2e6d8;
@@ -709,7 +710,6 @@
   }
 
   @media (max-width: 520px) {
-    .be-fotos-wrap { height: 300px; }
     .be-body { padding: 16px 18px 18px; }
     .be-titulo { font-size: 21px; }
     .be-precio { font-size: 26px; }
@@ -1399,7 +1399,7 @@ function renderBoxEspecial(b, idx){
   var stepper = stockOut ?
     '<div class="be-agotado">Agotado</div>' :
     '<div class="be-stepper">' +
-      '<button class="be-step-btn" onclick="beMenos(\''+b.id+'\')" '+(cant===0?'disabled':'')+'>−</button>' +
+      '<button class="be-step-btn" id="be-menos-'+b.id+'" onclick="beMenos(\''+b.id+'\')" '+(cant===0?'disabled':'')+'>−</button>' +
       '<span class="be-cant" id="be-cant-'+b.id+'">'+cant+'</span>' +
       '<button class="be-step-btn" onclick="beMas(\''+b.id+'\')">+</button>' +
     '</div>';
@@ -1438,6 +1438,8 @@ function beMas(id){
   beQty[id] = (beQty[id]||0) + 1;
   var el = $("be-cant-"+id);
   if(el) el.textContent = beQty[id];
+  var btnMenos = $("be-menos-"+id);
+  if(btnMenos) btnMenos.disabled = false;
   renderResumen();
 }
 
@@ -1446,6 +1448,8 @@ function beMenos(id){
   beQty[id]--;
   var el = $("be-cant-"+id);
   if(el) el.textContent = beQty[id];
+  var btnMenos = $("be-menos-"+id);
+  if(btnMenos) btnMenos.disabled = (beQty[id] === 0);
   renderResumen();
 }
 
@@ -1809,6 +1813,7 @@ function renderDatos(){
     '<label>Nombre completo</label><input type="text" id="iNom" placeholder="María García">' +
     '<label>Teléfono (WhatsApp)</label><input type="tel" id="iTel" placeholder="2284 000000">' +
     '<label>Email (opcional)</label><input type="email" id="iMail" placeholder="tu@email.com">' +
+    '<label>¿Para quién es? <span style="color:var(--gris);font-weight:400;font-size:12px">(opcional — si es un regalo, este nombre va en la etiqueta)</span></label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)">' +
     '<div id="campoDir" style="display:none"><label>Dirección</label><input type="text" id="iDir" placeholder="Calle y número, barrio"></div>' +
     '<label>Aclaraciones (opcional)</label><textarea id="iNotas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
   return d;
@@ -2094,6 +2099,13 @@ function confirmar(){
   if(box2Qty>0) packTxt.push("Box6 x"+box2Qty);
   t.itemsBE.forEach(function(it){ packTxt.push(it.nombre+" x"+it.cant); });
 
+  var destinatario = $("iDestin") ? $("iDestin").value.trim() : "";
+  // Si hay destinatario, lo prependeo a las aclaraciones para que quede visible en el panel
+  var notasFinal = $("iNotas").value.trim();
+  if(destinatario){
+    notasFinal = "🎁 Para: " + destinatario + (notasFinal ? " · " + notasFinal : "");
+  }
+
   var payload = {
     tipo:"pedido", fecha:hoy(), hora:hora(), nro_orden:"",
     nombre:nom, telefono:tel, email:$("iMail").value.trim(),
@@ -2109,7 +2121,8 @@ function confirmar(){
       return CFG.costoEnvio;
     })(),
     total:t.total, pago: pago==="transferencia"?"Transferencia":"Efectivo",
-    notas:$("iNotas").value.trim(), estado:"Pendiente",
+    notas: notasFinal, estado:"Pendiente",
+    destinatario: destinatario,
     stockChanges:stockChanges,
     esReserva: t.requiereTrf  // marca el pedido como reserva especial
   };
@@ -2133,11 +2146,14 @@ function exito(p){
     "📋 Pedido: " + p.cookies,
     "💰 Total: " + fmt(p.total),
     "👤 Nombre: " + p.nombre,
-    "📞 Tel: " + p.telefono,
-    "📅 " + p.entrega + ": " + p.dia_entrega + " " + p.horario,
-    "🏠 " + p.direccion,
-    "💳 Pago: " + p.pago
+    "📞 Tel: " + p.telefono
   ];
+  if(p.destinatario){
+    lineas.push("🎁 Para: " + p.destinatario + " (nombre para la etiqueta)");
+  }
+  lineas.push("📅 " + p.entrega + ": " + p.dia_entrega + " " + p.horario);
+  lineas.push("🏠 " + p.direccion);
+  lineas.push("💳 Pago: " + p.pago);
   if(p.pago === "Transferencia"){
     lineas.push("");
     lineas.push("Adjunto el comprobante de transferencia 👇");
@@ -2178,6 +2194,7 @@ function exito(p){
       '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--azul);font-weight:700;margin-bottom:10px">Tu reserva</div>' +
       '<div style="font-size:13.5px;color:var(--tinta);line-height:1.7">' +
         '<b>Pedido:</b> '+esc(p.cookies)+'<br>' +
+        (p.destinatario ? '<b>🎁 Para:</b> '+esc(p.destinatario)+' <span style="font-size:11px;color:var(--gris)">(nombre en la etiqueta)</span><br>' : '') +
         '<b>Total:</b> '+fmt(p.total)+'<br>' +
         '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+' '+esc(p.horario)+'<br>' +
         '<b>'+(p.entrega==="Envio"?"Dirección":"Punto")+':</b> '+esc(p.direccion)+'<br>' +
