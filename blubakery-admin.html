@@ -549,6 +549,10 @@ function renderProductos(){
         <div class="field"><label>Stock semana</label><input type="number" id="pstock-${i}" value="${p.stock||0}" min="0" style="font-weight:700"/></div>
       </div>
       <div class="field"><label>Descripción</label><input type="text" id="pdesc-${i}" value="${(p.descripcion||'').replace(/"/g,'&quot;')}"/></div>
+      <div style="background:#f5f0e6;border-radius:8px;padding:10px 12px;margin:8px 0">
+        <label class="toggle"><input type="checkbox" id="pnolist-${i}" ${p.noListable?'checked':''}/><span><b>No mostrar como cookie suelta</b></span></label>
+        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo si este producto NO debería poder elegirse por separado (ej. la Box de minis, que sólo se vende como caja completa). No aparece en el menú ni dentro de las boxes x4/x6, pero igual existe como producto.</div>
+      </div>
       <div class="field">
         <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
         <input type="text" id="pfoto-${i}" value="${(p.foto && !p.foto.startsWith('data:')) ? p.foto : ''}" placeholder="https://drive.google.com/file/d/XXXXX/view..."/>
@@ -560,7 +564,7 @@ function renderProductos(){
 }
 
 function agregarProducto(){
-  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:""});
+  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:"",noListable:false});
   renderProductos();
 }
 
@@ -622,6 +626,13 @@ function renderBoxesEspeciales(){
         <div style="font-size:11px;color:#777;margin-top:8px;line-height:1.4">
           <b>Solo por transferencia</b>: si el cliente agrega esta box al carrito, se fuerza el pago a transferencia · <b>Orden</b>: cuál aparece primero en la web (menor = arriba)
         </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #ead8b0">
+          <label style="font-size:11px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block">📅 Fechas de entrega permitidas (solo para esta box)</label>
+          <input type="text" id="be-fechas-${i}" value="${(b.fechasEntrega||'').replace(/"/g,'&quot;')}" placeholder="Ejemplos: 20/06/2026  ó  09/06/2026, 13/06/2026, 16/06/2026" style="width:100%"/>
+          <div style="font-size:11px;color:#777;margin-top:6px;line-height:1.5">
+            Si esta box tiene <b>fechas fijas</b> (ej. el Día del Padre se entrega solo el 20/6), ponelas acá <b>separadas por coma</b> en formato <code>dd/mm/aaaa</code>. Cuando un cliente agregue esta box al carrito, solo podrá elegir estas fechas y se le avisa con un mensaje. <br>Si lo dejás <b>vacío</b>, se usan los días normales de tanda.
+          </div>
+        </div>
       </div>
 
       <div class="field">
@@ -656,7 +667,8 @@ function agregarBoxEspecial(){
     descripcionLarga:"",
     soloTransferencia:false,
     orden:(CONFIG.boxesEspeciales.length+1),
-    fotosExtra:[]
+    fotosExtra:[],
+    fechasEntrega:""
   });
   renderBoxesEspeciales();
 }
@@ -695,6 +707,7 @@ function leerEstadoBoxesEspecialesDesdeDOM(){
     if(get("be-descLarga-"+i)) b.descripcionLarga = get("be-descLarga-"+i).value || "";
     if(get("be-trf-"+i)) b.soloTransferencia = get("be-trf-"+i).checked;
     if(get("be-orden-"+i)) b.orden = parseInt(get("be-orden-"+i).value) || 0;
+    if(get("be-fechas-"+i)) b.fechasEntrega = get("be-fechas-"+i).value.trim();
     if(get("be-activo-"+i)) b.activo = get("be-activo-"+i).checked;
     const nf = get("be-foto-"+i)?.value.trim();
     if(nf) b.foto = convertirLinkDrive(nf);
@@ -860,6 +873,7 @@ function getConfig() {
     p.emoji=document.getElementById("pemoji-"+i)?.value||p.emoji;
     p.stock=parseInt(document.getElementById("pstock-"+i)?.value)||0;
     p.descripcion=document.getElementById("pdesc-"+i)?.value||"";
+    p.noListable=document.getElementById("pnolist-"+i)?.checked||false;
     const nf=document.getElementById("pfoto-"+i)?.value.trim();
     if(nf) p.foto=convertirLinkDrive(nf);
     p.activo=document.getElementById("act-"+i)?.checked;
