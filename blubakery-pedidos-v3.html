@@ -459,6 +459,89 @@
     .aeg-bot { font-size: 12.5px; }
   }
 
+  /* === LIGHTBOX (ampliar fotos al clickear) === */
+  .lbx {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: lbx-in 0.2s ease;
+  }
+  .lbx.on { display: flex; }
+  @keyframes lbx-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .lbx-img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    user-select: none;
+  }
+  .lbx-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .lbx-close:hover { background: rgba(255, 255, 255, 0.3); }
+  .lbx-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .lbx-nav:hover { background: rgba(255, 255, 255, 0.3); }
+  .lbx-prev { left: 20px; }
+  .lbx-next { right: 20px; }
+  .lbx-counter {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 6px 14px;
+    border-radius: 100px;
+  }
+  @media (max-width: 520px) {
+    .lbx-nav { width: 40px; height: 40px; font-size: 22px; }
+    .lbx-prev { left: 10px; }
+    .lbx-next { right: 10px; }
+    .lbx-close { top: 12px; right: 12px; }
+  }
+
   /* === BOXES ESPECIALES (LANZAMIENTOS) === */
   .lanz-section { display: flex; flex-direction: column; gap: 18px; margin: 4px 0 24px; }
 
@@ -579,6 +662,7 @@
     background-position: center;
     background-repeat: no-repeat;
     background-color: #f2e6d8;
+    cursor: zoom-in;
   }
   .be-dots {
     position: absolute;
@@ -1082,6 +1166,15 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- LIGHTBOX para ampliar fotos -->
+<div class="lbx" id="lbx" onclick="cerrarLbx(event)">
+  <button class="lbx-close" onclick="cerrarLbx(event,true)" aria-label="Cerrar">✕</button>
+  <button class="lbx-nav lbx-prev" onclick="lbxNav(event,-1)" aria-label="Anterior">‹</button>
+  <img class="lbx-img" id="lbxImg" alt="">
+  <button class="lbx-nav lbx-next" onclick="lbxNav(event,1)" aria-label="Siguiente">›</button>
+  <div class="lbx-counter" id="lbxCounter"></div>
+</div>
+
 <script>
 /* ===== CONFIG ===== */
 var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
@@ -1263,7 +1356,7 @@ function render(){
   var grid = document.createElement("div");
   grid.className = "grid";
   CFG.productos.forEach(function(p){
-    if(p.activo) grid.appendChild(renderCookie(p));
+    if(p.activo && !p.noListable) grid.appendChild(renderCookie(p));
   });
   app.appendChild(grid);
 
@@ -1348,13 +1441,17 @@ function renderBoxEspecial(b, idx){
   // Carrusel de fotos
   var fotosHtml = "";
   if(fotos.length > 0){
+    var fotosJsonId = "lbx-fotos-"+b.id;
     var slides = fotos.map(function(f, i){
-      return '<div class="be-slide" style="background-image:url(\''+driveImg(f)+'\')"></div>';
+      return '<div class="be-slide" style="background-image:url(\''+driveImg(f)+'\')" onclick="abrirLbx(\''+b.id+'\','+i+')"></div>';
     }).join("");
     var dots = fotos.length > 1 ? '<div class="be-dots">' + fotos.map(function(_, i){
       return '<span class="be-dot'+(i===0?' on':'')+'" data-i="'+i+'"></span>';
     }).join("") + '</div>' : "";
     fotosHtml = '<div class="be-fotos-wrap"><div class="be-track" id="beTrack-'+b.id+'">'+slides+'</div>'+dots+'</div>';
+    // Guardar fotos para acceso del lightbox
+    window._lbxFotos = window._lbxFotos || {};
+    window._lbxFotos[b.id] = fotos.map(driveImg);
   }
 
   // Descripción larga: convertir saltos de línea a <br>
@@ -1441,6 +1538,7 @@ function beMas(id){
   var btnMenos = $("be-menos-"+id);
   if(btnMenos) btnMenos.disabled = false;
   renderResumen();
+  renderDias(); // re-renderizar días por si hay fechas forzadas
 }
 
 function beMenos(id){
@@ -1451,6 +1549,7 @@ function beMenos(id){
   var btnMenos = $("be-menos-"+id);
   if(btnMenos) btnMenos.disabled = (beQty[id] === 0);
   renderResumen();
+  renderDias(); // re-renderizar días por si se quitan las fechas forzadas
 }
 
 // Carrusel simple para cada box especial (auto-play + dots clickeables + swipe)
@@ -1469,20 +1568,104 @@ function iniciarCarruselBE(id){
     dots.forEach(function(d,j){ d.classList.toggle("on", j===idx); });
   };
   dots.forEach(function(d, j){
-    d.addEventListener("click", function(){ moverA(j); pausa = true; });
+    d.addEventListener("click", function(e){
+      e.stopPropagation(); // que el click en el punto NO abra el lightbox
+      moverA(j); pausa = true;
+    });
   });
-  // swipe
-  var startX = 0, dx = 0;
-  track.addEventListener("touchstart", function(e){ startX = e.touches[0].clientX; dx = 0; pausa = true; }, {passive:true});
-  track.addEventListener("touchmove", function(e){ dx = e.touches[0].clientX - startX; }, {passive:true});
+  // swipe — si hubo movimiento, prevenir que el clic abra lightbox
+  var startX = 0, dx = 0, hubeSwipe = false;
+  track.addEventListener("touchstart", function(e){ startX = e.touches[0].clientX; dx = 0; hubeSwipe = false; pausa = true; }, {passive:true});
+  track.addEventListener("touchmove", function(e){
+    dx = e.touches[0].clientX - startX;
+    if(Math.abs(dx) > 10) hubeSwipe = true;
+  }, {passive:true});
   track.addEventListener("touchend", function(){
     if(Math.abs(dx) > 40) moverA(idx + (dx < 0 ? 1 : -1));
     setTimeout(function(){ pausa = false; }, 3000);
   }, {passive:true});
+  // Cancelar onclick si hubo swipe
+  slides.forEach(function(s){
+    s.addEventListener("click", function(e){
+      if(hubeSwipe){ e.stopPropagation(); e.preventDefault(); hubeSwipe = false; }
+    }, true); // capture phase para interceptar antes del onclick="abrirLbx"
+  });
   // auto
   var pausa = false;
   setInterval(function(){ if(!pausa) moverA(idx+1); }, 5000);
 }
+
+/* ===== LIGHTBOX (ampliar fotos con flechas) ===== */
+var _lbxState = { id: null, idx: 0, fotos: [] };
+
+function abrirLbx(boxId, idx){
+  var fotos = (window._lbxFotos && window._lbxFotos[boxId]) || [];
+  if(fotos.length === 0) return;
+  _lbxState = { id: boxId, idx: idx, fotos: fotos };
+  _lbxActualizar();
+  $("lbx").classList.add("on");
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarLbx(e, forzar){
+  if(e && !forzar){
+    // Solo cerrar si se clickeó el fondo, no la imagen
+    if(e.target.id !== "lbx") return;
+  }
+  $("lbx").classList.remove("on");
+  document.body.style.overflow = "";
+}
+
+function lbxNav(e, dir){
+  if(e) { e.stopPropagation(); }
+  var n = _lbxState.fotos.length;
+  if(n < 1) return;
+  _lbxState.idx = (_lbxState.idx + dir + n) % n;
+  _lbxActualizar();
+}
+
+function _lbxActualizar(){
+  var img = $("lbxImg");
+  var counter = $("lbxCounter");
+  var prev = document.querySelector(".lbx-prev");
+  var next = document.querySelector(".lbx-next");
+  if(img) img.src = _lbxState.fotos[_lbxState.idx] || "";
+  if(counter) counter.textContent = (_lbxState.idx + 1) + " / " + _lbxState.fotos.length;
+  // Ocultar flechas si hay solo 1 foto
+  var hay1sola = _lbxState.fotos.length <= 1;
+  if(prev) prev.style.display = hay1sola ? "none" : "";
+  if(next) next.style.display = hay1sola ? "none" : "";
+  if(counter) counter.style.display = hay1sola ? "none" : "";
+}
+
+// Teclado: flechas + ESC
+document.addEventListener("keydown", function(e){
+  var lbx = document.getElementById("lbx");
+  if(!lbx || !lbx.classList.contains("on")) return;
+  if(e.key === "Escape") cerrarLbx(null, true);
+  else if(e.key === "ArrowLeft") lbxNav(null, -1);
+  else if(e.key === "ArrowRight") lbxNav(null, 1);
+});
+
+// Swipe en mobile dentro del lightbox
+(function(){
+  var sx = 0, dx = 0;
+  document.addEventListener("touchstart", function(e){
+    var lbx = document.getElementById("lbx");
+    if(!lbx || !lbx.classList.contains("on")) return;
+    sx = e.touches[0].clientX; dx = 0;
+  }, {passive: true});
+  document.addEventListener("touchmove", function(e){
+    var lbx = document.getElementById("lbx");
+    if(!lbx || !lbx.classList.contains("on")) return;
+    dx = e.touches[0].clientX - sx;
+  }, {passive: true});
+  document.addEventListener("touchend", function(){
+    var lbx = document.getElementById("lbx");
+    if(!lbx || !lbx.classList.contains("on")) return;
+    if(Math.abs(dx) > 40) lbxNav(null, dx < 0 ? 1 : -1);
+  }, {passive: true});
+})();
 
 function renderCDM(p){
   var d = document.createElement("div");
@@ -1623,7 +1806,7 @@ function openModal(tipo){
   var list = $("mList");
   list.innerHTML = "";
   CFG.productos.forEach(function(p){
-    if(!p.activo) return;
+    if(!p.activo || p.noListable) return;
     var r = document.createElement("div");
     r.className = "srow";
     r.innerHTML =
@@ -1712,13 +1895,57 @@ function setEnt(t, punto){
 }
 
 /* ===== DÍAS ===== */
+// Detectar si hay box especial en el carrito con fechas fijas
+function obtenerFechasForzadas(){
+  if(!Array.isArray(CFG.boxesEspeciales)) return null;
+  var boxesEnCarrito = CFG.boxesEspeciales.filter(function(b){ return (beQty[b.id]||0) > 0 && b.fechasEntrega && b.fechasEntrega.trim(); });
+  if(boxesEnCarrito.length === 0) return null;
+  // Tomo las fechas de la primera (en práctica casi nunca habrá dos)
+  var b = boxesEnCarrito[0];
+  var fechas = b.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
+  return { fechas: fechas, nombreBox: b.nombre };
+}
+
 function renderDias(){
   var wrap = $("diaSec");
   if(!wrap) return;
   wrap.innerHTML = "";
-  if(!CFG.diasEntrega.length) return;
   wrap.appendChild(secHead("Día", "¿Cuándo lo querés?"));
 
+  // ¿Hay fechas forzadas por una box especial?
+  var forzado = obtenerFechasForzadas();
+
+  if(forzado){
+    // Mostrar AVISO al cliente
+    var aviso = document.createElement("div");
+    aviso.style.cssText = "background:#fbeede;border:1px solid var(--mostaza);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7a4f0e;line-height:1.5";
+    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
+    wrap.appendChild(aviso);
+    // Generar pills con las fechas forzadas
+    var row = document.createElement("div");
+    row.className = "pills";
+    forzado.fechas.forEach(function(f, i){
+      var idForzado = "forzado_" + i;
+      var b = document.createElement("button");
+      b.className = "pill"; b.id = "d-" + idForzado;
+      b.textContent = f;
+      b.onclick = (function(id){ return function(){ setDia(id); }; })(idForzado);
+      row.appendChild(b);
+    });
+    wrap.appendChild(row);
+    // Crear diasEntrega virtual para que el resto del código funcione
+    disp = forzado.fechas.map(function(f, i){
+      return { dia: { id: "forzado_" + i, label: f, franjas: ["A coordinar"], horario: "15:00" }, ok: true };
+    });
+    // Auto-seleccionar la primera
+    diaId = "forzado_0";
+    var fb = $("d-forzado_0"); if(fb) fb.classList.add("on");
+    renderFranjas();
+    return;
+  }
+
+  // FLUJO NORMAL (sin fechas forzadas)
+  if(!CFG.diasEntrega.length) return;
   var now = new Date();
   var minH = CFG.horasCorte || 24;
   function parseFecha(d){
