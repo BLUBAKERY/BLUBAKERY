@@ -1919,7 +1919,7 @@ function renderDias(){
     // Mostrar AVISO al cliente
     var aviso = document.createElement("div");
     aviso.style.cssText = "background:#fbeede;border:1px solid var(--mostaza);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7a4f0e;line-height:1.5";
-    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
+    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies en las otras fechas disponibles que hay antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
     wrap.appendChild(aviso);
     // Generar pills con las fechas forzadas
     var row = document.createElement("div");
@@ -2280,15 +2280,26 @@ function confirmar(){
   if(!ent){ toast("Elegí envío o retiro"); return; }
   if(ent==="retiro" && !puntoRetiro){ toast("Elegí dónde retirar"); return; }
   if(ent==="envio" && !$("iDir").value.trim()){ toast("Completá la dirección"); return; }
-  if(!diaId){ toast("Elegí un día"); return; }
+  if(!diaId){ toast("Elegí un día de entrega — es obligatorio"); return; }
   if(!pago){ toast("Elegí forma de pago"); return; }
-  // Si hay box que requiere transferencia y eligió efectivo, no debería pasar (ya forzamos antes), pero por las dudas:
   if(t.requiereTrf && pago !== "transferencia"){
     toast("Esta box es solo por transferencia");
     return;
   }
 
+  // Buscar el día: primero en CFG.diasEntrega normales, después en disp (que incluye fechas forzadas)
   var dia = CFG.diasEntrega.find(function(d){ return d.id===diaId; });
+  if(!dia){
+    var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
+    if(dispMatch) dia = dispMatch.dia;
+  }
+
+  // BLINDAJE FINAL: si después de todo no encontramos día, abortar
+  if(!dia || !dia.label){
+    toast("Hubo un problema con la fecha. Recargá la página y volvé a intentar.");
+    return;
+  }
+
   var ck = [];
   // Boxes especiales primero
   t.itemsBE.forEach(function(it){
@@ -2340,7 +2351,7 @@ function confirmar(){
     pack: packTxt.length?packTxt.join(", "):"No",
     subtotal:t.total, entrega: ent==="envio"?"Envio":"Retiro",
     direccion: ent==="envio" ? $("iDir").value.trim() : (puntoRetiro==="lomanegra" ? "Retiro Loma Negra" : "Retiro Olavarría"),
-    dia_entrega: dia?dia.label:"", horario: franja||"",
+    dia_entrega: dia.label, horario: franja||"",
     costo_envio: (function(){
       if(ent!=="envio") return 0;
       var umbral = parseInt(CFG.envioGratisDesde) || 0;
