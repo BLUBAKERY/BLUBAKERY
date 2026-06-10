@@ -1934,8 +1934,17 @@ function renderDias(){
     });
     wrap.appendChild(row);
     // Crear diasEntrega virtual para que el resto del código funcione
+    // IMPORTANTE: usar las franjas/horarios REALES cargados en el admin para los días normales
+    // (no inventar valores). Tomamos la configuración del primer día normal si existe.
+    var franjasReales = [];
+    var horarioReal = "";
+    var primerDiaNormal = (CFG.diasEntrega && CFG.diasEntrega.length > 0) ? CFG.diasEntrega[0] : null;
+    if(primerDiaNormal){
+      if(primerDiaNormal.franjas && primerDiaNormal.franjas.length) franjasReales = primerDiaNormal.franjas;
+      if(primerDiaNormal.horario) horarioReal = primerDiaNormal.horario;
+    }
     disp = forzado.fechas.map(function(f, i){
-      return { dia: { id: "forzado_" + i, label: f, franjas: ["A coordinar"], horario: "15:00" }, ok: true };
+      return { dia: { id: "forzado_" + i, label: f, franjas: franjasReales, horario: horarioReal }, ok: true };
     });
     // Auto-seleccionar la primera
     diaId = "forzado_0";
