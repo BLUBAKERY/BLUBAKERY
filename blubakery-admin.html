@@ -418,7 +418,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
   
     <div class="dia-row">
       <input type="text" id="dialabel-1" value="" style="width:100px;flex-shrink:0" placeholder="Día">
-      <input type="text" id="diahora-1" value="" placeholder="Ej: 15:00 – 19:00 hs">
+      <input type="text" id="diahora-1" value="" placeholder="Ej: 15:00 – 16:30 hs">
       <button class="remove-btn" onclick="eliminarDia(1)">✕</button>
     </div>
   </div>
@@ -427,7 +427,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
         <label>Horas de anticipación mínima para pedir</label>
         <select id="horas-corte">
           <option value="24">24 horas antes (recomendado)</option>
-          <option value="48">48 horas antes</option>
+          <option value="48">18 horas antes</option>
           <option value="12">12 horas antes</option>
         </select>
       </div>
@@ -504,8 +504,8 @@ const CONFIG = {
     {id:"pistachio",nombre:"Cookie Pistachio",precio:5200,emoji:"🌿",activo:true,stock:20,foto:"",descripcion:"Pistachio con chocolate blanco"}
   ],
   diasEntrega:[
-    {id:"viernes",label:"Viernes",horario:"15:00 – 19:00 hs"},
-    {id:"sabado",label:"Sábado",horario:"15:00 – 19:00 hs"}
+    {id:"viernes",label:"Viernes",horario:"15:00 – 16:30 hs"},
+    {id:"sabado",label:"Sábado",horario:"15:00 – 16:30 hs"}
   ],
   descuentos:[],
   horasCorte:24,
