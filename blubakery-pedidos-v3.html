@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#F3EBDD">
 <title>Blu Bakery</title>
@@ -1198,7 +1201,6 @@ var CFG = {
   msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
   msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
   msgEfectivo: "Por favor abonar con el importe justo.",
-  franjasDefault: ["15:00 - 17:00", "17:00 - 19:00"],
   diasEntrega: [],
   novedades: [
     { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
@@ -2017,10 +2019,15 @@ function renderFranjas(){
   if(!wrap) return;
   wrap.innerHTML = "";
   var d = CFG.diasEntrega.find(function(x){ return x.id===diaId; });
+  // Si no está en CFG.diasEntrega (puede ser una fecha forzada), buscar en disp
+  if(!d){
+    var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
+    if(dispMatch) d = dispMatch.dia;
+  }
   var fr = [];
   if(d && d.franjas && d.franjas.length) fr = d.franjas;
   else if(d && d.horario) fr = [d.horario];
-  else fr = CFG.franjasDefault || [];
+  // NO usar defaults — si no hay franjas cargadas, no mostrar ninguna
   if(!fr.length){ franja = null; return; }
   wrap.appendChild(secHead("Horario", "¿A qué hora?"));
   var row = document.createElement("div");
