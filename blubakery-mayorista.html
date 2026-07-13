@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#F3EBDD">
+<title>Blu Bakery · Mayorista</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --azul: #004e64;
+    --crema: #F3EBDD;
+    --crema-card: #FBF6EC;
+    --avena: #E7DAC8;
+    --lila: #D9CCE7;
+    --bordo: #7E1F2D;
+    --mostaza: #D7A13A;
+    --tinta: #1d2b30;
+    --gris: #6a7276;
+    --verde: #4E6546;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--crema);
+    color: var(--tinta);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  /* === HEADER === */
+  .header {
+    text-align: center;
+    padding: 20px 12px 26px;
+    border-bottom: 1px dashed rgba(0, 78, 100, 0.25);
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--azul);
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .header .subtitle {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--mostaza);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  /* === MENÚ PRINCIPAL === */
+  .menu {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 520px) {
+    .menu { grid-template-columns: 1fr 1fr 1fr; }
+  }
+  .menu-btn {
+    background: var(--crema-card);
+    border: 2px solid var(--avena);
+    border-radius: 14px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--tinta);
+    font-family: 'Inter', sans-serif;
+  }
+  .menu-btn:hover, .menu-btn.on {
+    background: var(--azul);
+    color: #fff;
+    border-color: var(--azul);
+    transform: translateY(-1px);
+  }
+  .menu-btn:hover .menu-icon,
+  .menu-btn.on .menu-icon { transform: scale(1.1); }
+  .menu-icon {
+    font-size: 30px;
+    margin-bottom: 6px;
+    display: block;
+    transition: transform 0.2s;
+  }
+  .menu-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .menu-sub {
+    font-size: 10.5px;
+    color: var(--gris);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+  .menu-btn.on .menu-sub { color: rgba(255,255,255,0.75); }
+
+  /* === PANELES === */
+  .panel {
+    background: var(--crema-card);
+    border-radius: 14px;
+    padding: 20px 18px;
+    margin-bottom: 18px;
+    border: 1px solid var(--avena);
+    display: none;
+  }
+  .panel.on { display: block; }
+  .panel h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--azul);
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .panel-sub {
+    font-size: 12.5px;
+    color: var(--gris);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  /* === FORM === */
+  label {
+    display: block;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--azul);
+    font-weight: 700;
+    margin: 14px 0 5px;
+  }
+  input[type="text"], input[type="date"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d5c8b0;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: #fff;
+    color: var(--tinta);
+    transition: border-color 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--azul);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+  .hint {
+    font-size: 11px;
+    color: var(--gris);
+    margin-top: 4px;
+    line-height: 1.4;
+    font-style: italic;
+  }
+  .hint.bordo { color: var(--bordo); font-weight: 600; font-style: normal; }
+
+  /* Radio pills */
+  .pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .pill {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 14px;
+    border: 1px solid #d5c8b0;
+    border-radius: 100px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tinta);
+    transition: all 0.15s;
+  }
+  .pill:hover { border-color: var(--azul); }
+  .pill.on {
+    background: var(--azul);
+    color: #fff;
+    border-color: var(--azul);
+  }
+
+  /* Líneas de producto */
+  .item-row {
+    display: grid;
+    grid-template-columns: 1fr 90px 30px;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+  .item-row select, .item-row input {
+    padding: 9px 10px;
+    font-size: 13.5px;
+  }
+  .item-del {
+    background: none;
+    border: 1px solid #d5c8b0;
+    border-radius: 8px;
+    width: 30px;
+    height: 38px;
+    color: var(--bordo);
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .btn-add {
+    background: #fff;
+    color: var(--azul);
+    border: 1px dashed var(--azul);
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* Calc box */
+  .calc {
+    background: #fff;
+    border: 1px solid var(--avena);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .calc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .calc-row.total {
+    border-top: 1px dashed #d5c8b0;
+    margin-top: 6px;
+    padding-top: 10px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--azul);
+  }
+  .calc-row.neg { color: var(--bordo); }
+  .calc-row .lbl {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--gris);
+    font-weight: 700;
+  }
+  .calc-row.total .lbl { color: var(--azul); font-size: 12px; }
+  .calc-row .val { font-weight: 600; }
+
+  /* Botones acción */
+  .btn-main {
+    background: var(--azul);
+    color: #fff;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    width: 100%;
+    margin-top: 20px;
+    transition: background 0.15s;
+  }
+  .btn-main:hover { background: #003a4d; }
+  .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-main.bordo { background: var(--bordo); }
+  .btn-main.bordo:hover { background: #661820; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--azul);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 100px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0,78,100,0.25);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.on {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .toast.err { background: var(--bordo); }
+  .toast.ok { background: var(--verde); }
+
+  /* Aviso stock aparte */
+  .aviso-stock {
+    background: rgba(215,161,58,0.12);
+    border: 1px solid var(--mostaza);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    color: #7a5a1a;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--gris);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Blu Bakery</h1>
+    <div class="subtitle">MAYORISTA · CONSIGNACIÓN · MARKETING</div>
+  </div>
+
+  <div class="menu">
+    <button class="menu-btn" onclick="mostrar('entrega')" id="btn-entrega">
+      <span class="menu-icon">📦</span>
+      <div class="menu-title">Nueva entrega</div>
+      <div class="menu-sub">Registrar y generar remito</div>
+    </button>
+    <button class="menu-btn" onclick="mostrar('cobro')" id="btn-cobro">
+      <span class="menu-icon">💰</span>
+      <div class="menu-title">Cobro mayorista</div>
+      <div class="menu-sub">Cuando te pagan</div>
+    </button>
+    <button class="menu-btn" onclick="mostrar('marketing')" id="btn-marketing">
+      <span class="menu-icon">🎁</span>
+      <div class="menu-title">Cookies marketing</div>
+      <div class="menu-sub">Uso interno / promo</div>
+    </button>
+  </div>
+
+  <div id="cargando" class="loading">Cargando datos…</div>
+
+  <!-- ==== PANEL ENTREGA ==== -->
+  <div class="panel" id="panel-entrega">
+    <h2>Nueva entrega</h2>
+    <div class="panel-sub">Registrá qué le entregaste al comercio y generá el remito PDF para imprimir.</div>
+
+    <label>Tipo de entrega</label>
+    <div class="pills" id="ent-tipo">
+      <button class="pill on" onclick="setTipo(this,'Consignación')">Consignación</button>
+      <button class="pill" onclick="setTipo(this,'Mayorista')">Mayorista</button>
+    </div>
+
+    <label>Nombre del comercio</label>
+    <input type="text" id="ent-comercio" placeholder="Ej: Chocotería Delicias">
+
+    <label>Dirección (opcional)</label>
+    <input type="text" id="ent-direccion" placeholder="Calle y número">
+
+    <label>Fecha de entrega</label>
+    <input type="date" id="ent-fecha">
+
+    <label>Cookies entregadas</label>
+    <div id="ent-items"></div>
+    <button class="btn-add" onclick="agregarItem('ent')">+ Agregar cookie</button>
+
+    <label>Notas (opcional)</label>
+    <textarea id="ent-notas" placeholder="Ej: acordamos revisión de stock cada 15 días"></textarea>
+
+    <div class="aviso-stock">💡 <b>Recordá:</b> este stock no se descuenta del inventario web. Es stock aparte que producís específicamente para el mayorista.</div>
+
+    <button class="btn-main" onclick="guardarEntrega()">📄 Generar remito PDF y registrar</button>
+  </div>
+
+  <!-- ==== PANEL COBRO ==== -->
+  <div class="panel" id="panel-cobro">
+    <h2>Cobro mayorista</h2>
+    <div class="panel-sub">Cargá el cobro cuando el comercio te paga (por lo que se vendió). La app calcula el neto descontando la comisión.</div>
+
+    <label>Comercio</label>
+    <input type="text" id="cob-comercio" placeholder="Ej: Chocotería Delicias">
+
+    <label>Fecha del cobro</label>
+    <input type="date" id="cob-fecha">
+
+    <label>Cookies vendidas</label>
+    <div id="cob-items"></div>
+    <button class="btn-add" onclick="agregarItem('cob')">+ Agregar cookie</button>
+
+    <label>Comisión del comercio (%)</label>
+    <input type="number" id="cob-comision" value="20" min="0" max="100" step="0.5">
+    <div class="hint">Ellos se quedan con este porcentaje. Vos recibís el resto.</div>
+
+    <label>¿Cómo cobraste?</label>
+    <div class="pills" id="cob-caja">
+      <button class="pill on" onclick="setCaja(this,'Efectivo')">💵 Efectivo</button>
+      <button class="pill" onclick="setCaja(this,'Banco')">🏦 Banco</button>
+    </div>
+
+    <label>Notas (opcional)</label>
+    <textarea id="cob-notas" placeholder="Ej: cobro correspondiente a la semana del 15 al 22"></textarea>
+
+    <div class="calc" id="cob-calc">
+      <div class="calc-row"><span class="lbl">Total bruto</span><span class="val" id="cob-bruto">$0</span></div>
+      <div class="calc-row neg"><span class="lbl">Comisión (20%)</span><span class="val" id="cob-comisMonto">−$0</span></div>
+      <div class="calc-row total"><span class="lbl">Neto para Blu</span><span class="val" id="cob-neto">$0</span></div>
+    </div>
+
+    <button class="btn-main" onclick="guardarCobro()">💰 Registrar cobro</button>
+  </div>
+
+  <!-- ==== PANEL MARKETING ==== -->
+  <div class="panel" id="panel-marketing">
+    <h2>Cookies para marketing</h2>
+    <div class="panel-sub">Registrá cookies que usás para promo, contenido, degustaciones o regalos. Se cuenta el costo de producción para tu balance mensual (no toca cajas de plata real).</div>
+
+    <label>Tipo de uso</label>
+    <select id="mk-tipo">
+      <option value="Degustación">Degustación (dar a probar)</option>
+      <option value="Contenido/fotos">Contenido / fotos</option>
+      <option value="Regalo/promo">Regalo / promo</option>
+      <option value="Muestra clientes">Muestra a clientes</option>
+      <option value="Otro">Otro</option>
+    </select>
+
+    <label>Fecha</label>
+    <input type="date" id="mk-fecha">
+
+    <label>Cookies usadas</label>
+    <div id="mk-items"></div>
+    <button class="btn-add" onclick="agregarItem('mk')">+ Agregar cookie</button>
+
+    <label>Notas (¿qué fue exactamente?)</label>
+    <textarea id="mk-notas" placeholder="Ej: sesión de fotos para redes, degustación en Café Bar X, etc."></textarea>
+
+    <div class="calc" id="mk-calc">
+      <div class="calc-row total"><span class="lbl">Costo total en cookies</span><span class="val" id="mk-costo">$0</span></div>
+      <div class="hint" style="text-align:center; margin-top:6px">Este costo se contabiliza para el balance mensual sin tocar tus cajas de Efectivo/Banco.</div>
+    </div>
+
+    <div class="aviso-stock" style="background:rgba(126,31,45,0.08); border-color:var(--bordo); color:var(--bordo)">📦 <b>Sí</b> se descuenta del stock del sitio web.</div>
+
+    <button class="btn-main bordo" onclick="guardarMarketing()">🎁 Registrar uso de marketing</button>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIGURACIÓN ============ */
+var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsUwYu8_MF5aRY_KB5zd8onLolRwJhigaFsNX5xezFQYNrBVhqlY-6yo-jzMweOZVX/exec";
+var SHEET_ID = "1Aj0dEaukdl1moh9oKhIMzZdhS_P1Fraemaen15wjDyI";
+var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Config&range=A1";
+var COSTOS_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Boxes&range=A1";
+
+var CFG = { productos: [] };
+var COSTOS = {}; // { productId: costoUnitario }
+var estado = {
+  ent: { tipo: "Consignación", items: [] },
+  cob: { caja: "Efectivo", items: [] },
+  mk:  { items: [] }
+};
+
+/* ============ UTILS ============ */
+function $(id) { return document.getElementById(id); }
+function fmt(n) { return "$" + (Math.round(n||0)).toLocaleString("es-AR"); }
+function hoyISO() {
+  var d = new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function hoyBonito() {
+  var d = new Date();
+  return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();
+}
+function fechaBonita(iso) {
+  if (!iso) return hoyBonito();
+  var p = iso.split("-");
+  return p[2]+"/"+p[1]+"/"+p[0];
+}
+function toast(msg, tipo) {
+  var t = $("toast");
+  t.textContent = msg;
+  t.className = "toast on " + (tipo||"");
+  setTimeout(function(){ t.className = "toast"; }, 3400);
+}
+
+/* ============ CARGAR DATOS ============ */
+(function(){
+  var pC = fetch(CONFIG_GVIZ).then(function(r){return r.text();}).then(function(t){
+    try {
+      var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+      if(j.table.rows.length && j.table.rows[0].c[0]){
+        var d = JSON.parse(j.table.rows[0].c[0].v);
+        if(d.productos) CFG.productos = d.productos;
+      }
+    } catch(e){ console.warn("Config error:", e); }
+  }).catch(function(e){ console.warn("Config fetch:", e); });
+
+  var pB = fetch(COSTOS_GVIZ).then(function(r){return r.text();}).then(function(t){
+    try {
+      var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+      if(j.table.rows.length && j.table.rows[0].c[0]){
+        var d = JSON.parse(j.table.rows[0].c[0].v);
+        // Estructura esperada: { productos: [{id, costoUnitario, ...}] } o { costos: {id: costo} }
+        if(d.productos){
+          d.productos.forEach(function(p){
+            if(p.id && p.costoUnitario) COSTOS[p.id] = parseFloat(p.costoUnitario);
+          });
+        }
+        if(d.costos && typeof d.costos === "object"){
+          Object.keys(d.costos).forEach(function(k){ COSTOS[k] = parseFloat(d.costos[k]); });
+        }
+      }
+    } catch(e){ console.warn("Costos error:", e); }
+  }).catch(function(e){ console.warn("Costos fetch:", e); });
+
+  Promise.all([pC, pB]).finally(init);
+})();
+
+function init(){
+  $("cargando").style.display = "none";
+  // Setear fecha hoy en todos los date pickers
+  ["ent-fecha","cob-fecha","mk-fecha"].forEach(function(id){
+    var el = $(id); if(el) el.value = hoyISO();
+  });
+  // Agregar primer ítem en cada panel
+  agregarItem("ent");
+  agregarItem("cob");
+  agregarItem("mk");
+  // Mostrar el primer panel por default
+  mostrar("entrega");
+}
+
+/* ============ NAVEGACIÓN ============ */
+function mostrar(seccion){
+  ["entrega","cobro","marketing"].forEach(function(s){
+    $("panel-"+s).classList.toggle("on", s === seccion);
+    $("btn-"+s).classList.toggle("on", s === seccion);
+  });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function setTipo(el, tipo){
+  var pills = el.parentElement.querySelectorAll(".pill");
+  pills.forEach(function(p){ p.classList.remove("on"); });
+  el.classList.add("on");
+  estado.ent.tipo = tipo;
+}
+
+function setCaja(el, caja){
+  var pills = el.parentElement.querySelectorAll(".pill");
+  pills.forEach(function(p){ p.classList.remove("on"); });
+  el.classList.add("on");
+  estado.cob.caja = caja;
+}
+
+/* ============ ÍTEMS (productos) ============ */
+var itemCount = { ent:0, cob:0, mk:0 };
+
+function agregarItem(seccion){
+  var cont = $(seccion + "-items");
+  if(!cont) return;
+  itemCount[seccion]++;
+  var id = seccion + "-item-" + itemCount[seccion];
+  var row = document.createElement("div");
+  row.className = "item-row";
+  row.id = id;
+  // Armar options de productos activos
+  var opts = '<option value="">Elegí una cookie…</option>';
+  CFG.productos.filter(function(p){ return p.activo !== false; }).forEach(function(p){
+    opts += '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+  });
+  row.innerHTML =
+    '<select class="item-prod" onchange="recalcular(\''+seccion+'\')">'+opts+'</select>' +
+    '<input type="number" class="item-cant" placeholder="Cant." min="0" step="1" value="1" oninput="recalcular(\''+seccion+'\')">' +
+    '<button class="item-del" onclick="quitarItem(\''+id+'\',\''+seccion+'\')">✕</button>';
+  cont.appendChild(row);
+  recalcular(seccion);
+}
+
+function quitarItem(id, seccion){
+  var el = $(id);
+  if(el) el.remove();
+  recalcular(seccion);
+}
+
+function leerItems(seccion){
+  var rows = $(seccion+"-items").querySelectorAll(".item-row");
+  var items = [];
+  rows.forEach(function(r){
+    var pid = r.querySelector(".item-prod").value;
+    var cant = parseInt(r.querySelector(".item-cant").value) || 0;
+    if(pid && cant > 0){
+      var p = CFG.productos.find(function(x){ return x.id === pid; });
+      if(p){
+        items.push({
+          id: pid,
+          nombre: p.nombre,
+          cantidad: cant,
+          precio: parseFloat(p.precio) || 0,
+          costo: COSTOS[pid] || (parseFloat(p.precio)*0.33) // fallback: 33% del precio
+        });
+      }
+    }
+  });
+  return items;
+}
+
+function recalcular(seccion){
+  if(seccion === "cob"){
+    var items = leerItems("cob");
+    var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+    var pct = parseFloat($("cob-comision").value) || 0;
+    var comisMonto = bruto * pct / 100;
+    var neto = bruto - comisMonto;
+    $("cob-bruto").textContent = fmt(bruto);
+    $("cob-comisMonto").textContent = "−" + fmt(comisMonto);
+    $("cob-neto").textContent = fmt(neto);
+    // Update label de comisión
+    var labelComis = document.querySelector("#cob-calc .calc-row.neg .lbl");
+    if(labelComis) labelComis.textContent = "Comisión (" + pct + "%)";
+  }
+  if(seccion === "mk"){
+    var items = leerItems("mk");
+    var costo = items.reduce(function(s,it){ return s + it.costo*it.cantidad; }, 0);
+    $("mk-costo").textContent = fmt(costo);
+  }
+}
+
+// Listener para recalcular cuando cambia comisión
+document.addEventListener("input", function(e){
+  if(e.target && e.target.id === "cob-comision") recalcular("cob");
+});
+
+/* ============ GUARDAR ENTREGA + GENERAR PDF ============ */
+function guardarEntrega(){
+  var comercio = $("ent-comercio").value.trim();
+  var direccion = $("ent-direccion").value.trim();
+  var fecha = $("ent-fecha").value;
+  var notas = $("ent-notas").value.trim();
+  var items = leerItems("ent");
+
+  if(!comercio){ toast("Falta el nombre del comercio", "err"); return; }
+  if(!fecha){ toast("Elegí una fecha", "err"); return; }
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+
+  // Guardar en Sheet vía Apps Script
+  var payload = {
+    tipo: "entrega_mayorista",
+    fecha: fecha,
+    comercio: comercio,
+    direccion: direccion,
+    tipoEntrega: estado.ent.tipo,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
+    notas: notas
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).then(function(){
+    generarRemitoPDF(comercio, direccion, fecha, items, notas, estado.ent.tipo);
+    toast("Entrega registrada · Generando remito…", "ok");
+    setTimeout(function(){ limpiarPanel("ent"); }, 500);
+  }).catch(function(){
+    generarRemitoPDF(comercio, direccion, fecha, items, notas, estado.ent.tipo);
+    toast("Remito generado (revisá que se guardó)", "ok");
+  });
+}
+
+function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega){
+  var { jsPDF } = window.jspdf;
+  var doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  var pageW = 210;
+  var m = 20; // margen
+
+  // ===== HEADER =====
+  // Franja azul superior
+  doc.setFillColor(0, 78, 100);
+  doc.rect(0, 0, pageW, 32, "F");
+
+  // Logo/nombre
+  doc.setTextColor(243, 235, 221);
+  doc.setFont("times", "bolditalic");
+  doc.setFontSize(24);
+  doc.text("Blu Bakery", m, 16);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(215, 161, 58);
+  doc.text("COOKIES ARTESANALES · OLAVARRÍA", m, 22);
+
+  // Info Blu del lado derecho
+  doc.setTextColor(243, 235, 221);
+  doc.setFontSize(8);
+  doc.text("blubakery.bb@gmail.com", pageW - m, 14, { align: "right" });
+  doc.text("@blubakery.bb", pageW - m, 19, { align: "right" });
+  doc.text("2284 35-3970", pageW - m, 24, { align: "right" });
+
+  // ===== TÍTULO =====
+  doc.setTextColor(126, 31, 45);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text("REMITO DE ENTREGA", pageW/2, 46, { align: "center" });
+
+  doc.setTextColor(0, 78, 100);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "bold");
+  doc.text(tipoEntrega.toUpperCase(), pageW/2, 53, { align: "center" });
+
+  // Línea decorativa
+  doc.setDrawColor(215, 161, 58);
+  doc.setLineWidth(0.5);
+  doc.line(m+20, 57, pageW-m-20, 57);
+
+  // ===== DATOS COMERCIO =====
+  var y = 68;
+  doc.setTextColor(29, 43, 48);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(106, 114, 118);
+  doc.text("DESTINATARIO", m, y);
+  doc.setTextColor(29, 43, 48);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(comercio, m, y + 6);
+
+  if(direccion){
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(106, 114, 118);
+    doc.text(direccion, m, y + 12);
+  }
+
+  // Fecha del lado derecho
+  doc.setTextColor(106, 114, 118);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.text("FECHA", pageW - m, y, { align: "right" });
+  doc.setTextColor(29, 43, 48);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(fechaBonita(fecha), pageW - m, y + 6, { align: "right" });
+
+  // ===== TABLA DE PRODUCTOS =====
+  y = direccion ? 90 : 84;
+
+  // Header tabla
+  doc.setFillColor(251, 246, 236);
+  doc.rect(m, y, pageW - 2*m, 9, "F");
+  doc.setDrawColor(215, 161, 58);
+  doc.setLineWidth(0.3);
+  doc.line(m, y, pageW - m, y);
+  doc.line(m, y+9, pageW - m, y+9);
+
+  doc.setTextColor(0, 78, 100);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("PRODUCTO", m + 4, y + 6);
+  doc.text("CANTIDAD", pageW - m - 20, y + 6, { align: "right" });
+
+  y += 9;
+
+  // Filas
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10.5);
+  doc.setTextColor(29, 43, 48);
+  var totalUnidades = 0;
+  items.forEach(function(it, i){
+    if(i % 2 === 0){
+      doc.setFillColor(251, 249, 244);
+      doc.rect(m, y, pageW - 2*m, 8, "F");
+    }
+    doc.text(it.nombre, m + 4, y + 5.5);
+    doc.setFont("helvetica", "bold");
+    doc.text(String(it.cantidad), pageW - m - 4, y + 5.5, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    totalUnidades += it.cantidad;
+    y += 8;
+  });
+
+  // Total unidades
+  doc.setDrawColor(0, 78, 100);
+  doc.setLineWidth(0.5);
+  doc.line(m, y, pageW - m, y);
+  y += 8;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(0, 78, 100);
+  doc.setFontSize(11);
+  doc.text("TOTAL UNIDADES ENTREGADAS", m + 4, y);
+  doc.text(String(totalUnidades), pageW - m - 4, y, { align: "right" });
+
+  // ===== NOTAS =====
+  if(notas){
+    y += 14;
+    doc.setTextColor(106, 114, 118);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.text("NOTAS", m, y);
+    doc.setTextColor(29, 43, 48);
+    doc.setFontSize(10);
+    y += 5;
+    var lineas = doc.splitTextToSize(notas, pageW - 2*m);
+    doc.text(lineas, m, y);
+    y += lineas.length * 5;
+  }
+
+  // ===== FIRMAS =====
+  y = Math.max(y + 20, 220);
+  doc.setDrawColor(106, 114, 118);
+  doc.setLineWidth(0.3);
+  doc.line(m + 5, y, m + 70, y);
+  doc.line(pageW - m - 70, y, pageW - m - 5, y);
+  doc.setTextColor(106, 114, 118);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text("Firma y aclaración - Blu Bakery", m + 37, y + 5, { align: "center" });
+  doc.text("Firma y aclaración - " + comercio, pageW - m - 37, y + 5, { align: "center" });
+
+  // ===== FOOTER =====
+  doc.setTextColor(106, 114, 118);
+  doc.setFontSize(7.5);
+  doc.setFont("helvetica", "italic");
+  doc.text("Blu Bakery · Lo bueno no necesita explicación", pageW/2, 285, { align: "center" });
+
+  // Descargar
+  var filename = "Remito_" + comercio.replace(/[^a-z0-9]/gi, "_") + "_" + fecha + ".pdf";
+  doc.save(filename);
+}
+
+/* ============ GUARDAR COBRO ============ */
+function guardarCobro(){
+  var comercio = $("cob-comercio").value.trim();
+  var fecha = $("cob-fecha").value;
+  var notas = $("cob-notas").value.trim();
+  var items = leerItems("cob");
+  var pct = parseFloat($("cob-comision").value) || 0;
+
+  if(!comercio){ toast("Falta el nombre del comercio", "err"); return; }
+  if(!fecha){ toast("Elegí una fecha", "err"); return; }
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+
+  var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+  var comisMonto = bruto * pct / 100;
+  var neto = bruto - comisMonto;
+
+  var resumen = items.map(function(it){ return it.nombre+" x"+it.cantidad; }).join(", ");
+
+  var payload = {
+    tipo: "cobro_mayorista",
+    fecha: fecha,
+    comercio: comercio,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; }),
+    bruto: bruto,
+    comision_pct: pct,
+    comision_monto: comisMonto,
+    neto: neto,
+    caja: estado.cob.caja,
+    notas: notas,
+    resumen: resumen
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).then(function(){
+    toast("Cobro registrado ✓ " + fmt(neto) + " a " + estado.cob.caja, "ok");
+    limpiarPanel("cob");
+  }).catch(function(){
+    toast("Enviado (revisá que se guardó)", "ok");
+  });
+}
+
+/* ============ GUARDAR MARKETING ============ */
+function guardarMarketing(){
+  var tipoUso = $("mk-tipo").value;
+  var fecha = $("mk-fecha").value;
+  var notas = $("mk-notas").value.trim();
+  var items = leerItems("mk");
+
+  if(!fecha){ toast("Elegí una fecha", "err"); return; }
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+
+  var costo = items.reduce(function(s,it){ return s + it.costo*it.cantidad; }, 0);
+  var resumen = items.map(function(it){ return it.nombre+" x"+it.cantidad; }).join(", ");
+
+  // stockChanges para que descuente stock
+  var stockChanges = {};
+  items.forEach(function(it){ stockChanges[it.id] = it.cantidad; });
+
+  var payload = {
+    tipo: "cookies_marketing",
+    fecha: fecha,
+    tipoUso: tipoUso,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, costo:it.costo }; }),
+    costo_total: costo,
+    notas: notas,
+    resumen: resumen,
+    stockChanges: stockChanges
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).then(function(){
+    toast("Marketing registrado ✓ " + fmt(costo) + " en cookies", "ok");
+    limpiarPanel("mk");
+  }).catch(function(){
+    toast("Enviado (revisá que se guardó)", "ok");
+  });
+}
+
+/* ============ LIMPIAR PANEL ============ */
+function limpiarPanel(seccion){
+  if(seccion === "ent"){
+    $("ent-comercio").value = "";
+    $("ent-direccion").value = "";
+    $("ent-notas").value = "";
+    $("ent-items").innerHTML = "";
+    itemCount.ent = 0;
+    agregarItem("ent");
+  }
+  if(seccion === "cob"){
+    $("cob-comercio").value = "";
+    $("cob-notas").value = "";
+    $("cob-items").innerHTML = "";
+    itemCount.cob = 0;
+    agregarItem("cob");
+    recalcular("cob");
+  }
+  if(seccion === "mk"){
+    $("mk-notas").value = "";
+    $("mk-items").innerHTML = "";
+    itemCount.mk = 0;
+    agregarItem("mk");
+    recalcular("mk");
+  }
+}
+</script>
+
+</body>
+</html>
