@@ -67,12 +67,12 @@
   /* === MENÚ PRINCIPAL === */
   .menu {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
     margin-bottom: 24px;
   }
   @media (min-width: 520px) {
-    .menu { grid-template-columns: 1fr 1fr 1fr; }
+    .menu { grid-template-columns: 1fr 1fr 1fr 1fr; }
   }
   .menu-btn {
     background: var(--crema-card);
@@ -341,6 +341,162 @@
     color: var(--gris);
     font-size: 13px;
   }
+
+  /* === HISTORIAL === */
+  .hist-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .hist-tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 9px 12px;
+    background: #fff;
+    border: 1px solid #d5c8b0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gris);
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .hist-tab.on {
+    background: var(--azul);
+    color: #fff;
+    border-color: var(--azul);
+  }
+  .hist-item {
+    background: #fff;
+    border: 1px solid var(--avena);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .hist-item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    gap: 8px;
+  }
+  .hist-nro {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--azul);
+  }
+  .hist-fecha {
+    font-size: 11px;
+    color: var(--gris);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  .hist-comercio {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--tinta);
+    margin-bottom: 3px;
+  }
+  .hist-prod {
+    font-size: 12px;
+    color: var(--gris);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .hist-monto {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--azul);
+  }
+  .hist-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--avena);
+  }
+  .hist-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: #fff;
+    transition: all 0.15s;
+  }
+  .hist-btn.edit { color: var(--azul); border-color: var(--azul); }
+  .hist-btn.edit:hover { background: var(--azul); color: #fff; }
+  .hist-btn.del { color: var(--bordo); border-color: var(--bordo); }
+  .hist-btn.del:hover { background: var(--bordo); color: #fff; }
+  .hist-btn.pdf { color: var(--verde); border-color: var(--verde); }
+  .hist-btn.pdf:hover { background: var(--verde); color: #fff; }
+  .hist-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--gris);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .hist-badge {
+    display: inline-block;
+    background: var(--lila);
+    color: var(--azul);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+  .hist-badge.mk { background: rgba(126,31,45,0.15); color: var(--bordo); }
+
+  /* === MODAL === */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(29,43,48,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-bg.on { display: flex; }
+  .modal {
+    background: var(--crema-card);
+    border-radius: 14px;
+    padding: 20px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--azul);
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--gris);
+    float: right;
+    line-height: 1;
+    margin-top: -2px;
+  }
 </style>
 </head>
 <body>
@@ -366,6 +522,11 @@
       <span class="menu-icon">🎁</span>
       <div class="menu-title">Cookies marketing</div>
       <div class="menu-sub">Uso interno / promo</div>
+    </button>
+    <button class="menu-btn" onclick="mostrar('historial')" id="btn-historial">
+      <span class="menu-icon">📋</span>
+      <div class="menu-title">Historial</div>
+      <div class="menu-sub">Editar o eliminar</div>
     </button>
   </div>
 
@@ -394,6 +555,15 @@
     <label>Cookies entregadas</label>
     <div id="ent-items"></div>
     <button class="btn-add" onclick="agregarItem('ent')">+ Agregar cookie</button>
+
+    <label>Comisión del comercio (%)</label>
+    <input type="number" id="ent-comision" value="20" min="0" max="100" step="0.5" oninput="recalcular('ent')">
+    <div class="hint">Este porcentaje se descuenta del precio de venta. Ustedes cobran el resto.</div>
+
+    <div class="calc" id="ent-calc">
+      <div class="calc-row"><span class="lbl">Precio de venta al público (total)</span><span class="val" id="ent-bruto">$0</span></div>
+      <div class="calc-row total"><span class="lbl">Precio que nos pagan (total)</span><span class="val" id="ent-neto">$0</span></div>
+    </div>
 
     <label>Notas (opcional)</label>
     <textarea id="ent-notas" placeholder="Ej: acordamos revisión de stock cada 15 días"></textarea>
@@ -474,6 +644,31 @@
     <button class="btn-main bordo" onclick="guardarMarketing()">🎁 Registrar uso de marketing</button>
   </div>
 
+  <!-- ==== PANEL HISTORIAL ==== -->
+  <div class="panel" id="panel-historial">
+    <h2>Historial</h2>
+    <div class="panel-sub">Ver, editar o eliminar registros. También podés reimprimir remitos.</div>
+
+    <div class="hist-tabs">
+      <button class="hist-tab on" onclick="setHistTab(this,'entregas')">📦 Entregas</button>
+      <button class="hist-tab" onclick="setHistTab(this,'cobros')">💰 Cobros</button>
+      <button class="hist-tab" onclick="setHistTab(this,'marketing')">🎁 Marketing</button>
+    </div>
+
+    <button class="btn-add" onclick="cargarHistorial()">🔄 Actualizar</button>
+
+    <div id="hist-content" style="margin-top:14px">
+      <div class="hist-empty">Cargando…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal de edición -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal">
+    <!-- se llena dinámicamente -->
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -565,10 +760,13 @@ function init(){
 
 /* ============ NAVEGACIÓN ============ */
 function mostrar(seccion){
-  ["entrega","cobro","marketing"].forEach(function(s){
-    $("panel-"+s).classList.toggle("on", s === seccion);
-    $("btn-"+s).classList.toggle("on", s === seccion);
+  ["entrega","cobro","marketing","historial"].forEach(function(s){
+    var p = $("panel-"+s);
+    var b = $("btn-"+s);
+    if(p) p.classList.toggle("on", s === seccion);
+    if(b) b.classList.toggle("on", s === seccion);
   });
+  if(seccion === "historial") cargarHistorial();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
@@ -639,6 +837,14 @@ function leerItems(seccion){
 }
 
 function recalcular(seccion){
+  if(seccion === "ent"){
+    var items = leerItems("ent");
+    var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+    var pct = parseFloat($("ent-comision").value) || 0;
+    var neto = bruto * (1 - pct/100);
+    $("ent-bruto").textContent = fmt(bruto);
+    $("ent-neto").textContent = fmt(neto);
+  }
   if(seccion === "cob"){
     var items = leerItems("cob");
     var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
@@ -648,7 +854,6 @@ function recalcular(seccion){
     $("cob-bruto").textContent = fmt(bruto);
     $("cob-comisMonto").textContent = "−" + fmt(comisMonto);
     $("cob-neto").textContent = fmt(neto);
-    // Update label de comisión
     var labelComis = document.querySelector("#cob-calc .calc-row.neg .lbl");
     if(labelComis) labelComis.textContent = "Comisión (" + pct + "%)";
   }
@@ -671,50 +876,67 @@ function guardarEntrega(){
   var fecha = $("ent-fecha").value;
   var notas = $("ent-notas").value.trim();
   var items = leerItems("ent");
+  var pct = parseFloat($("ent-comision").value) || 20;
 
   if(!comercio){ toast("Falta el nombre del comercio", "err"); return; }
   if(!fecha){ toast("Elegí una fecha", "err"); return; }
   if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
 
-  // Guardar en Sheet vía Apps Script
   var payload = {
     tipo: "entrega_mayorista",
     fecha: fecha,
     comercio: comercio,
     direccion: direccion,
     tipoEntrega: estado.ent.tipo,
-    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
+    comision_pct: pct,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; }),
     notas: notas
   };
 
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  }).then(function(){
-    generarRemitoPDF(comercio, direccion, fecha, items, notas, estado.ent.tipo);
-    toast("Entrega registrada · Generando remito…", "ok");
-    setTimeout(function(){ limpiarPanel("ent"); }, 500);
-  }).catch(function(){
-    generarRemitoPDF(comercio, direccion, fecha, items, notas, estado.ent.tipo);
-    toast("Remito generado (revisá que se guardó)", "ok");
+  // Como no podemos leer el response con no-cors, calculamos el N° de remito localmente
+  // usando el historial que ya conocemos + timestamp de fallback
+  obtenerProximoNroRemito(function(nroRemito){
+    fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).finally(function(){
+      generarRemitoPDF(nroRemito, comercio, direccion, fecha, items, notas, estado.ent.tipo, pct);
+      toast("Remito N° " + nroRemito + " generado ✓", "ok");
+      setTimeout(function(){ limpiarPanel("ent"); }, 500);
+    });
   });
 }
 
-function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega){
+function obtenerProximoNroRemito(cb){
+  // Consultar el historial para saber cuál es el último número usado
+  fetch(APPS_SCRIPT_URL + "?accion=historial_mayorista")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      var max = 0;
+      if(j && j.data && Array.isArray(j.data.entregas)){
+        j.data.entregas.forEach(function(e){
+          var n = parseInt(e.nro);
+          if(!isNaN(n) && n > max) max = n;
+        });
+      }
+      cb(max + 1);
+    })
+    .catch(function(){ cb(1); });
+}
+
+function generarRemitoPDF(nroRemito, comercio, direccion, fecha, items, notas, tipoEntrega, comisionPct){
   var { jsPDF } = window.jspdf;
   var doc = new jsPDF({ unit: "mm", format: "a4" });
 
   var pageW = 210;
-  var m = 20; // margen
+  var m = 20;
 
-  // ===== HEADER =====
-  // Franja azul superior
+  // ===== HEADER azul =====
   doc.setFillColor(0, 78, 100);
   doc.rect(0, 0, pageW, 32, "F");
 
-  // Logo/nombre
   doc.setTextColor(243, 235, 221);
   doc.setFont("times", "bolditalic");
   doc.setFontSize(24);
@@ -725,35 +947,38 @@ function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega)
   doc.setTextColor(215, 161, 58);
   doc.text("COOKIES ARTESANALES · OLAVARRÍA", m, 22);
 
-  // Info Blu del lado derecho
   doc.setTextColor(243, 235, 221);
   doc.setFontSize(8);
   doc.text("blubakery.bb@gmail.com", pageW - m, 14, { align: "right" });
   doc.text("@blubakery.bb", pageW - m, 19, { align: "right" });
   doc.text("2284 35-3970", pageW - m, 24, { align: "right" });
 
-  // ===== TÍTULO =====
+  // ===== TÍTULO + Nº REMITO =====
   doc.setTextColor(126, 31, 45);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.text("REMITO DE ENTREGA", pageW/2, 46, { align: "center" });
 
+  // Nº Remito destacado
+  doc.setTextColor(215, 161, 58);
+  doc.setFontSize(12);
+  doc.text("N° " + nroRemito, pageW/2, 54, { align: "center" });
+
   doc.setTextColor(0, 78, 100);
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
-  doc.text(tipoEntrega.toUpperCase(), pageW/2, 53, { align: "center" });
+  doc.text(tipoEntrega.toUpperCase(), pageW/2, 60, { align: "center" });
 
   // Línea decorativa
   doc.setDrawColor(215, 161, 58);
   doc.setLineWidth(0.5);
-  doc.line(m+20, 57, pageW-m-20, 57);
+  doc.line(m+20, 64, pageW-m-20, 64);
 
-  // ===== DATOS COMERCIO =====
-  var y = 68;
-  doc.setTextColor(29, 43, 48);
-  doc.setFontSize(9);
-  doc.setFont("helvetica", "normal");
+  // ===== DATOS COMERCIO / FECHA =====
+  var y = 74;
   doc.setTextColor(106, 114, 118);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
   doc.text("DESTINATARIO", m, y);
   doc.setTextColor(29, 43, 48);
   doc.setFont("helvetica", "bold");
@@ -767,7 +992,6 @@ function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega)
     doc.text(direccion, m, y + 12);
   }
 
-  // Fecha del lado derecho
   doc.setTextColor(106, 114, 118);
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
@@ -777,57 +1001,125 @@ function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega)
   doc.setFontSize(13);
   doc.text(fechaBonita(fecha), pageW - m, y + 6, { align: "right" });
 
-  // ===== TABLA DE PRODUCTOS =====
-  y = direccion ? 90 : 84;
+  // ===== TABLA CON 2 COLUMNAS DE PRECIOS =====
+  y = direccion ? 96 : 90;
 
-  // Header tabla
-  doc.setFillColor(251, 246, 236);
-  doc.rect(m, y, pageW - 2*m, 9, "F");
-  doc.setDrawColor(215, 161, 58);
-  doc.setLineWidth(0.3);
-  doc.line(m, y, pageW - m, y);
-  doc.line(m, y+9, pageW - m, y+9);
-
+  // Header explicativo (aviso al comercio de qué es cada precio)
+  doc.setFillColor(217, 204, 231); // lila
+  doc.roundedRect(m, y, pageW - 2*m, 12, 2, 2, "F");
   doc.setTextColor(0, 78, 100);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9);
-  doc.text("PRODUCTO", m + 4, y + 6);
-  doc.text("CANTIDAD", pageW - m - 20, y + 6, { align: "right" });
+  doc.text("Precio de venta: lo que cobrás al público", m + 4, y + 5);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("Comisión pactada: " + comisionPct + "%", m + 4, y + 9.5);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text("Precio a pagar a Blu: lo que nos pagás por cookie", pageW - m - 4, y + 5, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("(precio - comisión)", pageW - m - 4, y + 9.5, { align: "right" });
 
-  y += 9;
+  y += 15;
+
+  // Header tabla — 4 columnas: Producto | Cant | Precio público c/u | Precio Blu c/u
+  doc.setFillColor(0, 78, 100);
+  doc.rect(m, y, pageW - 2*m, 10, "F");
+  doc.setTextColor(243, 235, 221);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  var colProd = m + 3;
+  var colCant = m + 78;
+  var colVenta = m + 108;
+  var colBlu = m + 155;
+  doc.text("PRODUCTO", colProd, y + 6.5);
+  doc.text("CANT.", colCant, y + 6.5, { align: "center" });
+  doc.text("PRECIO PÚBLICO", colVenta, y + 6.5, { align: "center" });
+  doc.text("PRECIO A BLU", colBlu, y + 6.5, { align: "center" });
+
+  y += 10;
 
   // Filas
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10.5);
+  doc.setFontSize(10);
   doc.setTextColor(29, 43, 48);
   var totalUnidades = 0;
+  var totalPublico = 0;
+  var totalBlu = 0;
+
   items.forEach(function(it, i){
+    var precioPublico = it.precio;
+    var precioBlu = precioPublico * (1 - comisionPct/100);
+
     if(i % 2 === 0){
-      doc.setFillColor(251, 249, 244);
-      doc.rect(m, y, pageW - 2*m, 8, "F");
+      doc.setFillColor(251, 246, 236);
+      doc.rect(m, y, pageW - 2*m, 10, "F");
     }
-    doc.text(it.nombre, m + 4, y + 5.5);
-    doc.setFont("helvetica", "bold");
-    doc.text(String(it.cantidad), pageW - m - 4, y + 5.5, { align: "right" });
+
+    // Nombre del producto
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(29, 43, 48);
+    doc.text(it.nombre, colProd, y + 6.5);
+
+    // Cantidad
+    doc.setFont("helvetica", "bold");
+    doc.text(String(it.cantidad), colCant, y + 6.5, { align: "center" });
+
+    // Precio público (c/u)
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(106, 114, 118);
+    doc.setFontSize(9.5);
+    doc.text("$" + Math.round(precioPublico).toLocaleString("es-AR") + " c/u", colVenta, y + 6.5, { align: "center" });
+
+    // Precio a Blu (c/u)
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(0, 78, 100);
+    doc.setFontSize(10);
+    doc.text("$" + Math.round(precioBlu).toLocaleString("es-AR") + " c/u", colBlu, y + 6.5, { align: "center" });
+
     totalUnidades += it.cantidad;
-    y += 8;
+    totalPublico += precioPublico * it.cantidad;
+    totalBlu += precioBlu * it.cantidad;
+    y += 10;
   });
 
-  // Total unidades
+  // ===== TOTALES =====
   doc.setDrawColor(0, 78, 100);
-  doc.setLineWidth(0.5);
+  doc.setLineWidth(0.6);
   doc.line(m, y, pageW - m, y);
-  y += 8;
+  y += 9;
+
   doc.setFont("helvetica", "bold");
   doc.setTextColor(0, 78, 100);
+  doc.setFontSize(10);
+  doc.text("TOTAL", colProd, y);
+  doc.text(String(totalUnidades) + " cookies", colCant, y, { align: "center" });
+  doc.text("$" + Math.round(totalPublico).toLocaleString("es-AR"), colVenta, y, { align: "center" });
+  doc.setTextColor(126, 31, 45);
   doc.setFontSize(11);
-  doc.text("TOTAL UNIDADES ENTREGADAS", m + 4, y);
-  doc.text(String(totalUnidades), pageW - m - 4, y, { align: "right" });
+  doc.text("$" + Math.round(totalBlu).toLocaleString("es-AR"), colBlu, y, { align: "center" });
+
+  // ===== EXPLICACIÓN CLARA =====
+  y += 12;
+  doc.setFillColor(251, 246, 236);
+  doc.setDrawColor(215, 161, 58);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(m, y, pageW - 2*m, 20, 2, 2, "FD");
+  doc.setTextColor(0, 78, 100);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Cómo funciona el cobro:", m + 4, y + 6);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(29, 43, 48);
+  doc.text("• El comercio vende cada cookie al PRECIO PÚBLICO indicado.", m + 4, y + 11.5);
+  doc.text("• Cuando nos paga, nos abona el PRECIO A BLU por cookie vendida (la diferencia queda para el comercio).", m + 4, y + 16);
 
   // ===== NOTAS =====
   if(notas){
-    y += 14;
+    y += 26;
     doc.setTextColor(106, 114, 118);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
@@ -841,7 +1133,7 @@ function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega)
   }
 
   // ===== FIRMAS =====
-  y = Math.max(y + 20, 220);
+  y = Math.max(y + 20, 230);
   doc.setDrawColor(106, 114, 118);
   doc.setLineWidth(0.3);
   doc.line(m + 5, y, m + 70, y);
@@ -856,10 +1148,11 @@ function generarRemitoPDF(comercio, direccion, fecha, items, notas, tipoEntrega)
   doc.setTextColor(106, 114, 118);
   doc.setFontSize(7.5);
   doc.setFont("helvetica", "italic");
-  doc.text("Blu Bakery · Lo bueno no necesita explicación", pageW/2, 285, { align: "center" });
+  doc.text("Blu Bakery · Lo bueno no necesita explicación · Remito N° " + nroRemito, pageW/2, 285, { align: "center" });
 
-  // Descargar
-  var filename = "Remito_" + comercio.replace(/[^a-z0-9]/gi, "_") + "_" + fecha + ".pdf";
+  // Descargar con nombre "Remito Nº10 Chocotería.pdf"
+  var comercioSlug = comercio.replace(/[^\w\sáéíóúñÁÉÍÓÚÑ]/g, "").replace(/\s+/g, "_");
+  var filename = "Remito_Nº" + nroRemito + "_" + comercioSlug + ".pdf";
   doc.save(filename);
 }
 
@@ -958,6 +1251,7 @@ function limpiarPanel(seccion){
     $("ent-items").innerHTML = "";
     itemCount.ent = 0;
     agregarItem("ent");
+    recalcular("ent");
   }
   if(seccion === "cob"){
     $("cob-comercio").value = "";
@@ -974,6 +1268,434 @@ function limpiarPanel(seccion){
     agregarItem("mk");
     recalcular("mk");
   }
+}
+
+/* ============ HISTORIAL ============ */
+var histActual = "entregas";
+var histData = { entregas: [], cobros: [], marketing: [] };
+
+function setHistTab(el, tab){
+  document.querySelectorAll(".hist-tab").forEach(function(x){ x.classList.remove("on"); });
+  el.classList.add("on");
+  histActual = tab;
+  renderHistorial();
+}
+
+function cargarHistorial(){
+  var cont = $("hist-content");
+  cont.innerHTML = '<div class="hist-empty">Cargando…</div>';
+  fetch(APPS_SCRIPT_URL + "?accion=historial_mayorista")
+    .then(function(r){ return r.json(); })
+    .then(function(j){
+      if(j && j.status === "ok" && j.data){
+        histData = j.data;
+        renderHistorial();
+      } else {
+        cont.innerHTML = '<div class="hist-empty">No se pudo cargar el historial. Reintentá.</div>';
+      }
+    })
+    .catch(function(){
+      cont.innerHTML = '<div class="hist-empty">Error al cargar. Revisá tu conexión.</div>';
+    });
+}
+
+function renderHistorial(){
+  var cont = $("hist-content");
+  var lista = histData[histActual] || [];
+  if(lista.length === 0){
+    cont.innerHTML = '<div class="hist-empty">Todavía no hay registros de este tipo.</div>';
+    return;
+  }
+  var html = "";
+  if(histActual === "entregas"){
+    lista.forEach(function(e){
+      html += '<div class="hist-item">';
+      html += '<div class="hist-item-head">';
+      html += '<span class="hist-nro">Remito N° ' + e.nro + '<span class="hist-badge">' + esc(e.tipo||"") + '</span></span>';
+      html += '<span class="hist-fecha">' + fmtFecha(e.fecha) + '</span>';
+      html += '</div>';
+      html += '<div class="hist-comercio">' + esc(e.comercio) + '</div>';
+      html += '<div class="hist-prod">' + esc(e.productos) + ' · <b>' + e.totalU + ' un.</b></div>';
+      html += '<div class="hist-actions">';
+      html += '<button class="hist-btn edit" onclick="editarEntregaMod(' + e.row + ')">✏️ Editar</button>';
+      html += '<button class="hist-btn pdf" onclick="reimprimirRemito(' + e.row + ')">📄 PDF</button>';
+      html += '<button class="hist-btn del" onclick="eliminarRegistro(\'entrega\',' + e.row + ')">🗑 Eliminar</button>';
+      html += '</div></div>';
+    });
+  } else if(histActual === "cobros"){
+    lista.forEach(function(c){
+      html += '<div class="hist-item">';
+      html += '<div class="hist-item-head">';
+      html += '<span class="hist-nro">' + esc(c.comercio || "Sin nombre") + '<span class="hist-badge">' + esc(c.caja||"") + '</span></span>';
+      html += '<span class="hist-fecha">' + fmtFecha(c.fecha) + '</span>';
+      html += '</div>';
+      html += '<div class="hist-prod">' + esc(c.productos) + '</div>';
+      html += '<div class="hist-monto">' + fmt(c.neto) + ' <span style="font-size:11px;color:var(--gris);font-weight:400">neto (' + c.comisionPct + '% comisión)</span></div>';
+      html += '<div class="hist-actions">';
+      html += '<button class="hist-btn edit" onclick="editarCobroMod(' + c.row + ')">✏️ Editar</button>';
+      html += '<button class="hist-btn del" onclick="eliminarRegistro(\'cobro\',' + c.row + ')">🗑 Eliminar</button>';
+      html += '</div></div>';
+    });
+  } else if(histActual === "marketing"){
+    lista.forEach(function(m){
+      html += '<div class="hist-item">';
+      html += '<div class="hist-item-head">';
+      html += '<span class="hist-nro">' + esc(m.tipoUso || "") + '<span class="hist-badge mk">Marketing</span></span>';
+      html += '<span class="hist-fecha">' + fmtFecha(m.fecha) + '</span>';
+      html += '</div>';
+      html += '<div class="hist-prod">' + esc(m.productos) + '</div>';
+      html += '<div class="hist-monto">' + fmt(m.costo) + ' <span style="font-size:11px;color:var(--gris);font-weight:400">en cookies</span></div>';
+      if(m.notas) html += '<div class="hist-prod" style="font-style:italic;margin-top:4px">' + esc(m.notas) + '</div>';
+      html += '<div class="hist-actions">';
+      html += '<button class="hist-btn edit" onclick="editarMarketingMod(' + m.row + ')">✏️ Editar</button>';
+      html += '<button class="hist-btn del" onclick="eliminarRegistro(\'marketing\',' + m.row + ')">🗑 Eliminar</button>';
+      html += '</div></div>';
+    });
+  }
+  cont.innerHTML = html;
+}
+
+function esc(s){ if(s==null) return ""; return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function fmtFecha(f){
+  if(!f) return "";
+  // Puede venir como "yyyy-mm-dd" o como Date object serializado
+  if(typeof f === "string" && f.indexOf("-") >= 0) return fechaBonita(f);
+  try { var d = new Date(f); return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(); } catch(e){ return String(f); }
+}
+
+/* ============ ELIMINAR ============ */
+function eliminarRegistro(tipo, row){
+  var msg = "¿Seguro que querés eliminar este registro?";
+  if(tipo === "cobro") msg += "\n\nSe va a eliminar también el ingreso de Movimientos.";
+  if(tipo === "marketing") msg += "\n\nSe va a devolver el stock al inventario.";
+  if(!confirm(msg)) return;
+
+  var payload = { tipo: "eliminar_" + (tipo === "entrega" ? "entrega" : tipo === "cobro" ? "cobro" : "marketing"), row: row };
+
+  // Si es marketing, mandar stockChanges para que devuelva
+  if(tipo === "marketing"){
+    var m = histData.marketing.find(function(x){ return x.row === row; });
+    if(m){
+      var stockChanges = {};
+      var parts = String(m.productos||"").split(" | ");
+      parts.forEach(function(p){
+        var mm = p.match(/(.+)\sx(\d+)$/);
+        if(mm){
+          var nombre = mm[1].trim();
+          var cant = parseInt(mm[2]);
+          var prod = CFG.productos.find(function(x){ return x.nombre === nombre; });
+          if(prod) stockChanges[prod.id] = cant;
+        }
+      });
+      payload.stockChanges = stockChanges;
+    }
+  }
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload)
+  }).finally(function(){
+    toast("Registro eliminado ✓", "ok");
+    setTimeout(cargarHistorial, 800);
+  });
+}
+
+/* ============ EDITAR — MODALES ============ */
+function abrirModal(html){
+  $("modal").innerHTML = html;
+  $("modal-bg").classList.add("on");
+}
+function cerrarModal(){ $("modal-bg").classList.remove("on"); }
+
+function parseProductosString(s){
+  // Devuelve array de {id, nombre, cantidad, precio, costo}
+  var items = [];
+  var parts = String(s||"").split(" | ");
+  parts.forEach(function(p){
+    var m = p.match(/(.+)\sx(\d+)$/);
+    if(m){
+      var nombre = m[1].trim();
+      var cant = parseInt(m[2]);
+      var prod = CFG.productos.find(function(x){ return x.nombre === nombre; });
+      if(prod){
+        items.push({
+          id: prod.id,
+          nombre: prod.nombre,
+          cantidad: cant,
+          precio: parseFloat(prod.precio) || 0,
+          costo: COSTOS[prod.id] || (parseFloat(prod.precio)*0.33)
+        });
+      } else {
+        // Producto que ya no existe: lo guardamos como texto
+        items.push({ id: "_" + nombre, nombre: nombre, cantidad: cant, precio: 0, costo: 0 });
+      }
+    }
+  });
+  return items;
+}
+
+function itemsHTMLEditar(seccion, items){
+  var opts = CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
+    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+  }).join("");
+  var html = '<div id="mod-items">';
+  items.forEach(function(it, i){
+    html += '<div class="item-row" data-i="'+i+'">';
+    html += '<select class="mod-prod" onchange="calcularModal(\''+seccion+'\')"><option value="">Elegí…</option>' +
+            CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
+              var sel = p.id === it.id ? ' selected' : '';
+              return '<option value="'+p.id+'"'+sel+'>'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+            }).join("") + '</select>';
+    html += '<input type="number" class="mod-cant" min="0" step="1" value="'+it.cantidad+'" oninput="calcularModal(\''+seccion+'\')">';
+    html += '<button class="item-del" onclick="quitarItemModal(this,\''+seccion+'\')">✕</button>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<button class="btn-add" onclick="agregarItemModal(\''+seccion+'\')">+ Agregar cookie</button>';
+  return html;
+}
+
+function agregarItemModal(seccion){
+  var cont = $("mod-items");
+  var row = document.createElement("div");
+  row.className = "item-row";
+  var opts = '<option value="">Elegí…</option>' + CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
+    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+  }).join("");
+  row.innerHTML =
+    '<select class="mod-prod" onchange="calcularModal(\''+seccion+'\')">'+opts+'</select>' +
+    '<input type="number" class="mod-cant" min="0" step="1" value="1" oninput="calcularModal(\''+seccion+'\')">' +
+    '<button class="item-del" onclick="quitarItemModal(this,\''+seccion+'\')">✕</button>';
+  cont.appendChild(row);
+  calcularModal(seccion);
+}
+
+function quitarItemModal(btn, seccion){
+  btn.parentElement.remove();
+  calcularModal(seccion);
+}
+
+function leerItemsModal(){
+  var items = [];
+  document.querySelectorAll("#mod-items .item-row").forEach(function(r){
+    var pid = r.querySelector(".mod-prod").value;
+    var cant = parseInt(r.querySelector(".mod-cant").value) || 0;
+    if(pid && cant > 0){
+      var p = CFG.productos.find(function(x){ return x.id === pid; });
+      if(p){
+        items.push({
+          id: pid,
+          nombre: p.nombre,
+          cantidad: cant,
+          precio: parseFloat(p.precio) || 0,
+          costo: COSTOS[pid] || (parseFloat(p.precio)*0.33)
+        });
+      }
+    }
+  });
+  return items;
+}
+
+function calcularModal(seccion){
+  var items = leerItemsModal();
+  if(seccion === "cob"){
+    var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+    var pct = parseFloat($("mod-comision").value) || 0;
+    var comisMonto = bruto * pct / 100;
+    var neto = bruto - comisMonto;
+    $("mod-bruto").textContent = fmt(bruto);
+    $("mod-comisMonto").textContent = "−" + fmt(comisMonto);
+    $("mod-neto").textContent = fmt(neto);
+  } else if(seccion === "mk"){
+    var costo = items.reduce(function(s,it){ return s + it.costo*it.cantidad; }, 0);
+    $("mod-costo").textContent = fmt(costo);
+  }
+}
+
+/* ---- Editar ENTREGA ---- */
+function editarEntregaMod(row){
+  var e = histData.entregas.find(function(x){ return x.row === row; });
+  if(!e) return;
+  var items = parseProductosString(e.productos);
+  var html =
+    '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Editar remito N° ' + e.nro + '</h3>' +
+    '<div class="panel-sub">Los cambios se guardan pero <b>no se regenera el PDF</b>. Si querés un nuevo PDF, tocá "PDF" en el historial después de guardar.</div>' +
+    '<label>Tipo</label>' +
+    '<select id="mod-tipo">' +
+      '<option value="Consignación"' + (e.tipo === "Consignación" ? " selected" : "") + '>Consignación</option>' +
+      '<option value="Mayorista"' + (e.tipo === "Mayorista" ? " selected" : "") + '>Mayorista</option>' +
+    '</select>' +
+    '<label>Comercio</label><input type="text" id="mod-comercio" value="' + esc(e.comercio) + '">' +
+    '<label>Dirección</label><input type="text" id="mod-direccion" value="' + esc(e.direccion||"") + '">' +
+    '<label>Fecha</label><input type="date" id="mod-fecha" value="' + toISO(e.fecha) + '">' +
+    '<label>Comisión (%)</label><input type="number" id="mod-comision" min="0" max="100" step="0.5" value="' + (parseFloat(e.comision)||20) + '">' +
+    '<label>Cookies</label>' +
+    itemsHTMLEditar("ent", items) +
+    '<label>Notas</label><textarea id="mod-notas">' + esc(e.notas||"") + '</textarea>' +
+    '<button class="btn-main" onclick="guardarEditEntrega(' + row + ')">💾 Guardar cambios</button>';
+  abrirModal(html);
+}
+
+function guardarEditEntrega(row){
+  var items = leerItemsModal();
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+  var payload = {
+    tipo: "editar_entrega",
+    row: row,
+    fecha: $("mod-fecha").value,
+    comercio: $("mod-comercio").value.trim(),
+    direccion: $("mod-direccion").value.trim(),
+    tipoEntrega: $("mod-tipo").value,
+    comision_pct: parseFloat($("mod-comision").value) || 20,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
+    notas: $("mod-notas").value.trim()
+  };
+  fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: {"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
+    .finally(function(){
+      toast("Cambios guardados ✓", "ok");
+      cerrarModal();
+      setTimeout(cargarHistorial, 800);
+    });
+}
+
+/* ---- Editar COBRO ---- */
+function editarCobroMod(row){
+  var c = histData.cobros.find(function(x){ return x.row === row; });
+  if(!c) return;
+  var items = parseProductosString(c.productos);
+  var html =
+    '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Editar cobro</h3>' +
+    '<label>Comercio</label><input type="text" id="mod-comercio" value="' + esc(c.comercio) + '">' +
+    '<label>Fecha</label><input type="date" id="mod-fecha" value="' + toISO(c.fecha) + '">' +
+    '<label>Cookies vendidas</label>' + itemsHTMLEditar("cob", items) +
+    '<label>Comisión (%)</label><input type="number" id="mod-comision" min="0" max="100" step="0.5" value="' + (parseFloat(c.comisionPct)||20) + '" oninput="calcularModal(\'cob\')">' +
+    '<label>Caja</label>' +
+    '<div class="pills" id="mod-cajaPills">' +
+      '<button class="pill' + (c.caja==="Efectivo"?" on":"") + '" onclick="pillClick(this,\'Efectivo\')">💵 Efectivo</button>' +
+      '<button class="pill' + (c.caja==="Banco"?" on":"") + '" onclick="pillClick(this,\'Banco\')">🏦 Banco</button>' +
+    '</div>' +
+    '<label>Notas</label><textarea id="mod-notas">' + esc(c.notas||"") + '</textarea>' +
+    '<div class="calc">' +
+      '<div class="calc-row"><span class="lbl">Bruto</span><span class="val" id="mod-bruto">$0</span></div>' +
+      '<div class="calc-row neg"><span class="lbl">Comisión</span><span class="val" id="mod-comisMonto">−$0</span></div>' +
+      '<div class="calc-row total"><span class="lbl">Neto</span><span class="val" id="mod-neto">$0</span></div>' +
+    '</div>' +
+    '<button class="btn-main" onclick="guardarEditCobro(' + row + ')">💾 Guardar cambios</button>';
+  abrirModal(html);
+  window._modCaja = c.caja;
+  calcularModal("cob");
+}
+
+function pillClick(el, val){
+  el.parentElement.querySelectorAll(".pill").forEach(function(p){ p.classList.remove("on"); });
+  el.classList.add("on");
+  window._modCaja = val;
+}
+
+function guardarEditCobro(row){
+  var items = leerItemsModal();
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+  var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+  var pct = parseFloat($("mod-comision").value) || 0;
+  var comisMonto = bruto * pct / 100;
+  var neto = bruto - comisMonto;
+  var resumen = items.map(function(it){ return it.nombre+" x"+it.cantidad; }).join(", ");
+  var payload = {
+    tipo: "editar_cobro",
+    row: row,
+    fecha: $("mod-fecha").value,
+    comercio: $("mod-comercio").value.trim(),
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; }),
+    bruto: bruto,
+    comision_pct: pct,
+    comision_monto: comisMonto,
+    neto: neto,
+    caja: window._modCaja || "Efectivo",
+    notas: $("mod-notas").value.trim(),
+    resumen: resumen
+  };
+  fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: {"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
+    .finally(function(){
+      toast("Cambios guardados ✓", "ok");
+      cerrarModal();
+      setTimeout(cargarHistorial, 800);
+    });
+}
+
+/* ---- Editar MARKETING ---- */
+function editarMarketingMod(row){
+  var m = histData.marketing.find(function(x){ return x.row === row; });
+  if(!m) return;
+  var items = parseProductosString(m.productos);
+  var opts = ["Degustación","Contenido/fotos","Regalo/promo","Muestra clientes","Otro"].map(function(t){
+    return '<option value="'+t+'"' + (m.tipoUso === t ? " selected" : "") + '>'+t+'</option>';
+  }).join("");
+  var html =
+    '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Editar uso marketing</h3>' +
+    '<label>Tipo</label><select id="mod-tipoUso">' + opts + '</select>' +
+    '<label>Fecha</label><input type="date" id="mod-fecha" value="' + toISO(m.fecha) + '">' +
+    '<label>Cookies</label>' + itemsHTMLEditar("mk", items) +
+    '<label>Notas</label><textarea id="mod-notas">' + esc(m.notas||"") + '</textarea>' +
+    '<div class="calc"><div class="calc-row total"><span class="lbl">Costo total</span><span class="val" id="mod-costo">$0</span></div></div>' +
+    '<button class="btn-main bordo" onclick="guardarEditMarketing(' + row + ',\'' + esc(m.productos) + '\')">💾 Guardar cambios</button>';
+  abrirModal(html);
+  calcularModal("mk");
+}
+
+function guardarEditMarketing(row, productosPrev){
+  var items = leerItemsModal();
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+  var costo = items.reduce(function(s,it){ return s + it.costo*it.cantidad; }, 0);
+  var resumen = items.map(function(it){ return it.nombre+" x"+it.cantidad; }).join(", ");
+  // stockChanges nuevo (descontar)
+  var stockChanges = {};
+  items.forEach(function(it){ stockChanges[it.id] = it.cantidad; });
+  // stockChangesPrev (devolver el stock anterior)
+  var itemsPrev = parseProductosString(productosPrev.replace(/&amp;/g,"&"));
+  var stockChangesPrev = {};
+  itemsPrev.forEach(function(it){ stockChangesPrev[it.id] = it.cantidad; });
+
+  var payload = {
+    tipo: "editar_marketing",
+    row: row,
+    fecha: $("mod-fecha").value,
+    tipoUso: $("mod-tipoUso").value,
+    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
+    costo_total: costo,
+    resumen: resumen,
+    notas: $("mod-notas").value.trim(),
+    stockChanges: stockChanges,
+    stockChangesPrev: stockChangesPrev
+  };
+  fetch(APPS_SCRIPT_URL, { method: "POST", mode: "no-cors", headers: {"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
+    .finally(function(){
+      toast("Cambios guardados ✓", "ok");
+      cerrarModal();
+      setTimeout(cargarHistorial, 800);
+    });
+}
+
+/* ---- Reimprimir remito ---- */
+function reimprimirRemito(row){
+  var e = histData.entregas.find(function(x){ return x.row === row; });
+  if(!e) return;
+  var items = parseProductosString(e.productos);
+  generarRemitoPDF(e.nro, e.comercio, e.direccion||"", toISO(e.fecha), items, e.notas||"", e.tipo||"Consignación", parseFloat(e.comision)||20);
+  toast("Regenerando PDF…", "ok");
+}
+
+function toISO(f){
+  if(!f) return hoyISO();
+  if(typeof f === "string" && f.indexOf("-") >= 0) return f;
+  try {
+    var d = new Date(f);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  } catch(e){ return hoyISO(); }
 }
 </script>
 
