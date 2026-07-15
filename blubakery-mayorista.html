@@ -1004,41 +1004,29 @@ function generarRemitoPDF(nroRemito, comercio, direccion, fecha, items, notas, t
   // ===== TABLA CON 2 COLUMNAS DE PRECIOS =====
   y = direccion ? 96 : 90;
 
-  // Header explicativo (aviso al comercio de qué es cada precio)
-  doc.setFillColor(217, 204, 231); // lila
-  doc.roundedRect(m, y, pageW - 2*m, 12, 2, 2, "F");
-  doc.setTextColor(0, 78, 100);
+  // Aclaración simple de la comisión
+  doc.setTextColor(126, 31, 45);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("Precio de venta: lo que cobrás al público", m + 4, y + 5);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("Comisión pactada: " + comisionPct + "%", m + 4, y + 9.5);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
-  doc.text("Precio a pagar a Blu: lo que nos pagás por cookie", pageW - m - 4, y + 5, { align: "right" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text("(precio - comisión)", pageW - m - 4, y + 9.5, { align: "right" });
+  doc.setFontSize(10);
+  doc.text("Comisión pactada: " + comisionPct + "%", pageW - m, y, { align: "right" });
+  y += 6;
 
-  y += 15;
-
-  // Header tabla — 4 columnas: Producto | Cant | Precio público c/u | Precio Blu c/u
+  // Header tabla — 4 columnas: Producto | Cant | Precio venta al público | Precio a Blu
   doc.setFillColor(0, 78, 100);
-  doc.rect(m, y, pageW - 2*m, 10, "F");
+  doc.rect(m, y, pageW - 2*m, 11, "F");
   doc.setTextColor(243, 235, 221);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   var colProd = m + 3;
-  var colCant = m + 78;
-  var colVenta = m + 108;
-  var colBlu = m + 155;
-  doc.text("PRODUCTO", colProd, y + 6.5);
-  doc.text("CANT.", colCant, y + 6.5, { align: "center" });
-  doc.text("PRECIO PÚBLICO", colVenta, y + 6.5, { align: "center" });
-  doc.text("PRECIO A BLU", colBlu, y + 6.5, { align: "center" });
+  var colCant = m + 68;
+  var colVenta = m + 105;
+  var colBlu = m + 152;
+  doc.text("PRODUCTO", colProd, y + 7);
+  doc.text("CANT.", colCant, y + 7, { align: "center" });
+  doc.text("PRECIO VENTA AL PÚBLICO", colVenta, y + 7, { align: "center" });
+  doc.text("PRECIO A BLU", colBlu, y + 7, { align: "center" });
 
-  y += 10;
+  y += 11;
 
   // Filas
   doc.setFont("helvetica", "normal");
@@ -1067,17 +1055,17 @@ function generarRemitoPDF(nroRemito, comercio, direccion, fecha, items, notas, t
     doc.setFont("helvetica", "bold");
     doc.text(String(it.cantidad), colCant, y + 6.5, { align: "center" });
 
-    // Precio público (c/u)
+    // Precio público
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(106, 114, 118);
-    doc.setFontSize(9.5);
-    doc.text("$" + Math.round(precioPublico).toLocaleString("es-AR") + " c/u", colVenta, y + 6.5, { align: "center" });
+    doc.setTextColor(29, 43, 48);
+    doc.setFontSize(10);
+    doc.text("$" + Math.round(precioPublico).toLocaleString("es-AR"), colVenta, y + 6.5, { align: "center" });
 
-    // Precio a Blu (c/u)
+    // Precio a Blu
     doc.setFont("helvetica", "bold");
     doc.setTextColor(0, 78, 100);
     doc.setFontSize(10);
-    doc.text("$" + Math.round(precioBlu).toLocaleString("es-AR") + " c/u", colBlu, y + 6.5, { align: "center" });
+    doc.text("$" + Math.round(precioBlu).toLocaleString("es-AR"), colBlu, y + 6.5, { align: "center" });
 
     totalUnidades += it.cantidad;
     totalPublico += precioPublico * it.cantidad;
@@ -1101,25 +1089,9 @@ function generarRemitoPDF(nroRemito, comercio, direccion, fecha, items, notas, t
   doc.setFontSize(11);
   doc.text("$" + Math.round(totalBlu).toLocaleString("es-AR"), colBlu, y, { align: "center" });
 
-  // ===== EXPLICACIÓN CLARA =====
-  y += 12;
-  doc.setFillColor(251, 246, 236);
-  doc.setDrawColor(215, 161, 58);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(m, y, pageW - 2*m, 20, 2, 2, "FD");
-  doc.setTextColor(0, 78, 100);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("Cómo funciona el cobro:", m + 4, y + 6);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(29, 43, 48);
-  doc.text("• El comercio vende cada cookie al PRECIO PÚBLICO indicado.", m + 4, y + 11.5);
-  doc.text("• Cuando nos paga, nos abona el PRECIO A BLU por cookie vendida (la diferencia queda para el comercio).", m + 4, y + 16);
-
   // ===== NOTAS =====
   if(notas){
-    y += 26;
+    y += 18;
     doc.setTextColor(106, 114, 118);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8.5);
