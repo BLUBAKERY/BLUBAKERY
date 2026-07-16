@@ -701,7 +701,10 @@ function hoyBonito() {
 }
 function fechaBonita(iso) {
   if (!iso) return hoyBonito();
-  var p = iso.split("-");
+  // Si viene un timestamp completo tipo "2026-07-16T03:00:00.000Z", quedarse solo con la parte de fecha
+  var soloFecha = String(iso).split("T")[0];
+  var p = soloFecha.split("-");
+  if (p.length !== 3) return String(iso);
   return p[2]+"/"+p[1]+"/"+p[0];
 }
 function toast(msg, tipo) {
@@ -798,7 +801,7 @@ function agregarItem(seccion){
   // Armar options de productos activos
   var opts = '<option value="">Elegí una cookie…</option>';
   CFG.productos.filter(function(p){ return p.activo !== false; }).forEach(function(p){
-    opts += '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+    opts += '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+' — $'+(parseFloat(p.precio)||0).toLocaleString("es-AR")+'</option>';
   });
   row.innerHTML =
     '<select class="item-prod" onchange="recalcular(\''+seccion+'\')">'+opts+'</select>' +
@@ -881,6 +884,15 @@ function guardarEntrega(){
   if(!comercio){ toast("Falta el nombre del comercio", "err"); return; }
   if(!fecha){ toast("Elegí una fecha", "err"); return; }
   if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+
+  // Verificar que ningún producto tenga precio 0 (bug detectado en Toffee)
+  var productosSinPrecio = items.filter(function(it){ return !it.precio || it.precio === 0; });
+  if(productosSinPrecio.length > 0){
+    var nombres = productosSinPrecio.map(function(it){ return it.nombre; }).join(", ");
+    if(!confirm("⚠ Estos productos tienen precio $0:\n\n" + nombres + "\n\nEsto probablemente sea un error. ¿Querés generar el remito igual?")){
+      return;
+    }
+  }
 
   var payload = {
     tipo: "entrega_mayorista",
@@ -1410,7 +1422,7 @@ function parseProductosString(s){
 
 function itemsHTMLEditar(seccion, items){
   var opts = CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
-    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+' — $'+(parseFloat(p.precio)||0).toLocaleString("es-AR")+'</option>';
   }).join("");
   var html = '<div id="mod-items">';
   items.forEach(function(it, i){
@@ -1418,7 +1430,7 @@ function itemsHTMLEditar(seccion, items){
     html += '<select class="mod-prod" onchange="calcularModal(\''+seccion+'\')"><option value="">Elegí…</option>' +
             CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
               var sel = p.id === it.id ? ' selected' : '';
-              return '<option value="'+p.id+'"'+sel+'>'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+              return '<option value="'+p.id+'"'+sel+'>'+(p.emoji||"🍪")+' '+p.nombre+' — $'+(parseFloat(p.precio)||0).toLocaleString("es-AR")+'</option>';
             }).join("") + '</select>';
     html += '<input type="number" class="mod-cant" min="0" step="1" value="'+it.cantidad+'" oninput="calcularModal(\''+seccion+'\')">';
     html += '<button class="item-del" onclick="quitarItemModal(this,\''+seccion+'\')">✕</button>';
@@ -1434,7 +1446,7 @@ function agregarItemModal(seccion){
   var row = document.createElement("div");
   row.className = "item-row";
   var opts = '<option value="">Elegí…</option>' + CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
-    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+'</option>';
+    return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+p.nombre+' — $'+(parseFloat(p.precio)||0).toLocaleString("es-AR")+'</option>';
   }).join("");
   row.innerHTML =
     '<select class="mod-prod" onchange="calcularModal(\''+seccion+'\')">'+opts+'</select>' +
