@@ -1212,6 +1212,7 @@ var CFG = {
 /* ===== ESTADO ===== */
 var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
+var cuponAplicado = null; // { codigo, tipo, valor, valido }
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
 var beQty = {};  // cantidad de cada box especial { idBoxEsp: cant }
 
@@ -2165,6 +2166,68 @@ function renderContacto(){
 }
 
 /* ===== RESUMEN ===== */
+/* ============ CUPÓN DE DESCUENTO ============ */
+function aplicarCupon(){
+  var input = $("cupInput");
+  if(!input) return;
+  var codigo = (input.value || "").trim().toUpperCase();
+  if(!codigo){ toast("Ingresá un código"); return; }
+
+  var cup = CFG.cupon || {};
+  if(!cup.activo){ toast("No hay cupones activos ahora"); return; }
+
+  // Comparación no sensible a mayúsculas
+  if(String(cup.codigo || "").toUpperCase() !== codigo){
+    cuponAplicado = { valido:false, error:"Código no válido" };
+    renderResumen();
+    return;
+  }
+
+  // Verificar vencimiento
+  if(cup.vence){
+    var hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    var venc = new Date(cup.vence + "T23:59:59");
+    if(hoy > venc){
+      cuponAplicado = { valido:false, error:"Este código venció el " + fechaBonita(cup.vence) };
+      renderResumen();
+      return;
+    }
+  }
+
+  // Verificar compra mínima
+  var t = totales();
+  var subActual = t.subtotal;
+  var min = parseFloat(cup.minimo) || 0;
+  if(min > 0 && subActual < min){
+    cuponAplicado = { valido:false, error:"El código aplica desde $" + Math.round(min).toLocaleString("es-AR") + " (te faltan $" + Math.round(min - subActual).toLocaleString("es-AR") + ")" };
+    renderResumen();
+    return;
+  }
+
+  // Todo OK
+  cuponAplicado = {
+    valido: true,
+    codigo: codigo,
+    tipo: cup.tipo,
+    valor: parseFloat(cup.valor) || 0
+  };
+  toast("✓ Cupón aplicado!");
+  renderResumen();
+}
+
+function quitarCupon(){
+  cuponAplicado = null;
+  renderResumen();
+}
+
+function fechaBonita(iso){
+  if(!iso) return "";
+  var p = String(iso).split("T")[0].split("-");
+  if(p.length !== 3) return String(iso);
+  return p[2]+"/"+p[1]+"/"+p[0];
+}
+
 function totales(){
   var sueltas = 0, items = [];
   CFG.productos.forEach(function(p){
@@ -2189,11 +2252,26 @@ function totales(){
     }
   });
 
+  var subtotal = boxes + sueltas - desc + bEsp;
+
+  // Cupón de descuento (se aplica sobre el subtotal, no sobre el envío)
+  var descCupon = 0;
+  if(cuponAplicado && cuponAplicado.valido){
+    if(cuponAplicado.tipo === "porcentaje"){
+      descCupon = subtotal * (parseFloat(cuponAplicado.valor)||0) / 100;
+    } else {
+      descCupon = Math.min(subtotal, parseFloat(cuponAplicado.valor)||0);
+    }
+    descCupon = Math.round(descCupon);
+  }
+
   var hayAlgo = hayBox || items.length>0 || itemsBE.length>0;
   return {
     sueltas:sueltas, boxes:boxes, desc:desc,
     bEsp:bEsp, itemsBE:itemsBE, requiereTrf:requiereTrf,
-    total: boxes + sueltas - desc + bEsp,
+    subtotal: subtotal,
+    descCupon: descCupon,
+    total: subtotal - descCupon,
     items:items, hayBox:hayBox, hayAlgo:hayAlgo
   };
 }
@@ -2220,7 +2298,40 @@ function renderResumen(){
     }
     t.items.forEach(function(it){ h += row(it.nombre+" ×"+it.cant, ""); });
     if(t.desc>0) h += row("Descuento sueltas ("+CFG.box.pctSueltas+"%)", "−"+fmt(t.desc));
+
+    // Subtotal si hay cupón aplicado
+    if(t.descCupon > 0){
+      h += '<div style="border-top:1px dashed rgba(0,78,100,0.2);margin-top:8px;padding-top:8px">';
+      h += row("Subtotal", fmt(t.subtotal));
+      var etiquetaCup = "Cupón " + (cuponAplicado && cuponAplicado.codigo ? cuponAplicado.codigo : "");
+      if(cuponAplicado && cuponAplicado.tipo === "porcentaje") etiquetaCup += " ("+cuponAplicado.valor+"%)";
+      h += '<div style="display:flex;justify-content:space-between;padding:3px 0;color:#4E6546;font-weight:600"><span>🎟️ '+esc(etiquetaCup)+'</span><span>−'+fmt(t.descCupon)+'</span></div>';
+      h += '</div>';
+    }
+
     h += '<div class="res-total"><span>Total</span><span>'+fmt(t.total)+'</span></div>';
+
+    // ==== BLOQUE CUPÓN DE DESCUENTO (llamativo) ====
+    if(CFG.cupon && CFG.cupon.activo){
+      if(cuponAplicado && cuponAplicado.valido){
+        h += '<div style="background:linear-gradient(135deg,#eaf5ed,#d7ecdc);border:2px dashed #4E6546;border-radius:12px;padding:12px 14px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:10px">';
+        h += '<div style="flex:1"><div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:11px;letter-spacing:1.5px;color:#4E6546;text-transform:uppercase;font-weight:700;margin-bottom:2px">✓ Cupón aplicado</div>';
+        h += '<div style="font-size:15px;font-weight:700;color:#3a4f36">'+esc(cuponAplicado.codigo)+'</div></div>';
+        h += '<button onclick="quitarCupon()" style="background:none;border:1px solid #4E6546;color:#4E6546;padding:6px 12px;border-radius:100px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Quitar</button>';
+        h += '</div>';
+      } else {
+        h += '<div style="background:linear-gradient(135deg,#fbeede,#f5e0c2);border:2px dashed var(--mostaza);border-radius:12px;padding:12px 14px;margin-top:12px">';
+        h += '<div style="font-family:\'Bricolage Grotesque\',sans-serif;font-size:11px;letter-spacing:1.5px;color:#8a5a14;text-transform:uppercase;font-weight:700;margin-bottom:8px">🎟️ ¿Tenés un código de descuento?</div>';
+        h += '<div style="display:flex;gap:8px">';
+        h += '<input type="text" id="cupInput" placeholder="Ingresá el código" style="flex:1;padding:10px 12px;border:1px solid #d5c8b0;border-radius:8px;font-size:14px;font-family:inherit;text-transform:uppercase" onkeypress="if(event.key===\'Enter\'){event.preventDefault();aplicarCupon();}">';
+        h += '<button onclick="aplicarCupon()" style="background:var(--azul);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;letter-spacing:0.5px">Aplicar</button>';
+        h += '</div>';
+        if(cuponAplicado && cuponAplicado.error){
+          h += '<div style="margin-top:8px;font-size:12.5px;color:var(--bordo);font-weight:600">⚠ '+esc(cuponAplicado.error)+'</div>';
+        }
+        h += '</div>';
+      }
+    }
 
     // Aviso de pago obligatorio por transferencia
     if(t.requiereTrf){
@@ -2365,7 +2476,7 @@ function confirmar(){
     nombre:nom, telefono:tel, email:$("iMail").value.trim(),
     cookies:ck.join(" | "), unidades:unidades,
     pack: packTxt.length?packTxt.join(", "):"No",
-    subtotal:t.total, entrega: ent==="envio"?"Envio":"Retiro",
+    subtotal:t.subtotal, entrega: ent==="envio"?"Envio":"Retiro",
     direccion: ent==="envio" ? $("iDir").value.trim() : (puntoRetiro==="lomanegra" ? "Retiro Loma Negra" : "Retiro Olavarría"),
     dia_entrega: dia.label, horario: franja||"",
     costo_envio: (function(){
@@ -2378,7 +2489,9 @@ function confirmar(){
     notas: notasFinal, estado:"Pendiente",
     destinatario: destinatario,
     stockChanges:stockChanges,
-    esReserva: t.requiereTrf  // marca el pedido como reserva especial
+    esReserva: t.requiereTrf,  // marca el pedido como reserva especial
+    cupon_codigo: (cuponAplicado && cuponAplicado.valido) ? cuponAplicado.codigo : "",
+    cupon_descuento: (cuponAplicado && cuponAplicado.valido) ? t.descCupon : 0
   };
 
   var btn = $("btnGo");
@@ -2402,6 +2515,9 @@ function exito(p){
     "👤 Nombre: " + p.nombre,
     "📞 Tel: " + p.telefono
   ];
+  if(p.cupon_codigo){
+    lineas.splice(6, 0, "🎟️ Cupón " + p.cupon_codigo + ": −" + fmt(p.cupon_descuento));
+  }
   if(p.destinatario){
     lineas.push("🎁 Para: " + p.destinatario + " (nombre para la etiqueta)");
   }
