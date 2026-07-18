@@ -98,6 +98,31 @@
   .reset-zone{background:rgba(126,31,45,.05);border:1px dashed var(--bordo);border-radius:10px;padding:14px;margin-top:20px;text-align:center}
   .btn-reset{background:none;border:1px solid var(--bordo);color:var(--bordo);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600}
   .btn-reset:hover{background:var(--bordo);color:#fff}
+
+  /* === Grilla stock locales === */
+  .stock-comercio{background:#fff;border:1px solid var(--avena);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+  .stock-comercio-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--avena)}
+  .stock-comercio-nom{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:800;color:var(--azul)}
+  .stock-tabla{width:100%;border-collapse:collapse}
+  .stock-tabla th{font-family:'Bricolage Grotesque',sans-serif;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--gris);font-weight:700;text-align:left;padding:6px 4px;border-bottom:1px solid var(--avena)}
+  .stock-tabla th.center{text-align:center}.stock-tabla th.right{text-align:right}
+  .stock-tabla td{padding:8px 4px;border-bottom:1px dashed rgba(0,78,100,.08);font-size:13px;vertical-align:middle}
+  .stock-tabla tr:last-child td{border-bottom:none}
+  .stock-tabla .cant-cell{font-family:'Playfair Display',Georgia,serif;font-size:18px;font-weight:800;color:var(--azul);text-align:center;min-width:40px}
+  .stock-tabla .cant-cell.low{color:var(--bordo)}
+  .stock-tabla .cant-cell.zero{color:var(--gris);opacity:.5}
+  .stock-acc{display:flex;gap:4px;justify-content:flex-end}
+  .stock-btn{width:30px;height:30px;border-radius:6px;border:1px solid;background:#fff;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;padding:0;display:flex;align-items:center;justify-content:center}
+  .stock-btn.minus{color:var(--bordo);border-color:var(--bordo)}
+  .stock-btn.minus:hover{background:var(--bordo);color:#fff}
+  .stock-btn.plus{color:var(--verde);border-color:var(--verde)}
+  .stock-btn.plus:hover{background:var(--verde);color:#fff}
+  .stock-btn.edit{color:var(--azul);border-color:var(--azul);font-size:11px;width:auto;padding:0 8px}
+  .stock-btn.edit:hover{background:var(--azul);color:#fff}
+  .stock-actions-footer{display:flex;gap:6px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--avena)}
+  .stock-sabor-agregar{width:100%;padding:9px 12px;border:1px dashed var(--azul);border-radius:8px;background:#fff;color:var(--azul);font-family:'Bricolage Grotesque',sans-serif;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px}
+  .motivo-btn{display:block;width:100%;padding:10px 12px;background:#fff;border:1px solid #d5c8b0;border-radius:8px;margin-bottom:6px;text-align:left;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;color:var(--tinta)}
+  .motivo-btn:hover{border-color:var(--bordo);background:rgba(126,31,45,.05)}
 </style>
 </head>
 <body>
@@ -111,7 +136,7 @@
   <div class="menu">
     <button class="menu-btn" onclick="mostrar('remito')" id="btn-remito"><span class="menu-icon">📦</span><div class="menu-title">Nuevo remito</div><div class="menu-sub">Dejar mercadería</div></button>
     <button class="menu-btn" onclick="mostrar('cobro')" id="btn-cobro"><span class="menu-icon">💰</span><div class="menu-title">Nuevo cobro</div><div class="menu-sub">Cobrar vendidas</div></button>
-    <button class="menu-btn" onclick="mostrar('retiro')" id="btn-retiro"><span class="menu-icon">↩️</span><div class="menu-title">Retirar</div><div class="menu-sub">Sacar del local</div></button>
+    <button class="menu-btn" onclick="mostrar('stock')" id="btn-stock"><span class="menu-icon">📊</span><div class="menu-title">Stock locales</div><div class="menu-sub">Ver y ajustar</div></button>
     <button class="menu-btn" onclick="mostrar('marketing')" id="btn-marketing"><span class="menu-icon">🎁</span><div class="menu-title">Marketing</div><div class="menu-sub">Cookies interno</div></button>
   </div>
   <button class="menu-wide" onclick="mostrar('comercios')" id="btn-comercios">📊 Ver comercios · Stock e historial</button>
@@ -176,27 +201,11 @@
     <button class="btn-main" onclick="guardarCobro()">📄 Generar comprobante y registrar</button>
   </div>
 
-  <div class="panel" id="panel-retiro">
-    <h2>Retiro de mercadería</h2>
-    <div class="panel-sub">Sacá cookies del local (por rotura, cambio, otro cliente, etc.). No toca cajas.</div>
-    <label>Comercio</label>
-    <select id="ret-comercio" onchange="renderStockRefRetiro()"></select>
-    <div id="ret-stockRef" style="margin-top:8px"></div>
-    <label>Fecha</label><input type="date" id="ret-fecha">
-    <label>Motivo</label>
-    <select id="ret-motivo">
-      <option value="Producto en mal estado">Producto en mal estado</option>
-      <option value="Para otro cliente">Para otro cliente</option>
-      <option value="Cambio de mercadería">Cambio de mercadería</option>
-      <option value="Vencimiento próximo">Vencimiento próximo</option>
-      <option value="Otro">Otro</option>
-    </select>
-    <label>Cookies retiradas</label>
-    <div class="item-labels"><span>PRODUCTO</span><span>CANT.</span><span></span><span></span></div>
-    <div id="ret-items"></div>
-    <button class="btn-add" onclick="agregarItem('ret')">+ Agregar cookie</button>
-    <label>Notas (opcional)</label><textarea id="ret-notas"></textarea>
-    <button class="btn-main bordo" onclick="guardarRetiro()">↩️ Registrar retiro</button>
+  <div class="panel" id="panel-stock">
+    <h2>Stock en locales</h2>
+    <div class="panel-sub">Ve y ajustá el stock de cada comercio en tiempo real. Los cambios quedan registrados en el historial.</div>
+    <button class="btn-add" onclick="cargarTodo()">🔄 Actualizar datos</button>
+    <div id="stock-lista" style="margin-top:14px"></div>
   </div>
 
   <div class="panel" id="panel-marketing">
@@ -250,7 +259,7 @@ var DATA = { comercios: [], remitos: [], cobros: [], retiros: [], ajustes: [], m
 var seccionActual = "";
 var descontarStockWebFlag = false;
 var cobCajaSel = "Efectivo";
-var itemCount = { rem:0, cob:0, ret:0, mk:0 };
+var itemCount = { rem:0, cob:0, mk:0 };
 
 function $(id){ return document.getElementById(id); }
 function fmt(n){ return "$" + (Math.round(n||0)).toLocaleString("es-AR"); }
@@ -297,8 +306,8 @@ function init(){
   }).catch(function(e){ console.warn(e); });
   Promise.all([pC, pB]).then(cargarTodo).finally(function(){
     $("cargando").style.display = "none";
-    ["rem-fecha","cob-fecha","ret-fecha","mk-fecha"].forEach(function(id){ var el=$(id); if(el) el.value = hoyISO(); });
-    agregarItem("rem"); agregarItem("cob"); agregarItem("ret"); agregarItem("mk");
+    ["rem-fecha","cob-fecha","mk-fecha"].forEach(function(id){ var el=$(id); if(el) el.value = hoyISO(); });
+    agregarItem("rem"); agregarItem("cob"); agregarItem("mk");
     poblarSelectComercios();
     mostrar("remito");
   });
@@ -320,12 +329,13 @@ function cargarTodo(){
 
 function mostrar(sec){
   seccionActual = sec;
-  ["remito","cobro","retiro","marketing","comercios"].forEach(function(s){
+  ["remito","cobro","stock","marketing","comercios"].forEach(function(s){
     var p=$("panel-"+s), b=$("btn-"+s);
     if(p) p.classList.toggle("on", s === sec);
     if(b) b.classList.toggle("on", s === sec);
   });
   if(sec === "comercios") renderComercios();
+  if(sec === "stock") renderStockGrilla();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
@@ -341,7 +351,7 @@ function toggleStockWeb(){
 }
 
 function poblarSelectComercios(){
-  ["rem-comercio","cob-comercio","ret-comercio"].forEach(function(id){
+  ["rem-comercio","cob-comercio"].forEach(function(id){
     var sel = $(id); if(!sel) return;
     var actual = sel.value;
     var html = '<option value="">Elegí un comercio…</option>';
@@ -413,11 +423,11 @@ function onProdChange(sec, rowId){
 
 function mostrarStockHint(sec, rowId){
   var hint = $(rowId+"-hint"); if(!hint) return;
-  if(sec === "rem" || sec === "mk"){ hint.textContent = ""; return; }
+  if(sec !== "cob"){ hint.textContent = ""; return; }
   var row = $(rowId);
   var pid = row.querySelector(".item-prod").value;
   var cant = parseInt(row.querySelector(".item-cant").value) || 0;
-  var comId = $(sec === "cob" ? "cob-comercio" : "ret-comercio").value;
+  var comId = $("cob-comercio").value;
   if(!pid || !comId){ hint.textContent = ""; return; }
   var stock = stockActualComercioProducto(comId, pid);
   if(cant > stock){ hint.className = "stock-hint warn"; hint.textContent = "⚠ Este comercio solo tiene " + stock + " en stock"; }
@@ -481,7 +491,6 @@ function stockActualComercio(comId){
 function stockActualComercioProducto(comId, pid){ return stockActualComercio(comId)[pid] || 0; }
 
 function renderStockRefCobro(){ renderStockRef("cob", $("cob-comercio").value); }
-function renderStockRefRetiro(){ renderStockRef("ret", $("ret-comercio").value); }
 
 function renderStockRef(sec, comId){
   var cont = $(sec+"-stockRef");
@@ -585,21 +594,6 @@ function generarRemitoPDF(nro, comercio, direccion, fecha, items, notas, pct, st
   doc.text("TOTAL COOKIES ENTREGADAS", cP, y);
   doc.text(String(totalU), cC, y, {align:"center"});
   y += 16;
-  doc.setFillColor(251,246,236); doc.setDrawColor(215,161,58); doc.setLineWidth(0.4);
-  var sabores = Object.keys(stockLocal).filter(function(k){ return stockLocal[k] > 0; });
-  var altoBloque = 12 + Math.ceil(sabores.length / 3) * 6;
-  doc.roundedRect(m, y, pageW - 2*m, altoBloque, 2, 2, "FD");
-  doc.setTextColor(126,31,45); doc.setFont("helvetica","bold"); doc.setFontSize(10);
-  doc.text("Sumado al stock anterior, el local cuenta ahora con:", m + 4, y + 6);
-  doc.setTextColor(29,43,48); doc.setFont("helvetica","normal"); doc.setFontSize(10);
-  var startY = y + 11;
-  sabores.forEach(function(pid, i){
-    var p = CFG.productos.find(function(x){ return x.id === pid; }); if(!p) return;
-    var col = i % 3; var fila = Math.floor(i / 3);
-    var xx = m + 4 + col * ((pageW - 2*m - 8) / 3);
-    doc.text("• " + p.nombre + ": " + stockLocal[pid], xx, startY + fila * 6);
-  });
-  y += altoBloque + 6;
   if(notas){
     doc.setTextColor(106,114,118); doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.text("NOTAS", m, y); y += 5;
     doc.setTextColor(29,43,48); doc.setFontSize(10);
@@ -731,26 +725,6 @@ function generarComprobantePDF(nro, comercio, fecha, items, notas, pct, bruto, c
   doc.save("ComprobantePago_" + fechaSlug + "_" + slug + "_Nº" + nro + ".pdf");
 }
 
-function guardarRetiro(){
-  var comId = $("ret-comercio").value;
-  var fecha = $("ret-fecha").value;
-  var motivo = $("ret-motivo").value;
-  var notas = $("ret-notas").value.trim();
-  var items = leerItems("ret");
-  if(!comId){ toast("Elegí un comercio", "err"); return; }
-  if(!fecha){ toast("Elegí una fecha", "err"); return; }
-  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
-  var comercio = DATA.comercios.find(function(c){ return c.id === comId; });
-  var comNombre = comercio ? comercio.nombre : "";
-  var payload = {
-    tipo:"retiro", fecha:fecha, comercioId:comId, comercio:comNombre,
-    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
-    motivo:motivo, notas:notas
-  };
-  fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
-    .finally(function(){ toast("Retiro registrado ✓", "ok"); limpiarPanel("ret"); setTimeout(cargarTodo, 1500); });
-}
-
 function guardarMarketing(){
   var tipoUso = $("mk-tipo").value;
   var fecha = $("mk-fecha").value;
@@ -768,7 +742,7 @@ function guardarMarketing(){
 }
 
 function limpiarPanel(sec){
-  var comIds = { rem:"rem-comercio", cob:"cob-comercio", ret:"ret-comercio" };
+  var comIds = { rem:"rem-comercio", cob:"cob-comercio" };
   if(comIds[sec]){ $(comIds[sec]).value = ""; }
   var notas = $(sec+"-notas"); if(notas) notas.value = "";
   var items = $(sec+"-items"); if(items) items.innerHTML = "";
@@ -776,7 +750,6 @@ function limpiarPanel(sec){
   agregarItem(sec); recalcular(sec);
   if(sec === "rem"){ descontarStockWebFlag = false; $("rem-toggle").classList.remove("on"); }
   if(sec === "cob") $("cob-stockRef").innerHTML = "";
-  if(sec === "ret") $("ret-stockRef").innerHTML = "";
 }
 
 function renderComercios(){
@@ -939,7 +912,6 @@ function verHistorialComercio(comId){
 function editarEvento(tipo, row){
   if(tipo === "remito") editarRemitoModal(row);
   else if(tipo === "cobro") editarCobroModal(row);
-  else if(tipo === "retiro") editarRetiroModal(row);
   else if(tipo === "ajuste") toast("Los ajustes no se editan. Hacé otro ajuste para corregir.", "err");
 }
 
@@ -986,13 +958,30 @@ function guardarEditRemito(row){
   if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
   var comId = $("er-com").value;
   var com = DATA.comercios.find(function(c){ return c.id === comId; });
-  var payload = { tipo:"editar_remito", row:row, fecha:$("er-fecha").value, comercioId:comId,
-    comercio: com ? com.nombre : "",
-    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; }),
-    comision_pct: parseFloat($("er-com-pct").value)||20, descontarStockWeb: false,
-    notas: $("er-notas").value.trim() };
+  var pct = parseFloat($("er-com-pct").value)||20;
+  var fecha = $("er-fecha").value;
+  var notas = $("er-notas").value.trim();
+  var comNombre = com ? com.nombre : "";
+  var itemsPayload = items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; });
+  var payload = { tipo:"editar_remito", row:row, fecha:fecha, comercioId:comId,
+    comercio: comNombre, items: itemsPayload,
+    comision_pct: pct, descontarStockWeb: false, notas: notas };
+  // Buscar el número del remito para el PDF
+  var rem = DATA.remitos.find(function(x){ return x.row === row; });
+  var nro = rem ? rem.nro : "?";
+  // Actualizar data local para que el stock del PDF sea correcto
+  if(rem){
+    rem.items = itemsPayload; rem.comercioId = comId; rem.comercio = comNombre;
+    rem.fecha = fecha; rem.comision = pct; rem.notas = notas;
+  }
   fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
-    .finally(function(){ toast("Guardado ✓", "ok"); cerrarModal(); setTimeout(cargarTodo, 1000); });
+    .finally(function(){
+      // Regenerar PDF con los datos nuevos
+      var direccion = com ? (com.direccion || "") : "";
+      var stockLocal = stockActualComercio(comId);
+      generarRemitoPDF(nro, comNombre, direccion, fecha, items, notas, pct, stockLocal);
+      toast("Guardado ✓ PDF actualizado", "ok"); cerrarModal(); setTimeout(cargarTodo, 1000);
+    });
 }
 
 function editarCobroModal(row){
@@ -1037,43 +1026,27 @@ function guardarEditCobro(row){
   var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
   var comis = bruto * pct / 100;
   var neto = bruto - comis;
-  var payload = { tipo:"editar_cobro", row:row, fecha:$("ec-fecha").value, comercioId:comId,
-    comercio: com ? com.nombre : "",
-    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; }),
+  var caja = window._editCaja || "Efectivo";
+  var fecha = $("ec-fecha").value;
+  var notas = $("ec-notas").value.trim();
+  var comNombre = com ? com.nombre : "";
+  var itemsPayload = items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; });
+  var payload = { tipo:"editar_cobro", row:row, fecha:fecha, comercioId:comId,
+    comercio: comNombre, items: itemsPayload,
     comision_pct: pct, bruto:bruto, comision_monto:comis, neto:neto,
-    caja: window._editCaja || "Efectivo", notas: $("ec-notas").value.trim() };
+    caja: caja, notas: notas };
+  var cob = DATA.cobros.find(function(x){ return x.row === row; });
+  var nro = cob ? cob.nro : "?";
+  if(cob){
+    cob.items = itemsPayload; cob.comercioId = comId; cob.comercio = comNombre;
+    cob.fecha = fecha; cob.comision = pct; cob.bruto = bruto; cob.comisionMonto = comis;
+    cob.neto = neto; cob.caja = caja; cob.notas = notas;
+  }
   fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
-    .finally(function(){ toast("Guardado ✓", "ok"); cerrarModal(); setTimeout(cargarTodo, 1000); });
-}
-
-function editarRetiroModal(row){
-  var r = DATA.retiros.find(function(x){ return x.row === row; }); if(!r) return;
-  var comOpts = DATA.comercios.map(function(x){ return '<option value="'+esc(x.id)+'"'+(x.id===r.comercioId?" selected":"")+'>'+esc(x.nombre)+'</option>'; }).join("");
-  var itemsHTML = itemsEditHTML(r.items, "retedit", false);
-  var motivos = ["Producto en mal estado","Para otro cliente","Cambio de mercadería","Vencimiento próximo","Otro"];
-  var motOpts = motivos.map(function(m){ return '<option value="'+m+'"'+(m===r.motivo?" selected":"")+'>'+m+'</option>'; }).join("");
-  var html = '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
-    '<h3>Editar Retiro N° '+r.nro+'</h3>' +
-    '<label>Comercio</label><select id="ert-com">'+comOpts+'</select>' +
-    '<label>Fecha</label><input type="date" id="ert-fecha" value="'+toISO(r.fecha)+'">' +
-    '<label>Motivo</label><select id="ert-motivo">'+motOpts+'</select>' +
-    '<label>Cookies</label>' + itemsHTML +
-    '<label>Notas</label><textarea id="ert-notas">'+esc(r.notas||"")+'</textarea>' +
-    '<button class="btn-main bordo" onclick="guardarEditRetiro('+row+')">Guardar cambios</button>';
-  abrirModal(html);
-}
-
-function guardarEditRetiro(row){
-  var items = leerItemsEdit("retedit", false);
-  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
-  var comId = $("ert-com").value;
-  var com = DATA.comercios.find(function(c){ return c.id === comId; });
-  var payload = { tipo:"editar_retiro", row:row, fecha:$("ert-fecha").value, comercioId:comId,
-    comercio: com ? com.nombre : "",
-    items: items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad }; }),
-    motivo: $("ert-motivo").value, notas: $("ert-notas").value.trim() };
-  fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
-    .finally(function(){ toast("Guardado ✓", "ok"); cerrarModal(); setTimeout(cargarTodo, 1000); });
+    .finally(function(){
+      generarComprobantePDF(nro, comNombre, fecha, items, notas, pct, bruto, comis, neto, caja);
+      toast("Guardado ✓ PDF actualizado", "ok"); cerrarModal(); setTimeout(cargarTodo, 1000);
+    });
 }
 
 function itemsEditHTML(items, prefix, mostrarPrecio){
@@ -1136,6 +1109,143 @@ function recalcEdit(prefix){
 
 function abrirModal(html){ $("modal").innerHTML = html; $("modal-bg").classList.add("on"); }
 function cerrarModal(){ $("modal-bg").classList.remove("on"); }
+
+/* ============ STOCK LOCALES (grilla) ============ */
+function renderStockGrilla(){
+  var cont = $("stock-lista");
+  if(!cont) return;
+  if(DATA.comercios.length === 0){
+    cont.innerHTML = '<div class="empty">No hay comercios cargados. Cargá tu primer remito para empezar.</div>';
+    return;
+  }
+  var html = "";
+  DATA.comercios.forEach(function(c){
+    var stock = stockActualComercio(c.id);
+    // Traer todos los sabores que hayan aparecido alguna vez en este comercio, no solo los > 0
+    var sabores = Object.keys(stock);
+    html += '<div class="stock-comercio">';
+    html += '<div class="stock-comercio-head">';
+    html += '<div><div class="stock-comercio-nom">'+esc(c.nombre)+'</div>';
+    if(c.direccion) html += '<div style="font-size:11.5px;color:var(--gris)">'+esc(c.direccion)+'</div>';
+    html += '</div>';
+    html += '<button class="c-btn" onclick="verHistorialComercio(\''+esc(c.id)+'\')" style="flex:0 0 auto">📋 Historial</button>';
+    html += '</div>';
+
+    if(sabores.length === 0){
+      html += '<div style="text-align:center;padding:20px 10px;color:var(--gris);font-size:12px;font-style:italic">Sin sabores registrados todavía. Agregá el primero abajo.</div>';
+    } else {
+      html += '<table class="stock-tabla"><thead><tr>';
+      html += '<th>SABOR</th><th class="center">STOCK</th><th class="right">AJUSTAR</th>';
+      html += '</tr></thead><tbody>';
+      sabores.sort(function(a,b){
+        var pa = CFG.productos.find(function(x){ return x.id === a; });
+        var pb = CFG.productos.find(function(x){ return x.id === b; });
+        return (pa?pa.nombre:"").localeCompare(pb?pb.nombre:"");
+      }).forEach(function(pid){
+        var p = CFG.productos.find(function(x){ return x.id === pid; });
+        if(!p) return;
+        var cant = stock[pid] || 0;
+        var cls = cant === 0 ? "zero" : (cant <= 2 ? "low" : "");
+        html += '<tr>';
+        html += '<td>'+(p.emoji||"🍪")+' '+esc(p.nombre)+'</td>';
+        html += '<td class="cant-cell '+cls+'">'+cant+'</td>';
+        html += '<td><div class="stock-acc">';
+        html += '<button class="stock-btn minus" onclick="ajusteRapido(\''+esc(c.id)+'\',\''+esc(c.nombre)+'\',\''+pid+'\',-1)" title="Restar 1">−</button>';
+        html += '<button class="stock-btn plus" onclick="ajusteRapido(\''+esc(c.id)+'\',\''+esc(c.nombre)+'\',\''+pid+'\',1)" title="Sumar 1">+</button>';
+        html += '<button class="stock-btn edit" onclick="ajusteExacto(\''+esc(c.id)+'\',\''+esc(c.nombre)+'\',\''+pid+'\','+cant+')" title="Cambiar a un número exacto">Editar</button>';
+        html += '</div></td>';
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    html += '<button class="stock-sabor-agregar" onclick="agregarSaborAComercio(\''+esc(c.id)+'\',\''+esc(c.nombre)+'\')">+ Agregar sabor</button>';
+    html += '</div>';
+  });
+  cont.innerHTML = html;
+}
+
+// Ajuste rápido: si es -1, pide motivo. Si es +1, no.
+function ajusteRapido(comId, comNombre, pid, delta){
+  var p = CFG.productos.find(function(x){ return x.id === pid; });
+  if(!p) return;
+  var stockActual = stockActualComercioProducto(comId, pid);
+  if(delta < 0 && stockActual <= 0){ toast("El stock ya está en 0", "err"); return; }
+  if(delta < 0){
+    // Pedir motivo
+    pedirMotivoYAjustar(comId, comNombre, pid, p.nombre, delta);
+  } else {
+    // Ajuste rápido sin motivo (corrección)
+    ejecutarAjuste(comId, comNombre, pid, p.nombre, delta, "Ajuste manual (+)");
+  }
+}
+
+function ajusteExacto(comId, comNombre, pid, cantActual){
+  var p = CFG.productos.find(function(x){ return x.id === pid; });
+  if(!p) return;
+  var nuevoStr = prompt("Nuevo stock de " + p.nombre + " (actual: " + cantActual + ")", cantActual);
+  if(nuevoStr === null) return;
+  var nuevo = parseInt(nuevoStr);
+  if(isNaN(nuevo) || nuevo < 0){ toast("Ingresá un número válido", "err"); return; }
+  var delta = nuevo - cantActual;
+  if(delta === 0){ toast("No hubo cambios"); return; }
+  if(delta < 0){
+    pedirMotivoYAjustar(comId, comNombre, pid, p.nombre, delta);
+  } else {
+    ejecutarAjuste(comId, comNombre, pid, p.nombre, delta, "Ajuste manual (+)");
+  }
+}
+
+function pedirMotivoYAjustar(comId, comNombre, pid, prodNombre, delta){
+  var motivos = ["Retiro por Blu","Producto en mal estado","Vendido sin cobro registrado","Corrección de conteo","Otro"];
+  var html = '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Motivo del ajuste</h3>' +
+    '<div class="panel-sub">Vas a restar <b>'+Math.abs(delta)+'</b> ' + esc(prodNombre) + ' del stock de <b>'+esc(comNombre)+'</b>. ¿Por qué?</div>';
+  motivos.forEach(function(m){
+    html += '<button class="motivo-btn" onclick="ejecutarAjuste(\''+esc(comId)+'\',\''+esc(comNombre)+'\',\''+pid+'\',\''+esc(prodNombre)+'\','+delta+',\''+esc(m)+'\')">'+esc(m)+'</button>';
+  });
+  abrirModal(html);
+}
+
+function ejecutarAjuste(comId, comNombre, pid, prodNombre, delta, motivo){
+  var payload = { tipo:"ajuste_stock_comercio", fecha:hoyISO(),
+    comercioId:comId, comercio:comNombre,
+    items: [{ id: pid, nombre: prodNombre, cantidad: delta }],
+    motivo: motivo };
+  // Actualización optimista: agregar a data local para que se vea al toque
+  DATA.ajustes.push({ row:-1, fecha:hoyISO(), comercioId:comId, comercio:comNombre,
+    items:[{ id:pid, nombre:prodNombre, cantidad:delta }], motivo:motivo });
+  renderStockGrilla();
+  cerrarModal();
+  fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
+    .finally(function(){
+      toast((delta>0?"+"+delta:delta) + " " + prodNombre + " ✓", "ok");
+      setTimeout(cargarTodo, 1500);
+    });
+}
+
+function agregarSaborAComercio(comId, comNombre){
+  var opts = '<option value="">Elegí un sabor…</option>' +
+    CFG.productos.filter(function(p){return p.activo !== false;}).map(function(p){
+      return '<option value="'+p.id+'">'+(p.emoji||"🍪")+' '+esc(p.nombre)+'</option>';
+    }).join("");
+  var html = '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Agregar sabor</h3>' +
+    '<div class="panel-sub">Agregá un sabor al stock de <b>'+esc(comNombre)+'</b>.</div>' +
+    '<label>Sabor</label><select id="as-prod">'+opts+'</select>' +
+    '<label>Cantidad inicial</label><input type="number" id="as-cant" min="1" step="1" value="1">' +
+    '<button class="btn-main" onclick="ejecutarAgregarSabor(\''+esc(comId)+'\',\''+esc(comNombre)+'\')">Agregar</button>';
+  abrirModal(html);
+}
+
+function ejecutarAgregarSabor(comId, comNombre){
+  var pid = $("as-prod").value;
+  var cant = parseInt($("as-cant").value) || 0;
+  if(!pid){ toast("Elegí un sabor", "err"); return; }
+  if(cant <= 0){ toast("Cantidad debe ser mayor a 0", "err"); return; }
+  var p = CFG.productos.find(function(x){ return x.id === pid; });
+  ejecutarAjuste(comId, comNombre, pid, p.nombre, cant, "Alta manual de sabor");
+}
 
 function resetSistema(){
   if(!confirm("⚠ ATENCIÓN: Esto borra TODOS los datos actuales de comercios, remitos, cobros, retiros y ajustes.\n\nNO se pueden recuperar.\n\n¿Estás segura?")) return;
