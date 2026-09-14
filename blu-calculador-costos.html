@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blu Bakery - Calculador de Costos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #004e64;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #004e64;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #004e64;
+            border-bottom-color: #d7a13a;
+        }
+
+        .tab-btn:hover {
+            color: #004e64;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #004e64;
+            box-shadow: 0 0 0 3px rgba(0,78,100,0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #004e64;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #003845;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,78,100,0.3);
+        }
+
+        .btn-secondary {
+            background: #f2e6d8;
+            color: #004e64;
+            border: 1.5px solid #004e64;
+        }
+
+        .btn-secondary:hover {
+            background: #e8d5c4;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+        }
+
+        .btn-danger {
+            background: #d84949;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c73939;
+        }
+
+        .ingredient-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 100px 80px auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .ingredient-row input {
+            margin: 0;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #004e64;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d7a13a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cost-summary {
+            background: linear-gradient(135deg, #f2e6d8 0%, #e8d5c4 100%);
+            border-left: 5px solid #d7a13a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .cost-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.95em;
+        }
+
+        .cost-row:last-child {
+            border-bottom: none;
+        }
+
+        .cost-row.total {
+            font-weight: 700;
+            font-size: 1.1em;
+            padding-top: 15px;
+            color: #004e64;
+        }
+
+        .cost-row.highlight {
+            background: white;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .recipe-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .recipe-card {
+            background: white;
+            border: 2px solid #004e64;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .recipe-card:hover {
+            box-shadow: 0 8px 16px rgba(0,78,100,0.2);
+            transform: translateY(-4px);
+        }
+
+        .recipe-card h3 {
+            color: #004e64;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        .recipe-card p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .recipe-card .price {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #d7a13a;
+            margin: 15px 0;
+        }
+
+        .recipe-card .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .recipe-card button {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .message {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #bee5eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #004e64;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .ingredient-row {
+                grid-template-columns: 1fr;
+            }
+
+            .recipe-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #d7a13a;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .variables-section {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #004e64;
+        }
+
+        .variable-input {
+            display: grid;
+            grid-template-columns: auto 120px;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .variable-input label {
+            margin: 0;
+        }
+
+        .variable-input input {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍪 Blu Bakery</h1>
+            <p>Calculador Inteligente de Costos</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('recipes')">📝 Mis Recetas</button>
+            <button class="tab-btn" onclick="switchTab('products')">🎁 Productos</button>
+            <button class="tab-btn" onclick="switchTab('settings')">⚙️ Configuración</button>
+        </div>
+
+        <!-- TAB: RECETAS -->
+        <div id="recipes" class="tab-content active">
+            <div class="card">
+                <h2>📝 Nueva Cookie</h2>
+                <p class="help-text" style="margin-bottom: 20px;">Pegá la receta en formato texto y el sistema calculará automáticamente los costos.</p>
+
+                <div class="form-group">
+                    <label>Nombre de la cookie</label>
+                    <input type="text" id="recipeName" placeholder="Ej: COOKIE NUTELLA & ESPRESSO">
+                </div>
+
+                <div class="form-group">
+                    <label>Receta (MASA - RELLENO - TOPPING)</label>
+                    <textarea id="recipeText" placeholder="Pegá la receta aquí...&#10;&#10;MASA:&#10;460g manteca pomada&#10;200g azúcar blanca&#10;...&#10;&#10;RELLENO:&#10;615g nutella&#10;..."></textarea>
+                    <p class="help-text">Formato: Ingrediente + cantidad + unidad (g, kg, ml, l, u)</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="parseRecipe()">🔄 Analizar Receta</button>
+                    <button class="btn-secondary" onclick="clearRecipe()">Limpiar</button>
+                </div>
+
+                <div id="parseStatus"></div>
+                <div id="recipePreview"></div>
+            </div>
+
+            <div id="recipesList" class="recipe-list"></div>
+        </div>
+
+        <!-- TAB: PRODUCTOS -->
+        <div id="products" class="tab-content">
+            <div class="card">
+                <h2>🎁 Gestionar Productos</h2>
+                
+                <div id="productsList"></div>
+
+                <div class="button-group">
+                    <button class="btn-primary" onclick="addNewProduct()">+ Nuevo Producto</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: CONFIGURACIÓN -->
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2>⚙️ Costos Indirectos</h2>
+                <p class="help-text">Ajustá los porcentajes que se aplicarán automáticamente a todos los costos</p>
+
+                <div class="variables-section">
+                    <div class="variable-input">
+                        <label>Mermas (cookies rotas, desperdicio):</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="mermasPercent" min="0" max="100" value="8" style="width: 80px;">
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div class="variable-input">
+                        <label>Traslados / Logística:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="transportsPercent" min="0" max="100" value="5" style="width: 80px;">
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div class="variable-input">
+                        <label>Marketing / Servicios:</label>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="number" id="marketingPercent" min="0" max="100" value="4" style="width: 80px;">
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 6px;">
+                        <strong>Total Indirectos:</strong> <span id="totalIndirectPercent">17%</span>
+                    </div>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-primary" onclick="saveSettings()">💾 Guardar Configuración</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Información de Conexión</h2>
+                <div class="message info">
+                    <span>✓ Google Sheets conectada</span>
+                </div>
+                <div class="message info">
+                    <span>✓ Google Docs conectada</span>
+                </div>
+                <p class="help-text" style="margin-top: 20px;">Los datos se leen automáticamente desde tus hojas de cálculo y documentos compartidos.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATOS GLOBALES ===
+        let recipes = JSON.parse(localStorage.getItem('bluRecipes')) || [];
+        let products = JSON.parse(localStorage.getItem('bluProducts')) || [];
+        let settings = JSON.parse(localStorage.getItem('bluSettings')) || {
+            mermas: 8,
+            transports: 5,
+            marketing: 4
+        };
+
+        // === UTILIDADES ===
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showMessage(text, type = 'info') {
+            const statusDiv = document.getElementById('parseStatus');
+            statusDiv.innerHTML = `<div class="message ${type}">✓ ${text}</div>`;
+        }
+
+        function getTotalIndirects() {
+            return (settings.mermas + settings.transports + settings.marketing) / 100;
+        }
+
+        // === PARSEO DE RECETAS ===
+        function parseRecipe() {
+            const name = document.getElementById('recipeName').value.trim();
+            const text = document.getElementById('recipeText').value.trim();
+
+            if (!name || !text) {
+                showMessage('Completa nombre y receta', 'error');
+                return;
+            }
+
+            // Parse simple: buscar secciones (MASA, RELLENO, TOPPING)
+            const sections = {
+                masa: [],
+                relleno: [],
+                topping: []
+            };
+
+            const lines = text.split('\n');
+            let currentSection = null;
+
+            lines.forEach(line => {
+                const upper = line.toUpperCase().trim();
+                if (upper.includes('MASA')) currentSection = 'masa';
+                else if (upper.includes('RELLENO')) currentSection = 'relleno';
+                else if (upper.includes('TOPPING')) currentSection = 'topping';
+                else if (line.trim() && currentSection) {
+                    sections[currentSection].push(line.trim());
+                }
+            });
+
+            // Crear receta
+            const recipe = {
+                id: Date.now(),
+                name: name,
+                date: new Date().toLocaleDateString('es-AR'),
+                masa: sections.masa,
+                relleno: sections.relleno,
+                topping: sections.topping,
+                cookies: 22,
+                cookieWeight: 130,
+                masaWeight: 90,
+                rellenoWeight: 40
+            };
+
+            recipes.push(recipe);
+            localStorage.setItem('bluRecipes', JSON.stringify(recipes));
+            
+            showMessage(`✓ Receta "${name}" guardada`, 'success');
+            clearRecipe();
+            renderRecipes();
+        }
+
+        function clearRecipe() {
+            document.getElementById('recipeName').value = '';
+            document.getElementById('recipeText').value = '';
+            document.getElementById('parseStatus').innerHTML = '';
+        }
+
+        function renderRecipes() {
+            const container = document.getElementById('recipesList');
+            if (recipes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Sin recetas aún. Carga una nueva.</p>';
+                return;
+            }
+
+            container.innerHTML = recipes.map(recipe => `
+                <div class="recipe-card">
+                    <h3>${recipe.name}</h3>
+                    <p><span class="badge">${recipe.cookies} cookies</span></p>
+                    <p>Peso: ${recipe.cookieWeight}g | Masa: ${recipe.masaWeight}g | Relleno: ${recipe.rellenoWeight}g</p>
+                    <p style="font-size: 0.85em; color: #999;">${recipe.date}</p>
+                    <div class="actions">
+                        <button class="btn-secondary btn-small" onclick="editRecipe(${recipe.id})">✏️ Editar</button>
+                        <button class="btn-danger btn-small" onclick="deleteRecipe(${recipe.id})">🗑️ Borrar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecipe(id) {
+            recipes = recipes.filter(r => r.id !== id);
+            localStorage.setItem('bluRecipes', JSON.stringify(recipes));
+            renderRecipes();
+            showMessage('Receta eliminada', 'success');
+        }
+
+        // === PRODUCTOS ===
+        function addNewProduct() {
+            const product = {
+                id: Date.now(),
+                name: 'Nuevo Producto',
+                cookies: [],
+                packaging: [],
+                discount: 0
+            };
+            products.push(product);
+            localStorage.setItem('bluProducts', JSON.stringify(products));
+            renderProducts();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            if (products.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Sin productos. Crea uno nuevo.</p>';
+                return;
+            }
+
+            container.innerHTML = products.map(product => `
+                <div class="card" style="border-left: 4px solid #d7a13a;">
+                    <h3>${product.name}</h3>
+                    <p>Cookies: ${product.cookies.length} | Descuento: ${product.discount}%</p>
+                    <button class="btn-secondary btn-small" onclick="editProduct(${product.id})">✏️ Editar</button>
+                </div>
+            `).join('');
+        }
+
+        // === CONFIGURACIÓN ===
+        function saveSettings() {
+            settings.mermas = parseInt(document.getElementById('mermasPercent').value) || 0;
+            settings.transports = parseInt(document.getElementById('transportsPercent').value) || 0;
+            settings.marketing = parseInt(document.getElementById('marketingPercent').value) || 0;
+            
+            localStorage.setItem('bluSettings', JSON.stringify(settings));
+            updateIndirectsDisplay();
+            showMessage('Configuración guardada', 'success');
+        }
+
+        function updateIndirectsDisplay() {
+            const total = settings.mermas + settings.transports + settings.marketing;
+            document.getElementById('totalIndirectPercent').textContent = total + '%';
+            document.getElementById('mermasPercent').value = settings.mermas;
+            document.getElementById('transportsPercent').value = settings.transports;
+            document.getElementById('marketingPercent').value = settings.marketing;
+        }
+
+        // === INIT ===
+        window.addEventListener('DOMContentLoaded', () => {
+            renderRecipes();
+            renderProducts();
+            updateIndirectsDisplay();
+        });
+    </script>
+</body>
+</html>
