@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blu Bakery - Calculador Completo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 40px; color: #004e64; }
+        header h1 { font-size: 2.2em; margin-bottom: 5px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #004e64; flex-wrap: wrap; }
+        .tab-btn { padding: 12px 24px; border: none; background: transparent; color: #666; cursor: pointer; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.3s; }
+        .tab-btn.active { color: #004e64; border-bottom-color: #d7a13a; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .section { margin: 30px 0; padding: 20px; background: #f9f9f9; border-left: 4px solid #d7a13a; border-radius: 6px; }
+        .section h3 { color: #004e64; margin-bottom: 15px; font-size: 1.1em; }
+        label { display: block; font-weight: 600; color: #333; margin: 20px 0 8px; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 1em; font-family: inherit; }
+        input:focus, textarea:focus { outline: none; border-color: #004e64; box-shadow: 0 0 0 3px rgba(0,78,100,0.1); }
+        textarea { min-height: 120px; font-family: monospace; font-size: 0.9em; }
+        button { padding: 12px 24px; background: #004e64; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 10px 10px 10px 0; }
+        button:hover { background: #003845; transform: translateY(-2px); }
+        .btn-secondary { background: #f2e6d8; color: #004e64; border: 1.5px solid #004e64; }
+        .btn-secondary:hover { background: #e8d5c4; }
+        .ing-row { display: grid; grid-template-columns: 2fr 100px 70px 100px auto; gap: 10px; align-items: center; padding: 12px; background: white; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: 10px; }
+        .ing-row input, .ing-row select { margin: 0; }
+        .ing-row button { padding: 6px 12px; margin: 0; font-size: 0.85em; }
+        .cost-summary { background: linear-gradient(135deg, #f2e6d8 0%, #e8d5c4 100%); border-left: 5px solid #d7a13a; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.3); }
+        .cost-row.total { font-weight: 700; font-size: 1.1em; color: #004e64; padding-top: 15px; border-bottom: none; }
+        .cost-row.highlight { background: white; padding: 12px; margin: 10px 0; border-radius: 6px; font-weight: 700; color: #d7a13a; }
+        .message { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .message.success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .message.error { background: #f8d7da; color: #721c24; border-left: 4px solid #f5c6cb; }
+        .message.info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #bee5eb; }
+        .recipe-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
+        .recipe-card { background: white; border: 2px solid #004e64; border-radius: 8px; padding: 15px; cursor: pointer; transition: all 0.3s; }
+        .recipe-card:hover { box-shadow: 0 8px 16px rgba(0,78,100,0.2); transform: translateY(-4px); }
+        .recipe-card h4 { color: #004e64; margin-bottom: 8px; }
+        .recipe-card p { color: #666; font-size: 0.85em; margin-bottom: 5px; }
+        .history-item { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 10px; }
+        .history-item h4 { color: #004e64; margin-bottom: 8px; }
+        .history-item p { color: #666; font-size: 0.9em; margin: 5px 0; }
+        .history-item .price { font-weight: 700; color: #d7a13a; font-size: 1.1em; margin-top: 10px; }
+        @media (max-width: 768px) { .ing-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍪 Blu Bakery</h1>
+            <p>Calculador Inteligente de Costos</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('calculator')">📝 Calculador</button>
+            <button class="tab-btn" onclick="switchTab('historial')">📊 Historial</button>
+            <button class="tab-btn" onclick="switchTab('config')">⚙️ Configuración</button>
+        </div>
+
+        <!-- TAB CALCULADOR -->
+        <div id="calculator" class="tab-content active">
+            <div class="card">
+                <h2>📝 Nueva Cookie</h2>
+                <div id="statusMessage"></div>
+
+                <label>Nombre de la cookie:</label>
+                <input type="text" id="cookieName" placeholder="Ej: COOKIE NUTELLA & ESPRESSO">
+
+                <label>O selecciona de tus recetas:</label>
+                <div id="recipesList" class="recipe-list"></div>
+
+                <label style="margin-top: 30px;">O pega aquí la receta en texto:</label>
+                <textarea id="recipeText" placeholder="MASA:&#10;460g manteca pomada&#10;...&#10;&#10;RELLENO:&#10;615g nutella&#10;..."></textarea>
+
+                <button onclick="loadRecipe()">🔄 CARGAR RECETA</button>
+                <button class="btn-secondary" onclick="clearForm()">Limpiar</button>
+            </div>
+
+            <div id="editorContainer" style="display: none;">
+                <div class="card">
+                    <h2>💰 Calculador: <span id="recipeTitleEdit"></span></h2>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px;">
+                        <div>
+                            <label>Cantidad de cookies:</label>
+                            <input type="number" id="cookieQty" value="22" min="1" onchange="recalcular()">
+                        </div>
+                        <div>
+                            <label>Peso por cookie (g):</label>
+                            <input type="number" id="cookieWeight" value="130" min="1" onchange="recalcular()">
+                        </div>
+                        <div>
+                            <label>Costo packaging:</label>
+                            <input type="number" id="packagingCost" value="0" min="0" onchange="recalcular()">
+                        </div>
+                        <div>
+                            <label>Margen deseado (%):</label>
+                            <input type="number" id="desiredMargin" value="100" min="0" onchange="recalcular()">
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🥣 MASA</h3>
+                        <div id="masaContainer"></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>🍫 RELLENO</h3>
+                        <div id="rellenoContainer"></div>
+                    </div>
+
+                    <div class="section">
+                        <h3>✨ TOPPING</h3>
+                        <div id="toppingContainer"></div>
+                    </div>
+
+                    <div id="costResult"></div>
+
+                    <button onclick="saveToHistory()">💾 GUARDAR ESTA COOKIE</button>
+                    <button class="btn-secondary" onclick="backToForm()">← Volver</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB HISTORIAL -->
+        <div id="historial" class="tab-content">
+            <div class="card">
+                <h2>📊 Historial de Cookies Calculadas</h2>
+                <div id="historialContainer"></div>
+            </div>
+        </div>
+
+        <!-- TAB CONFIGURACIÓN -->
+        <div id="config" class="tab-content">
+            <div class="card">
+                <h2>⚙️ Configuración</h2>
+
+                <div class="section">
+                    <h3>Costos Indirectos</h3>
+                    <label>Mermas (%):</label>
+                    <input type="number" id="mermas" value="8" min="0" onchange="updateConfig()">
+                    
+                    <label>Traslados (%):</label>
+                    <input type="number" id="transports" value="5" min="0" onchange="updateConfig()">
+                    
+                    <label>Marketing (%):</label>
+                    <input type="number" id="marketing" value="4" min="0" onchange="updateConfig()">
+                    
+                    <div class="cost-summary">
+                        <strong>Total Indirectos: <span id="totalIndirect">17%</span></strong>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>📡 Estado de Conexión</h3>
+                    <div id="connectionStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx0-DaHbBBVPeMJK3RhG0sLWj-LWLj9scR3YmABlLEscEFpOCY3UlcHAr31lawrXEyAlg/exec";
+
+        let appData = {
+            ingredients: [],
+            recipes: [],
+            config: { mermas: 8, transports: 5, marketing: 4 },
+            history: JSON.parse(localStorage.getItem('bluHistory')) || []
+        };
+
+        let currentRecipe = { masa: [], relleno: [], topping: [] };
+
+        // ==================== INIT ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadConfig();
+            loadDataFromAppsScript();
+            renderHistorial();
+        });
+
+        // ==================== CARGAR DATOS ====================
+        async function loadDataFromAppsScript() {
+            try {
+                showMessage('statusMessage', '⏳ Cargando datos desde Google...', 'info');
+                const response = await fetch(APPS_SCRIPT_URL);
+                const data = await response.json();
+
+                appData.ingredients = data.ingredients || [];
+                appData.recipes = data.recipes || [];
+
+                showMessage('statusMessage', `✅ Cargado: ${appData.ingredients.length} ingredientes, ${appData.recipes.length} recetas`, 'success');
+                renderRecipesList();
+                updateConnectionStatus();
+            } catch (error) {
+                showMessage('statusMessage', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ==================== UI ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showMessage(id, text, type) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = `<div class="message ${type}">${text}</div>`;
+        }
+
+        // ==================== CARGAR RECETA ====================
+        function renderRecipesList() {
+            const list = document.getElementById('recipesList');
+            list.innerHTML = appData.recipes.map(recipe => `
+                <div class="recipe-card" onclick="loadRecipeFromDoc('${recipe.name.replace(/'/g, "\\'")}')">
+                    <h4>${recipe.name}</h4>
+                    <p>🥣 ${recipe.masa.length} ingredientes</p>
+                    <p>🍫 ${recipe.relleno.length} ingredientes</p>
+                </div>
+            `).join('');
+        }
+
+        function loadRecipeFromDoc(name) {
+            const recipe = appData.recipes.find(r => r.name === name);
+            if (!recipe) return;
+
+            document.getElementById('cookieName').value = recipe.name;
+            currentRecipe.masa = parseIngredients(recipe.masa);
+            currentRecipe.relleno = parseIngredients(recipe.relleno);
+            currentRecipe.topping = parseIngredients(recipe.topping || []);
+
+            showEditor();
+        }
+
+        function loadRecipe() {
+            const name = document.getElementById('cookieName').value.trim();
+            const text = document.getElementById('recipeText').value.trim();
+
+            if (!name) {
+                showMessage('statusMessage', '❌ Completa el nombre', 'error');
+                return;
+            }
+
+            currentRecipe = { masa: [], relleno: [], topping: [] };
+            let section = null;
+
+            text.split('\n').forEach(line => {
+                const upper = line.toUpperCase();
+                if (upper.includes('MASA')) section = 'masa';
+                else if (upper.includes('RELLENO')) section = 'relleno';
+                else if (upper.includes('TOPPING')) section = 'topping';
+                else if (line.trim() && section) {
+                    const ing = parseIngredient(line);
+                    if (ing.name) currentRecipe[section].push(ing);
+                }
+            });
+
+            showEditor();
+        }
+
+        function parseIngredients(lines) {
+            return lines.map(line => parseIngredient(line)).filter(ing => ing.name);
+        }
+
+        function parseIngredient(line) {
+            const match = line.match(/(\d+(?:\.\d+)?)\s*(g|kg|ml|l|u)/i);
+            if (!match) return { name: '', qty: 0, unit: 'g', price: 0 };
+
+            const qty = parseFloat(match[1]);
+            const unit = match[2].toLowerCase();
+            const name = line.replace(match[0], '').trim();
+
+            const found = appData.ingredients.find(ing => 
+                ing.nombre.toLowerCase().includes(name.toLowerCase()) ||
+                name.toLowerCase().includes(ing.nombre.toLowerCase())
+            );
+
+            return {
+                name: name,
+                qty: qty,
+                unit: unit,
+                price: found ? found.precio : 0,
+                found: !!found
+            };
+        }
+
+        function showEditor() {
+            document.getElementById('editorContainer').style.display = 'block';
+            document.getElementById('recipeTitleEdit').textContent = document.getElementById('cookieName').value;
+            renderIngredients('masa');
+            renderIngredients('relleno');
+            renderIngredients('topping');
+            recalcular();
+        }
+
+        function renderIngredients(section) {
+            const container = document.getElementById(section + 'Container');
+            container.innerHTML = currentRecipe[section].map((ing, idx) => `
+                <div class="ing-row">
+                    <input value="${ing.name}" onchange="currentRecipe.${section}[${idx}].name = this.value; recalcular()">
+                    <input type="number" step="0.1" value="${ing.qty}" onchange="currentRecipe.${section}[${idx}].qty = parseFloat(this.value) || 0; recalcular()">
+                    <select onchange="currentRecipe.${section}[${idx}].unit = this.value; recalcular()">
+                        <option value="g" ${ing.unit==='g'?'selected':''}>g</option>
+                        <option value="kg" ${ing.unit==='kg'?'selected':''}>kg</option>
+                        <option value="ml" ${ing.unit==='ml'?'selected':''}>ml</option>
+                        <option value="l" ${ing.unit==='l'?'selected':''}>l</option>
+                        <option value="u" ${ing.unit==='u'?'selected':''}>u</option>
+                    </select>
+                    <input type="number" step="0.01" value="${ing.price}" onchange="currentRecipe.${section}[${idx}].price = parseFloat(this.value) || 0; recalcular()">
+                    <button class="btn-secondary" onclick="currentRecipe.${section}.splice(${idx},1); renderIngredients('${section}'); recalcular();">❌</button>
+                </div>
+            `).join('');
+        }
+
+        // ==================== CALCULAR ====================
+        function recalcular() {
+            const qty = parseInt(document.getElementById('cookieQty').value) || 22;
+            const weight = parseInt(document.getElementById('cookieWeight').value) || 130;
+            const packaging = parseFloat(document.getElementById('packagingCost').value) || 0;
+            const margin = parseInt(document.getElementById('desiredMargin').value) || 100;
+
+            let costIng = 0;
+            ['masa', 'relleno', 'topping'].forEach(sec => {
+                currentRecipe[sec].forEach(ing => {
+                    let cost = ing.qty * ing.price;
+                    if (ing.unit === 'kg') cost = ing.qty * ing.price;
+                    else if (ing.unit === 'g') cost = (ing.qty / 1000) * ing.price;
+                    else if (ing.unit === 'l') cost = ing.qty * ing.price;
+                    else if (ing.unit === 'ml') cost = (ing.qty / 1000) * ing.price;
+                    costIng += cost;
+                });
+            });
+
+            const indirectPercent = (appData.config.mermas + appData.config.transports + appData.config.marketing) / 100;
+            const costWithPkg = costIng + packaging;
+            const costWithIndirect = costWithPkg * (1 + indirectPercent);
+            const costPerCookie = costWithIndirect / qty;
+            const pvp = costPerCookie * (1 + margin / 100);
+
+            const html = `
+                <div class="cost-summary">
+                    <div class="cost-row"><span>Ingredientes:</span><strong>$${costIng.toLocaleString('es-AR')}</strong></div>
+                    <div class="cost-row"><span>Packaging:</span><strong>$${packaging.toLocaleString('es-AR')}</strong></div>
+                    <div class="cost-row"><span>+ Indirectos (${appData.config.mermas + appData.config.transports + appData.config.marketing}%):</span><strong>$${(costWithIndirect - costWithPkg).toLocaleString('es-AR')}</strong></div>
+                    <div class="cost-row total"><span>COSTO POR COOKIE:</span><strong>$${costPerCookie.toLocaleString('es-AR', {maximumFractionDigits: 0})}</strong></div>
+                    <div class="cost-row highlight"><span>💰 PVP (${margin}% margen):</span><strong>$${pvp.toLocaleString('es-AR', {maximumFractionDigits: 0})}</strong></div>
+                </div>
+            `;
+            document.getElementById('costResult').innerHTML = html;
+        }
+
+        // ==================== HISTORIAL ====================
+        function saveToHistory() {
+            const name = document.getElementById('cookieName').value;
+            const qty = parseInt(document.getElementById('cookieQty').value);
+            const weight = parseInt(document.getElementById('cookieWeight').value);
+
+            // Calcular costo final (mismo que en recalcular)
+            let costIng = 0;
+            ['masa', 'relleno', 'topping'].forEach(sec => {
+                currentRecipe[sec].forEach(ing => {
+                    let cost = ing.qty * ing.price;
+                    if (ing.unit === 'g') cost = (ing.qty / 1000) * ing.price;
+                    else if (ing.unit === 'ml') cost = (ing.qty / 1000) * ing.price;
+                    costIng += cost;
+                });
+            });
+
+            const packaging = parseFloat(document.getElementById('packagingCost').value) || 0;
+            const margin = parseInt(document.getElementById('desiredMargin').value) || 100;
+            const indirectPercent = (appData.config.mermas + appData.config.transports + appData.config.marketing) / 100;
+            const costPerCookie = ((costIng + packaging) * (1 + indirectPercent)) / qty;
+            const pvp = costPerCookie * (1 + margin / 100);
+
+            const item = {
+                id: Date.now(),
+                name: name,
+                date: new Date().toLocaleString('es-AR'),
+                qty: qty,
+                weight: weight,
+                costPerCookie: costPerCookie,
+                pvp: pvp,
+                ingredients: currentRecipe
+            };
+
+            appData.history.unshift(item);
+            localStorage.setItem('bluHistory', JSON.stringify(appData.history));
+
+            showMessage('costResult', '✅ Guardado en historial', 'success');
+            renderHistorial();
+            clearForm();
+        }
+
+        function renderHistorial() {
+            const container = document.getElementById('historialContainer');
+            if (appData.history.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Sin historial aún</p>';
+                return;
+            }
+
+            container.innerHTML = appData.history.map(item => `
+                <div class="history-item">
+                    <h4>${item.name}</h4>
+                    <p>📅 ${item.date}</p>
+                    <p>📊 ${item.qty} cookies de ${item.weight}g</p>
+                    <p class="price">💰 Costo: $${item.costPerCookie.toLocaleString('es-AR', {maximumFractionDigits: 0})} | PVP: $${item.pvp.toLocaleString('es-AR', {maximumFractionDigits: 0})}</p>
+                </div>
+            `).join('');
+        }
+
+        // ==================== CONFIG ====================
+        function loadConfig() {
+            const saved = localStorage.getItem('bluConfig');
+            if (saved) {
+                appData.config = JSON.parse(saved);
+                document.getElementById('mermas').value = appData.config.mermas;
+                document.getElementById('transports').value = appData.config.transports;
+                document.getElementById('marketing').value = appData.config.marketing;
+            }
+            updateIndirect();
+        }
+
+        function updateConfig() {
+            appData.config.mermas = parseInt(document.getElementById('mermas').value) || 0;
+            appData.config.transports = parseInt(document.getElementById('transports').value) || 0;
+            appData.config.marketing = parseInt(document.getElementById('marketing').value) || 0;
+            localStorage.setItem('bluConfig', JSON.stringify(appData.config));
+            updateIndirect();
+            recalcular();
+        }
+
+        function updateIndirect() {
+            const total = appData.config.mermas + appData.config.transports + appData.config.marketing;
+            document.getElementById('totalIndirect').textContent = total + '%';
+        }
+
+        function updateConnectionStatus() {
+            document.getElementById('connectionStatus').innerHTML = `
+                <div class="message success">
+                    ✅ <strong>${appData.ingredients.length}</strong> ingredientes con precio<br>
+                    ✅ <strong>${appData.recipes.length}</strong> recetas cargadas
+                </div>
+            `;
+        }
+
+        // ==================== UTILIDADES ====================
+        function backToForm() {
+            document.getElementById('editorContainer').style.display = 'none';
+            clearForm();
+        }
+
+        function clearForm() {
+            document.getElementById('cookieName').value = '';
+            document.getElementById('recipeText').value = '';
+            document.getElementById('statusMessage').innerHTML = '';
+            currentRecipe = { masa: [], relleno: [], topping: [] };
+        }
+    </script>
+</body>
+</html>
