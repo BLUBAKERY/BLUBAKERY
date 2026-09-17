@@ -1147,6 +1147,13 @@
   </div>
 </header>
 
+<!-- BANNER PROMO DÍA DE LA PRIMAVERA -->
+<div id="promoBanner" style="background:linear-gradient(135deg, #7E1F2D 0%, #a02539 100%);color:#F3EBDD;padding:16px 20px;text-align:center;border-bottom:3px solid #D7A13A;display:none">
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#D7A13A;margin-bottom:6px">🌸 Promo Día de la Primavera 🌸</div>
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;line-height:1.1">10% de descuento</div>
+  <div style="font-size:13px;margin-top:4px;opacity:.9">Box de minis con dips · Válido hasta el domingo 20/9</div>
+</div>
+
 <div class="marquee">
   <span id="marqueeText"></span>
 </div>
@@ -1254,6 +1261,28 @@ function init(){
   // Inicializar boxes especiales
   if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
   CFG.boxesEspeciales.forEach(function(b){ beQty[b.id] = 0; });
+  
+  // ===== LÓGICA PROMO DÍA DE LA PRIMAVERA =====
+  var hoy = new Date();
+  var diaPromo = new Date(2026, 8, 20, 23, 59, 59); // 20/9/2026 23:59:59
+  var estaEnPromo = hoy <= diaPromo;
+  window._promoActiva = estaEnPromo;
+  
+  // Mostrar/ocultar banner
+  var promoBanner = $("promoBanner");
+  if(promoBanner) promoBanner.style.display = estaEnPromo ? "block" : "none";
+  
+  // Si la promo está activa, buscar la caja de minis y aplicarle descuento
+  if(estaEnPromo && CFG.boxesEspeciales){
+    CFG.boxesEspeciales.forEach(function(b){
+      if(b.nombre && b.nombre.toLowerCase().includes("mini")){
+        b._precioOriginal = b.precio;
+        b._tienePromo = true;
+        b.precio = Math.round(b.precio * 0.9); // 10% OFF
+      }
+    });
+  }
+  
   // marquee
   var mt = "Nuevas cookies todas las semanas <b>•</b> Hechas en el día <b>•</b> Ingredientes reales <b>•</b> Hecho a mano en Olavarría <b>•</b> ";
   $("marqueeText").innerHTML = mt + mt;
@@ -1504,6 +1533,16 @@ function renderBoxEspecial(b, idx){
       '<button class="be-step-btn" onclick="beMas(\''+b.id+'\')">+</button>' +
     '</div>';
 
+  // Precio con promo
+  var precioHtml = b._tienePromo
+    ? '<div class="be-precio-mini">Precio</div>' +
+      '<div style="display:flex;gap:8px;align-items:baseline;margin-bottom:4px">' +
+        '<strike style="font-size:16px;color:var(--gris);opacity:.6">'+fmt(b._precioOriginal||0)+'</strike>' +
+        '<div style="background:#7E1F2D;color:#F3EBDD;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px">−10%</div>' +
+      '</div>' +
+      '<div class="be-precio">'+fmt(b.precio||0)+'</div>'
+    : '<div class="be-precio-mini">Precio</div><div class="be-precio">'+fmt(b.precio||0)+'</div>';
+
   d.innerHTML =
     header +
     fotosHtml +
@@ -1515,8 +1554,7 @@ function renderBoxEspecial(b, idx){
       badgeTrf +
       '<div class="be-precio-row">' +
         '<div class="be-precio-block">' +
-          '<div class="be-precio-mini">Precio</div>' +
-          '<div class="be-precio">'+fmt(b.precio||0)+'</div>' +
+          precioHtml +
         '</div>' +
         stepper +
       '</div>' +
@@ -1541,7 +1579,8 @@ function beMas(id){
   var btnMenos = $("be-menos-"+id);
   if(btnMenos) btnMenos.disabled = false;
   renderResumen();
-  renderDias(); // re-renderizar días por si hay fechas forzadas
+  renderDias(); // ACTUALIZAR FECHAS DISPONIBLES
+  renderFranjas();
 }
 
 function beMenos(id){
@@ -1552,7 +1591,8 @@ function beMenos(id){
   var btnMenos = $("be-menos-"+id);
   if(btnMenos) btnMenos.disabled = (beQty[id] === 0);
   renderResumen();
-  renderDias(); // re-renderizar días por si se quitan las fechas forzadas
+  renderDias(); // ACTUALIZAR FECHAS DISPONIBLES
+  renderFranjas();
 }
 
 // Carrusel simple para cada box especial (auto-play + dots clickeables + swipe)
@@ -1915,6 +1955,45 @@ function renderDias(){
   wrap.innerHTML = "";
   wrap.appendChild(secHead("Día", "¿Cuándo lo querés?"));
 
+  // ===== LÓGICA ESPECIAL: Restricciones por promo =====
+  // Detectar si hay MINI COOKIES en el carrito
+  var hayMinis = Object.keys(beQty).some(function(id){ return (beQty[id]||0) > 0; });
+  
+  var ahora = new Date();
+  var cierreMañana = new Date(2026, 8, 17, 21, 0, 0); // 17/9 21:00
+  var cierreJueves = new Date(2026, 8, 23, 21, 0, 0);  // 23/9 21:00
+  
+  var puedeMañana = ahora <= cierreMañana;
+  var puedeProximo = ahora <= cierreJueves;
+  
+  // Si hay minis: mostrar SOLO lunes 21/9
+  if(hayMinis){
+    var aviso = document.createElement("div");
+    aviso.style.cssText = "background:#7E1F2D;color:#F3EBDD;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.5;text-align:left";
+    aviso.innerHTML = '⚡ <b>Entrega exclusiva de mini cookies.</b> El lunes 21/9 entregamos solo pedidos de Box de minis (se requiere 24hs de anticipación mínimo).';
+    wrap.appendChild(aviso);
+    
+    var row = document.createElement("div");
+    row.className = "pills";
+    var b = document.createElement("button");
+    b.className = "pill on"; b.id = "d-lun21";
+    b.textContent = "Lunes 21/9 · 14:00-16:00";
+    b.onclick = function(){ setDia("lun21"); };
+    row.appendChild(b);
+    wrap.appendChild(row);
+    
+    diaId = "lun21";
+    franja = "14:00-16:00";
+    renderFranjas();
+    return;
+  }
+  
+  // Si NO hay minis: mostrar viernes 18 y 24
+  var diasRestringidos = [
+    { id: "vie18", label: "Viernes 18/9", franjas: ["15:00", "18:00"], disponible: puedeMañana },
+    { id: "vie24", label: "Viernes 24/9", franjas: ["15:00", "18:00"], disponible: puedeProximo }
+  ];
+
   // ¿Hay fechas forzadas por una box especial?
   var forzado = obtenerFechasForzadas();
 
@@ -1957,30 +2036,16 @@ function renderDias(){
   }
 
   // FLUJO NORMAL (sin fechas forzadas)
-  if(!CFG.diasEntrega.length) return;
-  var now = new Date();
-  var minH = CFG.horasCorte || 24;
-  function parseFecha(d){
-    var mf = (d.label||"").match(/(\d{1,2})\/(\d{1,2})/);
-    if(!mf) return null;
-    var hs = (d.horario || (d.franjas&&d.franjas[0]) || "15:00");
-    var mh = hs.match(/(\d{1,2})[:.]?(\d{0,2})/);
-    var f = new Date(now.getFullYear(), parseInt(mf[2])-1, parseInt(mf[1]),
-                     mh?parseInt(mh[1]):15, (mh&&mh[2])?parseInt(mh[2]):0, 0);
-    if(f < now && (now.getMonth()-(parseInt(mf[2])-1) > 6))
-      f = new Date(now.getFullYear()+1, parseInt(mf[2])-1, parseInt(mf[1]), 15, 0, 0);
-    return f;
-  }
-  disp = CFG.diasEntrega.map(function(d){
-    var f = parseFecha(d);
-    if(!f) return { dia:d, ok:true };
-    return { dia:d, ok: (f-now)/3600000 >= minH };
+  // Usar los días restringidos en lugar de CFG.diasEntrega
+  disp = diasRestringidos.map(function(d){
+    return { dia: d, ok: d.disponible };
   });
+  
   var oks = disp.filter(function(x){ return x.ok; });
   if(!oks.length){
     var w = document.createElement("div");
     w.className = "warn";
-    w.textContent = "⚠ Los días disponibles ya cerraron (mínimo "+minH+"hs de anticipación). Volvé cuando carguemos nuevas fechas.";
+    w.textContent = "⚠ Los días ya cerraron para compra. Los pedidos solo se pueden hacer dentro de los horarios establecidos.";
     wrap.appendChild(w);
   }
   var row = document.createElement("div");
@@ -1993,8 +2058,9 @@ function renderDias(){
       b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
     } else {
       b.className = "pill off";
-      b.textContent = it.dia.label + " · cerrado";
-      b.onclick = function(){ toast("Ese día ya cerró. Mínimo "+minH+"hs antes."); };
+      var msg = it.dia.id === "vie18" ? "cerrado (hasta 21hs del 17)" : "cerrado (hasta 21hs del 23)";
+      b.textContent = it.dia.label + " · " + msg;
+      b.onclick = function(){ toast("Ese día ya cerró."); };
     }
     row.appendChild(b);
   });
@@ -2019,17 +2085,24 @@ function renderFranjas(){
   var wrap = $("frSec");
   if(!wrap) return;
   wrap.innerHTML = "";
-  var d = CFG.diasEntrega.find(function(x){ return x.id===diaId; });
-  // Si no está en CFG.diasEntrega (puede ser una fecha forzada), buscar en disp
-  if(!d){
-    var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
-    if(dispMatch) d = dispMatch.dia;
+  
+  // Si es lunes, el horario es fijo: no mostrar selector
+  if(diaId === "lun21"){
+    franja = "14:00-16:00";
+    return;
   }
+  
+  // Buscar el día en disp (que incluye los días restringidos)
+  var d = null;
+  var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
+  if(dispMatch) d = dispMatch.dia;
+  
   var fr = [];
   if(d && d.franjas && d.franjas.length) fr = d.franjas;
   else if(d && d.horario) fr = [d.horario];
-  // NO usar defaults — si no hay franjas cargadas, no mostrar ninguna
+  
   if(!fr.length){ franja = null; return; }
+  
   wrap.appendChild(secHead("Horario", "¿A qué hora?"));
   var row = document.createElement("div");
   row.className = "pills";
