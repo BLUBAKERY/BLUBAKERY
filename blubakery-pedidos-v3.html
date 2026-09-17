@@ -1478,9 +1478,10 @@ function renderBoxEspecial(b, idx){
   // Detectar estilo por palabras clave del nombre
   var nombre = String(b.nombre||"").toLowerCase();
   var esMundial = nombre.includes("mundial");
+  var esPrimavera = nombre.includes("primavera");
   var esPadre = nombre.includes("padre") || nombre.includes("papá") || nombre.includes("papa");
-  // Default: estilo padre (cupón bordó). Si tiene "mundial" en el nombre → estilo mundial.
-  var estilo = esMundial ? "mundial" : "padre";
+  // Default: estilo padre. Si tiene "primavera" → primavera. Si tiene "mundial" → mundial.
+  var estilo = esPrimavera ? "primavera" : (esMundial ? "mundial" : "padre");
   d.className = "be-card be-" + estilo;
 
   var fotos = [];
@@ -1510,7 +1511,17 @@ function renderBoxEspecial(b, idx){
 
   // Header diferente según estilo
   var header = "";
-  if(estilo === "padre"){
+  if(estilo === "primavera"){
+    header =
+      '<div class="be-header">' +
+        '<div class="be-mini">🌸 Edición Especial Día de la Primavera</div>' +
+        '<div class="be-fecha-tag">Promo</div>' +
+      '</div>' +
+      '<div style="background:#f2e6d8;border-top:2px solid #d7a13a;padding:12px;font-size:12px;line-height:1.5;color:#333">' +
+        '📅 <b>Pedidos:</b> hasta domingo 20/9<br>' +
+        '🚚 <b>Entrega:</b> lunes 21/9 de 14 a 16hs' +
+      '</div>';
+  } else if(estilo === "padre"){
     header =
       '<div class="be-header">' +
         '<div class="be-mini">★ Edición Día del Padre</div>' +
