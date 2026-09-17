@@ -1260,7 +1260,6 @@ function init(){
   CFG.productos.forEach(function(p){ qty[p.id] = 0; });
   // Inicializar boxes especiales
   if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
-  CFG.boxesEspeciales.forEach(function(b){ beQty[b.id] = 0; });
   
   // ===== LÓGICA PROMO DÍA DE LA PRIMAVERA =====
   var hoy = new Date();
@@ -1272,16 +1271,36 @@ function init(){
   var promoBanner = $("promoBanner");
   if(promoBanner) promoBanner.style.display = estaEnPromo ? "block" : "none";
   
-  // Si la promo está activa, buscar la caja de minis y aplicarle descuento
-  if(estaEnPromo && CFG.boxesEspeciales){
-    CFG.boxesEspeciales.forEach(function(b){
-      if(b.nombre && b.nombre.toLowerCase().includes("mini")){
-        b._precioOriginal = b.precio;
-        b._tienePromo = true;
-        b.precio = Math.round(b.precio * 0.9); // 10% OFF
-      }
-    });
+  // Si la promo está activa, INYECTAR la caja de minis si no existe
+  if(estaEnPromo){
+    var yaExiste = CFG.boxesEspeciales.find(function(b){ return b.nombre && b.nombre.toLowerCase().includes("mini"); });
+    if(!yaExiste){
+      CFG.boxesEspeciales.unshift({
+        id: "box_minis_promo",
+        nombre: "🍪 Box de minis con dips",
+        descripcion: "Tres sabores en una box para compartir: triple chocolate, red velvet y clásica",
+        precio: 19800,
+        _precioOriginal: 22000,
+        _tienePromo: true,
+        stock: 7,
+        emoji: "🍪",
+        foto: "1bLZQI_GLU42R_KpYGM9haWbldEIsT7Ug",
+        activo: true,
+        orden: -1
+      });
+    } else {
+      // Si ya existe, aplicar descuento
+      CFG.boxesEspeciales.forEach(function(b){
+        if(b.nombre && b.nombre.toLowerCase().includes("mini")){
+          b._precioOriginal = b.precio;
+          b._tienePromo = true;
+          b.precio = Math.round(b.precio * 0.9);
+        }
+      });
+    }
   }
+  
+  CFG.boxesEspeciales.forEach(function(b){ beQty[b.id] = 0; });
   
   // marquee
   var mt = "Nuevas cookies todas las semanas <b>•</b> Hechas en el día <b>•</b> Ingredientes reales <b>•</b> Hecho a mano en Olavarría <b>•</b> ";
