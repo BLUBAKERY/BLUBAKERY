@@ -1084,6 +1084,9 @@
     line-height: 1.4;
   }
   .boxes-banner .box:last-child { margin-bottom: 0; }
+  .cdm-ctrl .stepper .step-btn { border-color: rgba(255,255,255,.6); color: #fff; }
+  .cdm-ctrl .stepper .step-num { color: #fff; }
+  .cdm-ctrl .add-btn { background: var(--crema); color: var(--bordo); }
   .block.contacto .block-btn { background: var(--azul); color: #fff; }
 
   .footer-end {
@@ -1459,6 +1462,15 @@ function render(){
   // BANNER DE BOXES — arriba de todo, siempre lo primero que se ve
   app.appendChild(renderBoxesBanner());
 
+  // PRODUCTOS ESPECIALES (minis, premium, etc.) — cada uno con su propio banner,
+  // justo debajo de las boxes. Se marcan con "especial": true en el Sheet.
+  (CFG.productos||[]).forEach(function(p){
+    if(p.activo && p.especial){
+      var pb = renderProductoBanner(p);
+      if(pb) app.appendChild(pb);
+    }
+  });
+
   // LANZAMIENTOS / BOXES ESPECIALES (arriba de todo)
   var lanzamientos = (CFG.boxesEspeciales || [])
     .filter(function(b){ return b.activo; })
@@ -1483,7 +1495,7 @@ function render(){
   var grid = document.createElement("div");
   grid.className = "grid";
   CFG.productos.forEach(function(p){
-    if(p.activo && !p.noListable) grid.appendChild(renderCookie(p));
+    if(p.activo && !p.noListable && !p.especial) grid.appendChild(renderCookie(p));
   });
   app.appendChild(grid);
 
@@ -1556,6 +1568,27 @@ function renderBoxesBanner(){
   d.appendChild(head);
   if(CFG.box && CFG.box.activo) d.appendChild(renderBox(CFG.box, "box"));
   if(CFG.box2 && CFG.box2.activo) d.appendChild(renderBox(CFG.box2, "box2"));
+  return d;
+}
+
+/* ===== BANNER DE PRODUCTO ESPECIAL (minis, premium, etc.) ===== */
+function renderProductoBanner(p){
+  var out = (parseInt(p.stock)||0) <= 0;
+  var d = document.createElement("div");
+  d.className = "cdm";
+  d.innerHTML =
+    '<div class="cdm-inner">' +
+      '<span class="cdm-tag"><span class="dot"></span>Producto especial</span>' +
+      '<img class="cdm-photo" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.25">' +
+      '<h3>'+esc(p.nombre)+'</h3>' +
+      (p.descripcion ? '<div class="cdm-desc">'+esc(p.descripcion)+'</div>' : '') +
+      '<div class="cdm-buy">' +
+        '<span class="cdm-price">'+fmt(p.precio)+'</span>' +
+        (out
+          ? '<button class="cdm-btn" onclick="avisar(\''+p.id+'\')">Avisame cuando vuelva</button>'
+          : '<div class="cdm-ctrl" id="prodBannerCtrl-'+p.id+'">'+ctrlHtml(p.id)+'</div>') +
+      '</div>' +
+    '</div>';
   return d;
 }
 
@@ -1923,6 +1956,8 @@ function chCookie(id, delta){
 function syncCookie(id){
   var c = $("ckctrl-"+id);
   if(c) c.innerHTML = ctrlHtml(id);
+  var b = $("prodBannerCtrl-"+id);
+  if(b) b.innerHTML = ctrlHtml(id);
 }
 
 /* ===== AVISAR ===== */
