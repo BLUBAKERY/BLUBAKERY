@@ -1046,6 +1046,9 @@
   .block.eventos { background: var(--bordo); color: #fff; }
   .block.eventos .block-eyebrow { color: var(--mostaza); opacity: 1; }
   .block.eventos .block-btn { background: var(--mostaza); color: var(--azul); }
+  .block.mayoristas { background: var(--mostaza); color: var(--azul); }
+  .block.mayoristas .block-eyebrow { color: var(--bordo); opacity: 1; }
+  .block.mayoristas .block-btn { background: var(--azul); color: #fff; }
   .block.contacto { background: var(--lavanda); color: var(--azul); }
   .block.contacto .block-btn { background: var(--azul); color: #fff; }
 
@@ -1204,16 +1207,14 @@ var CFG = {
   alias: "BLU.BAKERY",
   banco: "Banco Galicia",
   horasCorte: 24,
-  horarioViernes: "14:00 a 18:00hs",
+  horarioViernes: "14 a 18hs",
   msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
   msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
   msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
   msgEfectivo: "Por favor abonar con el importe justo.",
   diasEntrega: [],
   novedades: [
-    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
-    { emoji:"👔", titulo:"Box Día del Padre", desc:"Una edición especial para regalar. Pronto." },
-    { emoji:"⚽", titulo:"Algo se viene para el Mundial", desc:"Atentos: una caja pensada para los días de partido." }
+    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." }
   ]
 };
 
@@ -1484,6 +1485,7 @@ function render(){
   app.appendChild(spacer);
   app.appendChild(renderNov());
   app.appendChild(renderEventos());
+  app.appendChild(renderMayoristas());
   app.appendChild(renderContacto());
 
   // RESEÑAS (lee de la pestaña Reviews del Sheet)
@@ -2034,7 +2036,7 @@ function calcularViernes(base){
 }
 function fechaLabel(d){
   var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  return dias[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2);
+  return dias[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2) + " · " + CFG.horarioViernes;
 }
 function fechaISO(d){
   return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
@@ -2115,18 +2117,13 @@ function setDia(id){
   renderFranjas();
 }
 function renderFranjas(){
+  // El horario ya va incluido en la etiqueta del día (fechaLabel), así que
+  // acá solo fijamos la variable franja — no se dibuja nada aparte.
   var wrap = $("frSec");
-  if(!wrap) return;
-  wrap.innerHTML = "";
+  if(wrap) wrap.innerHTML = "";
   var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
   var d = dispMatch ? dispMatch.dia : null;
-  // Horario único, no seleccionable: se muestra como texto informativo
   franja = (d && d.horario) ? d.horario : CFG.horarioViernes;
-  wrap.appendChild(secHead("Horario", "¿A qué hora?"));
-  var info = document.createElement("div");
-  info.className = "note";
-  info.innerHTML = '🕐 <b>' + esc(franja) + '</b>';
-  wrap.appendChild(info);
 }
 
 /* ===== DATOS ===== */
@@ -2234,6 +2231,28 @@ function eventoWsp(){
     "• Cantidad aproximada (o si prefiero charlarlo con ustedes): \n" +
     "• Las quiero para: ofrecer en el evento / souvenir / que Blu esté presente sirviendo\n\n" +
     "¡Gracias! Quedo atenta/o 💛";
+  return "https://wa.me/"+WSP+"?text="+encodeURIComponent(m);
+}
+
+/* ===== MAYORISTAS ===== */
+function renderMayoristas(){
+  var d = document.createElement("div");
+  d.className = "block mayoristas";
+  d.innerHTML =
+    '<div class="block-eyebrow">Mayoristas</div>' +
+    '<h3>¿Tenés un comercio?</h3>' +
+    '<p>Sumá Blu Bakery a tu local. Te contamos cómo funciona la reventa y armamos una propuesta a tu medida.</p>' +
+    '<a class="block-btn" href="'+mayoristaWsp()+'" target="_blank" rel="noopener">💬 Quiero vender Blu</a>';
+  return d;
+}
+function mayoristaWsp(){
+  var m =
+    "Hola Blu Bakery! Tengo un comercio y me gustaría vender sus cookies 🍪\n\n" +
+    "Les cuento un poco:\n" +
+    "• Nombre del comercio: \n" +
+    "• Rubro: \n" +
+    "• Ciudad: \n\n" +
+    "¡Quedo atenta/o a la propuesta!";
   return "https://wa.me/"+WSP+"?text="+encodeURIComponent(m);
 }
 
@@ -2603,7 +2622,7 @@ function exito(p){
   if(p.destinatario){
     lineas.push("🎁 Para: " + p.destinatario + " (nombre para la etiqueta)");
   }
-  lineas.push("📅 " + p.entrega + ": " + p.dia_entrega + " " + p.horario);
+  lineas.push("📅 " + p.entrega + ": " + p.dia_entrega);
   lineas.push("🏠 " + p.direccion);
   lineas.push("💳 Pago: " + p.pago);
   if(p.pago === "Transferencia"){
@@ -2648,7 +2667,7 @@ function exito(p){
         '<b>Pedido:</b> '+esc(p.cookies)+'<br>' +
         (p.destinatario ? '<b>🎁 Para:</b> '+esc(p.destinatario)+' <span style="font-size:11px;color:var(--gris)">(nombre en la etiqueta)</span><br>' : '') +
         '<b>Total:</b> '+fmt(p.total)+'<br>' +
-        '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+' '+esc(p.horario)+'<br>' +
+        '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+'<br>' +
         '<b>'+(p.entrega==="Envio"?"Dirección":"Punto")+':</b> '+esc(p.direccion)+'<br>' +
         '<b>Pago:</b> '+esc(p.pago)+
       '</div>' +
