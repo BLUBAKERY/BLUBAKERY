@@ -1204,6 +1204,7 @@ var CFG = {
   alias: "BLU.BAKERY",
   banco: "Banco Galicia",
   horasCorte: 24,
+  horarioViernes: "14:00 a 18:00hs",
   msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
   msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
   msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
@@ -1239,8 +1240,45 @@ function driveImg(v){
   return "https://drive.google.com/thumbnail?id="+v+"&sz=w1200";
 }
 
+/* ===== TRACKING (eventos anónimos, sin pixel) ===== */
+function getSesionId(){
+  try{
+    var s = sessionStorage.getItem("bb_sesion");
+    if(!s){
+      s = "s" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+      sessionStorage.setItem("bb_sesion", s);
+    }
+    return s;
+  }catch(e){ return "s" + Date.now(); }
+}
+function getOrigen(){
+  try{
+    var p = new URLSearchParams(window.location.search);
+    var src = p.get("utm_source") || (document.referrer ? "referrer:" + document.referrer.split("/")[2] : "directo");
+    return src;
+  }catch(e){ return "directo"; }
+}
+function trackEvento(evento, detalle){
+  try{
+    var payload = {
+      tipo: "evento",
+      fecha: hoy(), hora: hora(),
+      sesion: getSesionId(),
+      evento: evento,
+      detalle: detalle || "",
+      origen: getOrigen()
+    };
+    fetch(APPS_SCRIPT_URL, {
+      method:"POST", mode:"no-cors",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    }).catch(function(){});
+  }catch(e){}
+}
+
 /* ===== CARGAR CONFIG ===== */
 (function(){
+  trackEvento("vista_pagina");
   fetch(CONFIG_GVIZ)
     .then(function(r){ return r.text(); })
     .then(function(t){
@@ -1252,7 +1290,7 @@ function driveImg(v){
         });
       }
     })
-    .catch(function(e){ console.warn("Config:", e); })
+    .catch(function(e){ console.warn("Config:", e); trackEvento("error_carga_menu", String(e)); })
     .finally(function(){ init(); });
 })();
 
@@ -1262,9 +1300,9 @@ function init(){
   if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
   
   // ===== LÓGICA PROMO DÍA DE LA PRIMAVERA =====
-  var hoy = new Date();
+  var hoyDate = new Date();
   var diaPromo = new Date(2026, 8, 20, 23, 59, 59); // 20/9/2026 23:59:59
-  var estaEnPromo = hoy <= diaPromo;
+  var estaEnPromo = hoyDate <= diaPromo;
   window._promoActiva = estaEnPromo;
   
   // Mostrar/ocultar banner
@@ -1611,6 +1649,7 @@ function beMas(id){
   renderResumen();
   renderDias(); // ACTUALIZAR FECHAS DISPONIBLES
   renderFranjas();
+  trackEvento("agrego_box_especial", b.nombre);
 }
 
 function beMenos(id){
@@ -1768,6 +1807,7 @@ function addCDM(id){
   syncCookie(id);
   renderResumen();
   toast(p.nombre + " sumada 🍪");
+  trackEvento("agrego_cookie", p.nombre);
 }
 
 /* ===== COOKIE CARD ===== */
@@ -1821,7 +1861,9 @@ function chCookie(id, delta){
   var p = CFG.productos.find(function(x){ return x.id===id; });
   if(delta>0){
     if((qty[id]||0) >= dispo(id)){ toast("Sin más stock de "+p.nombre); return; }
+    var eraCero = !qty[id];
     qty[id] = (qty[id]||0)+1;
+    if(eraCero) trackEvento("agrego_cookie", p.nombre);
   } else if((qty[id]||0)>0){
     qty[id]--;
   }
@@ -1836,6 +1878,7 @@ function syncCookie(id){
 /* ===== AVISAR ===== */
 function avisar(id){
   var p = CFG.productos.find(function(x){ return x.id===id; });
+  trackEvento("aviso_agotado", p ? p.nombre : id);
   var m = "Hola Blu Bakery! Quiero que me avisen cuando vuelva la cookie "+(p?p.nombre:"")+" 🍪";
   window.open("https://wa.me/"+WSP+"?text="+encodeURIComponent(m), "_blank");
 }
@@ -1924,6 +1967,7 @@ $("mConfirm").onclick = function(){
   closeModal();
   renderResumen();
   toast("Box agregada ✓");
+  trackEvento("agrego_box", box.nombre);
 };
 function closeModal(){ $("mbg").classList.remove("show"); }
 
@@ -1965,15 +2009,42 @@ function setEnt(t, punto){
   var dir = $("campoDir");
   if(dir) dir.style.display = t==="envio" ? "block" : "none";
   renderResumen();
+  trackEvento("eligio_entrega", t + (punto ? " · " + punto : ""));
 }
 
-/* ===== DÍAS ===== */
-// Detectar si hay box especial en el carrito con fechas fijas
+/* ===== DÍAS — VIERNES AUTOMÁTICO ===== */
+// Regla: se entrega los viernes. El corte de pedidos de cada semana es el
+// jueves anterior a las 21:00hs. Después de ese corte, el "próximo viernes"
+// pasa a ser el de la semana siguiente. El horario (CFG.horarioViernes) es
+// editable en cualquier momento desde la pestaña Config del Sheet.
+function calcularViernes(base){
+  // Devuelve la fecha del viernes de la semana de "base", respetando el
+  // corte del jueves 21:00. base=0 → próximo viernes disponible; base=1 → el siguiente.
+  var ahora = new Date();
+  var diaSemana = ahora.getDay(); // 0=dom .. 5=vie .. 6=sab
+  var diasHastaViernes = (5 - diaSemana + 7) % 7;
+  var viernes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + diasHastaViernes);
+  var corte = new Date(viernes.getFullYear(), viernes.getMonth(), viernes.getDate() - 1, 21, 0, 0);
+  if(ahora > corte){
+    // ya cerró el pedido de este viernes → arrancamos desde el siguiente
+    viernes.setDate(viernes.getDate() + 7);
+  }
+  viernes.setDate(viernes.getDate() + (base * 7));
+  return viernes;
+}
+function fechaLabel(d){
+  var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+  return dias[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2);
+}
+function fechaISO(d){
+  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
+}
+
+// Detectar si hay box especial en el carrito con fechas fijas (lanzamientos puntuales)
 function obtenerFechasForzadas(){
   if(!Array.isArray(CFG.boxesEspeciales)) return null;
   var boxesEnCarrito = CFG.boxesEspeciales.filter(function(b){ return (beQty[b.id]||0) > 0 && b.fechasEntrega && b.fechasEntrega.trim(); });
   if(boxesEnCarrito.length === 0) return null;
-  // Tomo las fechas de la primera (en práctica casi nunca habrá dos)
   var b = boxesEnCarrito[0];
   var fechas = b.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
   return { fechas: fechas, nombreBox: b.nombre };
@@ -1985,55 +2056,13 @@ function renderDias(){
   wrap.innerHTML = "";
   wrap.appendChild(secHead("Día", "¿Cuándo lo querés?"));
 
-  // ===== LÓGICA ESPECIAL: Restricciones por promo =====
-  // Detectar si hay MINI COOKIES en el carrito
-  var hayMinis = Object.keys(beQty).some(function(id){ return (beQty[id]||0) > 0; });
-  
-  var ahora = new Date();
-  var cierreMañana = new Date(2026, 8, 17, 21, 0, 0); // 17/9 21:00
-  var cierreJueves = new Date(2026, 8, 23, 21, 0, 0);  // 23/9 21:00
-  
-  var puedeMañana = ahora <= cierreMañana;
-  var puedeProximo = ahora <= cierreJueves;
-  
-  // Si hay minis: mostrar SOLO lunes 21/9
-  if(hayMinis){
-    var aviso = document.createElement("div");
-    aviso.style.cssText = "background:#7E1F2D;color:#F3EBDD;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.5;text-align:left";
-    aviso.innerHTML = '⚡ <b>Entrega exclusiva de mini cookies.</b> El lunes 21/9 entregamos solo pedidos de Box de minis (se requiere 24hs de anticipación mínimo).';
-    wrap.appendChild(aviso);
-    
-    var row = document.createElement("div");
-    row.className = "pills";
-    var b = document.createElement("button");
-    b.className = "pill on"; b.id = "d-lun21";
-    b.textContent = "Lunes 21/9 · 14:00-16:00";
-    b.onclick = function(){ setDia("lun21"); };
-    row.appendChild(b);
-    wrap.appendChild(row);
-    
-    diaId = "lun21";
-    franja = "14:00-16:00";
-    renderFranjas();
-    return;
-  }
-  
-  // Si NO hay minis: mostrar viernes 18 y 24
-  var diasRestringidos = [
-    { id: "vie18", label: "Viernes 18/9", franjas: ["15:00", "18:00"], disponible: puedeMañana },
-    { id: "vie24", label: "Viernes 24/9", franjas: ["15:00", "18:00"], disponible: puedeProximo }
-  ];
-
-  // ¿Hay fechas forzadas por una box especial?
+  // ¿Hay fechas forzadas por una box especial (lanzamiento con fecha propia)?
   var forzado = obtenerFechasForzadas();
-
   if(forzado){
-    // Mostrar AVISO al cliente
     var aviso = document.createElement("div");
     aviso.style.cssText = "background:#fbeede;border:1px solid var(--mostaza);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7a4f0e;line-height:1.5";
-    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies en las otras fechas disponibles que hay antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
+    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
     wrap.appendChild(aviso);
-    // Generar pills con las fechas forzadas
     var row = document.createElement("div");
     row.className = "pills";
     forzado.fechas.forEach(function(f, i){
@@ -2045,69 +2074,43 @@ function renderDias(){
       row.appendChild(b);
     });
     wrap.appendChild(row);
-    // Crear diasEntrega virtual para que el resto del código funcione
-    // IMPORTANTE: usar las franjas/horarios REALES cargados en el admin para los días normales
-    // (no inventar valores). Tomamos la configuración del primer día normal si existe.
-    var franjasReales = [];
-    var horarioReal = "";
-    var primerDiaNormal = (CFG.diasEntrega && CFG.diasEntrega.length > 0) ? CFG.diasEntrega[0] : null;
-    if(primerDiaNormal){
-      if(primerDiaNormal.franjas && primerDiaNormal.franjas.length) franjasReales = primerDiaNormal.franjas;
-      if(primerDiaNormal.horario) horarioReal = primerDiaNormal.horario;
-    }
     disp = forzado.fechas.map(function(f, i){
-      return { dia: { id: "forzado_" + i, label: f, franjas: franjasReales, horario: horarioReal }, ok: true };
+      return { dia: { id: "forzado_" + i, label: f, horario: CFG.horarioViernes }, ok: true };
     });
-    // Auto-seleccionar la primera
     diaId = "forzado_0";
     var fb = $("d-forzado_0"); if(fb) fb.classList.add("on");
     renderFranjas();
     return;
   }
 
-  // FLUJO NORMAL (sin fechas forzadas)
-  // Usar los días restringidos en lugar de CFG.diasEntrega
-  disp = diasRestringidos.map(function(d){
-    return { dia: d, ok: d.disponible };
-  });
-  
-  var oks = disp.filter(function(x){ return x.ok; });
-  if(!oks.length){
-    var w = document.createElement("div");
-    w.className = "warn";
-    w.textContent = "⚠ Los días ya cerraron para compra. Los pedidos solo se pueden hacer dentro de los horarios establecidos.";
-    wrap.appendChild(w);
-  }
+  // FLUJO NORMAL: próximo viernes disponible + el siguiente, calculados en el momento
+  var v0 = calcularViernes(0);
+  var v1 = calcularViernes(1);
+  var diasAuto = [
+    { id: "v0_" + fechaISO(v0), label: fechaLabel(v0), horario: CFG.horarioViernes },
+    { id: "v1_" + fechaISO(v1), label: fechaLabel(v1), horario: CFG.horarioViernes }
+  ];
+  disp = diasAuto.map(function(d){ return { dia: d, ok: true }; });
+
   var row = document.createElement("div");
   row.className = "pills";
   disp.forEach(function(it){
     var b = document.createElement("button");
-    if(it.ok){
-      b.className = "pill"; b.id = "d-"+it.dia.id;
-      b.textContent = it.dia.label;
-      b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
-    } else {
-      b.className = "pill off";
-      var msg = it.dia.id === "vie18" ? "cerrado (hasta 21hs del 17)" : "cerrado (hasta 21hs del 23)";
-      b.textContent = it.dia.label + " · " + msg;
-      b.onclick = function(){ toast("Ese día ya cerró."); };
-    }
+    b.className = "pill"; b.id = "d-"+it.dia.id;
+    b.textContent = it.dia.label;
+    b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
     row.appendChild(b);
   });
   wrap.appendChild(row);
-  if(oks.length){
-    diaId = oks[0].dia.id;
-    var fb = $("d-"+diaId); if(fb) fb.classList.add("on");
-    renderFranjas();
-  } else {
-    diaId = null;
-    $("frSec").innerHTML = "";
-  }
+
+  diaId = disp[0].dia.id;
+  var fb2 = $("d-"+diaId); if(fb2) fb2.classList.add("on");
+  renderFranjas();
 }
 function setDia(id){
   diaId = id;
   disp.forEach(function(it){
-    if(it.ok){ var b = $("d-"+it.dia.id); if(b) b.classList.toggle("on", it.dia.id===id); }
+    var b = $("d-"+it.dia.id); if(b) b.classList.toggle("on", it.dia.id===id);
   });
   renderFranjas();
 }
@@ -2115,41 +2118,15 @@ function renderFranjas(){
   var wrap = $("frSec");
   if(!wrap) return;
   wrap.innerHTML = "";
-  
-  // Si es lunes, el horario es fijo: no mostrar selector
-  if(diaId === "lun21"){
-    franja = "14:00-16:00";
-    return;
-  }
-  
-  // Buscar el día en disp (que incluye los días restringidos)
-  var d = null;
   var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
-  if(dispMatch) d = dispMatch.dia;
-  
-  var fr = [];
-  if(d && d.franjas && d.franjas.length) fr = d.franjas;
-  else if(d && d.horario) fr = [d.horario];
-  
-  if(!fr.length){ franja = null; return; }
-  
+  var d = dispMatch ? dispMatch.dia : null;
+  // Horario único, no seleccionable: se muestra como texto informativo
+  franja = (d && d.horario) ? d.horario : CFG.horarioViernes;
   wrap.appendChild(secHead("Horario", "¿A qué hora?"));
-  var row = document.createElement("div");
-  row.className = "pills";
-  fr.forEach(function(f, i){
-    var b = document.createElement("button");
-    b.className = "pill" + (i===0?" on":"");
-    b.textContent = f;
-    b.onclick = (function(val, el){
-      return function(){
-        row.querySelectorAll(".pill").forEach(function(x){ x.classList.remove("on"); });
-        el.classList.add("on"); franja = val;
-      };
-    })(f, b);
-    row.appendChild(b);
-  });
-  wrap.appendChild(row);
-  franja = fr[0];
+  var info = document.createElement("div");
+  info.className = "note";
+  info.innerHTML = '🕐 <b>' + esc(franja) + '</b>';
+  wrap.appendChild(info);
 }
 
 /* ===== DATOS ===== */
@@ -2163,6 +2140,10 @@ function renderDatos(){
     '<label>¿Para quién es? <span style="color:var(--gris);font-weight:400;font-size:12px">(opcional — si es un regalo, este nombre va en la etiqueta)</span></label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)">' +
     '<div id="campoDir" style="display:none"><label>Dirección</label><input type="text" id="iDir" placeholder="Calle y número, barrio"></div>' +
     '<label>Aclaraciones (opcional)</label><textarea id="iNotas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
+  setTimeout(function(){
+    var nom = $("iNom");
+    if(nom) nom.addEventListener("focus", function(){ trackEvento("empezo_datos"); }, { once:true });
+  }, 0);
   return d;
 }
 
@@ -2288,10 +2269,10 @@ function aplicarCupon(){
 
   // Verificar vencimiento
   if(cup.vence){
-    var hoy = new Date();
-    hoy.setHours(0,0,0,0);
+    var hoyChk = new Date();
+    hoyChk.setHours(0,0,0,0);
     var venc = new Date(cup.vence + "T23:59:59");
-    if(hoy > venc){
+    if(hoyChk > venc){
       cuponAplicado = { valido:false, error:"Este código venció el " + fechaBonita(cup.vence) };
       renderResumen();
       return;
@@ -2517,12 +2498,9 @@ function confirmar(){
     return;
   }
 
-  // Buscar el día: primero en CFG.diasEntrega normales, después en disp (que incluye fechas forzadas)
-  var dia = CFG.diasEntrega.find(function(d){ return d.id===diaId; });
-  if(!dia){
-    var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
-    if(dispMatch) dia = dispMatch.dia;
-  }
+  // Buscar el día elegido dentro de disp (siempre viene de ahí ahora)
+  var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
+  var dia = dispMatch ? dispMatch.dia : null;
 
   // BLINDAJE FINAL: si después de todo no encontramos día, abortar
   if(!dia || !dia.label){
@@ -2600,6 +2578,7 @@ function confirmar(){
   var btn = $("btnGo");
   btn.disabled = true;
   btn.textContent = "Enviando…";
+  trackEvento("completo_pedido", fmt(t.total));
   fetch(APPS_SCRIPT_URL, {
     method:"POST", mode:"no-cors",
     headers:{ "Content-Type":"text/plain;charset=utf-8" },
