@@ -1050,6 +1050,40 @@
   .block.mayoristas .block-eyebrow { color: var(--bordo); opacity: 1; }
   .block.mayoristas .block-btn { background: var(--azul); color: #fff; }
   .block.contacto { background: var(--lavanda); color: var(--azul); }
+
+  /* ===== BANNER DE BOXES (arriba de todo) ===== */
+  .boxes-banner {
+    background: var(--crema-card);
+    border: 2px solid var(--mostaza);
+    border-radius: 22px;
+    padding: 20px 16px 18px;
+    margin: 6px 0 4px;
+  }
+  .boxes-banner-head { text-align: center; margin-bottom: 16px; padding: 0 6px; }
+  .boxes-banner-head .bb-eyebrow {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--bordo);
+  }
+  .boxes-banner-head h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--azul);
+    line-height: 1.1;
+    margin-top: 4px;
+    letter-spacing: -.4px;
+  }
+  .boxes-banner-head p {
+    font-size: 13px;
+    color: var(--gris);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+  .boxes-banner .box:last-child { margin-bottom: 0; }
   .block.contacto .block-btn { background: var(--azul); color: #fff; }
 
   .footer-end {
@@ -1422,6 +1456,9 @@ function render(){
   var app = $("app");
   app.innerHTML = "";
 
+  // BANNER DE BOXES — arriba de todo, siempre lo primero que se ve
+  app.appendChild(renderBoxesBanner());
+
   // LANZAMIENTOS / BOXES ESPECIALES (arriba de todo)
   var lanzamientos = (CFG.boxesEspeciales || [])
     .filter(function(b){ return b.activo; })
@@ -1449,11 +1486,6 @@ function render(){
     if(p.activo && !p.noListable) grid.appendChild(renderCookie(p));
   });
   app.appendChild(grid);
-
-  // BOXES
-  app.appendChild(secHead("Para compartir", "Armá tu box"));
-  if(CFG.box && CFG.box.activo) app.appendChild(renderBox(CFG.box, "box"));
-  if(CFG.box2 && CFG.box2.activo) app.appendChild(renderBox(CFG.box2, "box2"));
 
   // RESUMEN (movido a justo después de las boxes)
   app.appendChild(secHead("Tu pedido", "Resumen"));
@@ -1483,7 +1515,7 @@ function render(){
   var spacer = document.createElement("div");
   spacer.style.height = "26px";
   app.appendChild(spacer);
-  app.appendChild(renderNov());
+  if(CFG.mostrarNovedades !== false) app.appendChild(renderNov());
   app.appendChild(renderEventos());
   app.appendChild(renderMayoristas());
   app.appendChild(renderContacto());
@@ -1508,6 +1540,22 @@ function secHead(eyebrow, titulo){
   var d = document.createElement("div");
   d.className = "sec-head";
   d.innerHTML = '<div class="eyebrow">'+esc(eyebrow)+'</div><h2>'+esc(titulo)+'</h2>';
+  return d;
+}
+
+/* ===== BANNER DE BOXES (arriba de todo) ===== */
+function renderBoxesBanner(){
+  var d = document.createElement("div");
+  d.className = "boxes-banner";
+  var head = document.createElement("div");
+  head.className = "boxes-banner-head";
+  head.innerHTML =
+    '<div class="bb-eyebrow">Packs</div>' +
+    '<h2>Armá tu box a tu medida y pagá menos</h2>' +
+    '<p>Elegís los sabores que más te gusten y ahorrás vs. comprar sueltas.</p>';
+  d.appendChild(head);
+  if(CFG.box && CFG.box.activo) d.appendChild(renderBox(CFG.box, "box"));
+  if(CFG.box2 && CFG.box2.activo) d.appendChild(renderBox(CFG.box2, "box2"));
   return d;
 }
 
