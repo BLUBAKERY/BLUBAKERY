@@ -88,191 +88,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
       <button class="add-btn" onclick="agregarProducto()">+ Nuevo producto</button>
     </div>
     <div class="hint" style="margin-bottom:12px">El stock se resetea manualmente cada semana. Poné 0 para marcar como agotado.</div>
-    <div id="productos-admin">
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🍪 Choco chips, la clásica</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-0" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(0)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-0" value="Choco chips, la clásica"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-0" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-0" value="🍪" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-0" value="2" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-0" value="La receta que lo empezó todo. Chips de chocolate semiamargo y con leche. Bordes crocantes, centro suave."></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-0" value="https://drive.google.com/thumbnail?id=1GGvb9s4sFfpkvSTHFvZqfR3phlc7KlXP&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-low">Stock bajo: 2</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🍫 Cookie Triple Chocolate</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-1" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(1)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-1" value="Cookie Triple Chocolate"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-1" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-1" value="🍫" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-1" value="10" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-1" value="Tres tipos de chocolate en una sola cookie: blanco, semiamargo y chocolate con leche. Infalible."></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-1" value="https://drive.google.com/thumbnail?id=153_3-8lrCGLQqSe1TTpmBcyc3YgWuBlE&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-ok">Stock: 10</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🧂 Cookie Toffee </span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-2" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(2)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-2" value="Cookie Toffee "></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-2" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-2" value="🧂" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-2" value="0" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-2" value="Nueces tostadas, chips de chocolate semiamargo y chips de caramelo salado."></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-2" value="https://drive.google.com/thumbnail?id=1bJdNRr9-C6XxQZQY1YAv_DUV5aDgFiXN&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-out">Agotada</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🍋 Cookie Limón y Coco</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-3"><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(3)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-3" value="Cookie Limón y Coco"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-3" value="1" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-3" value="🍋" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-3" value="20" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-3" value="Limón fresco con coco rallado"></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-3" value="" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        
-      </div>
-      <span class="stock-badge stock-ok">Stock: 20</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🌿 Cookie Pistacho</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-4" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(4)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-4" value="Cookie Pistacho"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-4" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-4" value="🌿" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-4" value="16" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-4" value="Pasta de pistacho en la masa y pistacho picado en su interior, con chips de chocolate blanco. Suave y delicada."></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-4" value="https://drive.google.com/thumbnail?id=1F9e0xI-1X7JR1w-j77DJaf9Spsl5Zwtx&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-ok">Stock: 16</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🫐 Castañas caramelizadas, arándanos y choco blanco</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-5" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(5)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-5" value="Castañas caramelizadas, arándanos y choco blanco"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-5" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-5" value="🫐" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-5" value="1" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-5" value="Masa sabor limón suave con crocante de castañas de cajú y arándanos deshidratados y chips de chocolate blanco. Mucho crunchy. Te vas a sorprender!"></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-5" value="https://drive.google.com/thumbnail?id=10DFdKLJ58C7vJwNH6eRcqQztF60NXh8n&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-low">Stock bajo: 1</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🥜 Cookie Choco Block</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-6" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(6)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-6" value="Cookie Choco Block"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-6" value="4500" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-6" value="🥜" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-6" value="12" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-6" value="Si amás el chocolate, esta va a ser tu preferida. Masa de vainilla con crocante de maní y relleno de nuestra ganache Bariloche  con maní crocante. "></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-6" value="https://drive.google.com/thumbnail?id=1mfntMUSEk1V343MfL2MxGI-1Akw49G70&amp;sz=w1200" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        <div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display=&#39;none&#39;"><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>
-      </div>
-      <span class="stock-badge stock-ok">Stock: 12</span>
-    </div>
-  
-    <div class="producto-row">
-      <div class="producto-header">
-        <span class="producto-titulo">🍪 Nuevo producto</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="act-7" checked=""><span>Activo</span></label>
-          <button class="remove-btn" onclick="eliminarProducto(7)">✕</button>
-        </div>
-      </div>
-      <div class="field-row-4">
-        <div class="field"><label>Nombre</label><input type="text" id="pnombre-7" value="Nuevo producto"></div>
-        <div class="field"><label>Precio ($)</label><input type="number" id="pprecio-7" value="0" min="0"></div>
-        <div class="field"><label>Emoji</label><input type="text" id="pemoji-7" value="🍪" style="text-align:center;font-size:18px"></div>
-        <div class="field"><label>Stock semana</label><input type="number" id="pstock-7" value="0" min="0" style="font-weight:700"></div>
-      </div>
-      <div class="field"><label>Descripción</label><input type="text" id="pdesc-7" value=""></div>
-      <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-        <input type="text" id="pfoto-7" value="" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-        
-      </div>
-      <span class="stock-badge stock-out">Agotada</span>
-    </div>
-  </div>
+    <div id="productos-admin"></div>
   </div>
 
   <!-- BOX (producto especial) -->
@@ -377,29 +193,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
       Descuentos y promociones
       <button class="add-btn" onclick="agregarDescuento()">+ Nueva promo</button>
     </div>
-    <div id="descuentos-admin">
-    <div class="descuento-row">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-family:&#39;Playfair Display&#39;,serif;font-size:13px;font-weight:700">Promoción 1</span>
-        <div style="display:flex;align-items:center;gap:10px">
-          <label class="toggle"><input type="checkbox" id="dact-0"><span>Activa</span></label>
-          <button class="remove-btn" onclick="eliminarDescuento(0)">✕</button>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Tipo</label>
-          <select id="dtipo-0">
-            <option value="porcentaje">% en todas las cookies</option>
-            <option value="producto">% en un producto</option>
-            <option value="pack_especial">Pack especial (precio fijo)</option>
-            <option value="texto" selected="">Promo libre</option>
-          </select>
-        </div>
-        <div class="field"><label>Valor (% o $)</label><input type="number" id="dvalor-0" value="10" min="0"></div>
-      </div>
-      <div class="field"><label>Descripción para el cliente</label><input type="text" id="ddesc-0" value="Box de 4 cookies a elección" placeholder="Ej: 10% de descuento hoy en todas las cookies"></div>
-    </div>
-  </div>
+    <div id="descuentos-admin"></div>
     <div class="hint" style="margin-top:8px">Ejemplos: 10% en todas · 2x1 en limón · Pack de 8 por $32.000</div>
   </div>
 
@@ -409,19 +203,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
       Días y horarios de entrega
       <button class="add-btn" onclick="agregarDia()">+ Agregar día</button>
     </div>
-    <div id="dias-admin">
-    <div class="dia-row">
-      <input type="text" id="dialabel-0" value="Miércoles 6/5" style="width:100px;flex-shrink:0" placeholder="Día">
-      <input type="text" id="diahora-0" value="16hs a 18hs" placeholder="Ej: 15:00 – 19:00 hs">
-      <button class="remove-btn" onclick="eliminarDia(0)">✕</button>
-    </div>
-  
-    <div class="dia-row">
-      <input type="text" id="dialabel-1" value="" style="width:100px;flex-shrink:0" placeholder="Día">
-      <input type="text" id="diahora-1" value="" placeholder="Ej: 15:00 – 19:00 hs">
-      <button class="remove-btn" onclick="eliminarDia(1)">✕</button>
-    </div>
-  </div>
+    <div id="dias-admin"></div>
     <div style="margin-top:14px">
       <div class="field">
         <label>Horas de anticipación mínima para pedir</label>
@@ -575,9 +357,57 @@ function stockBadge(s){
   return '<span class="stock-badge stock-ok">Stock: '+s+'</span>';
 }
 
+// Lee del DOM todos los campos de TODOS los productos actuales (igual que se
+// hace con las boxes especiales) — se llama antes de re-renderizar por un
+// cambio estructural (agregar/quitar foto extra) para no perder lo escrito.
+function leerEstadoProductosDesdeDOM(){
+  CONFIG.productos.forEach((p, i) => {
+    const get = (id) => document.getElementById(id);
+    if(get("pnombre-"+i)) p.nombre = get("pnombre-"+i).value || p.nombre;
+    if(get("pprecio-"+i)) p.precio = parseInt(get("pprecio-"+i).value) || p.precio;
+    if(get("pemoji-"+i)) p.emoji = get("pemoji-"+i).value || p.emoji;
+    if(get("pstock-"+i)) p.stock = parseInt(get("pstock-"+i).value) || 0;
+    if(get("pdesc-"+i)) p.descripcion = get("pdesc-"+i).value || "";
+    if(get("pnolist-"+i)) p.noListable = get("pnolist-"+i).checked;
+    if(get("pespecial-"+i)) p.especial = get("pespecial-"+i).checked;
+    if(get("act-"+i)) p.activo = get("act-"+i).checked;
+    const nf = get("pfoto-"+i)?.value.trim();
+    if(nf) p.foto = convertirLinkDrive(nf);
+    const fotosInputs = document.querySelectorAll(`#pfotos-extra-cont-${i} input.p-foto-extra`);
+    if(fotosInputs.length){
+      p.fotosExtra = Array.from(fotosInputs).map(inp => {
+        const v = inp.value.trim();
+        return v ? convertirLinkDrive(v) : "";
+      }).filter(v => v);
+    }
+  });
+}
+
+function agregarFotoProducto(prodIdx){
+  leerEstadoProductosDesdeDOM();
+  if(!Array.isArray(CONFIG.productos[prodIdx].fotosExtra)) CONFIG.productos[prodIdx].fotosExtra = [];
+  CONFIG.productos[prodIdx].fotosExtra.push("");
+  renderProductos();
+}
+
+function quitarFotoProducto(prodIdx, fotoIdx){
+  leerEstadoProductosDesdeDOM();
+  if(!CONFIG.productos[prodIdx].fotosExtra) return;
+  CONFIG.productos[prodIdx].fotosExtra.splice(fotoIdx, 1);
+  renderProductos();
+}
+
 function renderProductos(){
   const cont=document.getElementById("productos-admin");
-  cont.innerHTML=CONFIG.productos.map((p,i)=>`
+  cont.innerHTML=CONFIG.productos.map((p,i)=>{
+    const fotosExtra = Array.isArray(p.fotosExtra) ? p.fotosExtra : [];
+    const fotosHtml = fotosExtra.map((url, j) => `
+      <div style="display:flex;gap:6px;align-items:center;margin-top:6px">
+        <input type="text" class="p-foto-extra" data-prod="${i}" data-idx="${j}" value="${(url||'').replace(/"/g,'&quot;')}" placeholder="https://drive.google.com/file/d/XXXXX/view..." style="flex:1"/>
+        <button type="button" onclick="quitarFotoProducto(${i},${j})" class="remove-btn" style="border:1px solid #ddd;padding:5px 10px">✕</button>
+      </div>
+    `).join('');
+    return `
     <div class="producto-row">
       <div class="producto-header">
         <span class="producto-titulo">${p.emoji} ${p.nombre}</span>
@@ -597,18 +427,29 @@ function renderProductos(){
         <label class="toggle"><input type="checkbox" id="pnolist-${i}" ${p.noListable?'checked':''}/><span><b>No mostrar como cookie suelta</b></span></label>
         <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo si este producto NO debería poder elegirse por separado (ej. la Box de minis, que sólo se vende como caja completa). No aparece en el menú ni dentro de las boxes x4/x6, pero igual existe como producto.</div>
       </div>
+      <div style="background:#fbf6ec;border:1px solid #ead8b0;border-radius:8px;padding:10px 12px;margin:8px 0">
+        <label class="toggle"><input type="checkbox" id="pespecial-${i}" ${p.especial?'checked':''}/><span><b>Producto especial (banner propio)</b></span></label>
+        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo para que aparezca con su propio banner grande, arriba de todo (junto a las boxes x4/x6), en vez de mezclado en el menú de cookies. Ideal para la Box de minis o futuras cookies premium.</div>
+      </div>
       <div class="field">
-        <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
+        <label>Foto principal — pegá el link de Google Drive (se convierte solo al guardar)</label>
         <input type="text" id="pfoto-${i}" value="${(p.foto && !p.foto.startsWith('data:')) ? p.foto : ''}" placeholder="https://drive.google.com/file/d/XXXXX/view..."/>
         ${p.foto && !p.foto.startsWith('data:') ? `<div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="${convertirLinkDrive(p.foto)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display='none'"/><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>` : ''}
       </div>
+      <div class="field">
+        <label>Fotos adicionales (carrusel — solo se muestran si el producto es "especial")</label>
+        <div style="font-size:11px;color:#777;margin-bottom:6px">Agregá tantas fotos como quieras. Aparecen en la tienda como un carrusel deslizable.</div>
+        <div id="pfotos-extra-cont-${i}">${fotosHtml}</div>
+        <button type="button" onclick="agregarFotoProducto(${i})" style="margin-top:8px;background:#fff;border:1px dashed #1B6B8A;color:#1B6B8A;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">+ Agregar otra foto</button>
+      </div>
       ${stockBadge(p.stock||0)}
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function agregarProducto(){
-  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:"",noListable:false});
+  leerEstadoProductosDesdeDOM();
+  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:"",noListable:false,especial:false,fotosExtra:[]});
   renderProductos();
 }
 
@@ -911,17 +752,7 @@ const CLIENT_ID = "507038647920-d9a358fea6547uu25vlr5l39svskhnmp.apps.googleuser
 let accessToken = null;
 
 function getConfig() {
-  CONFIG.productos.forEach((p,i)=>{
-    p.nombre=document.getElementById("pnombre-"+i)?.value||p.nombre;
-    p.precio=parseInt(document.getElementById("pprecio-"+i)?.value)||p.precio;
-    p.emoji=document.getElementById("pemoji-"+i)?.value||p.emoji;
-    p.stock=parseInt(document.getElementById("pstock-"+i)?.value)||0;
-    p.descripcion=document.getElementById("pdesc-"+i)?.value||"";
-    p.noListable=document.getElementById("pnolist-"+i)?.checked||false;
-    const nf=document.getElementById("pfoto-"+i)?.value.trim();
-    if(nf) p.foto=convertirLinkDrive(nf);
-    p.activo=document.getElementById("act-"+i)?.checked;
-  });
+  leerEstadoProductosDesdeDOM();
   // Leer boxes especiales del DOM
   leerEstadoBoxesEspecialesDesdeDOM();
   CONFIG.descuentos.forEach((d,i)=>{
