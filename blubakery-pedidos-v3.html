@@ -311,6 +311,7 @@
     align-items: center;
     justify-content: center;
   }
+  .step-btn:disabled { opacity: .3; cursor: not-allowed; }
   .step-num {
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 700;
@@ -331,6 +332,20 @@
     border-radius: 100px;
     cursor: pointer;
     margin-top: 8px;
+  }
+
+  /* ===== COOKIES PREMIUM (en el menú) ===== */
+  .ck.premium {
+    background: linear-gradient(180deg, #F8EBCB 0%, #F0DAA2 100%);
+    border-color: var(--mostaza);
+  }
+  .ck.premium .ck-name { color: var(--bordo); }
+  .ck.premium .ck-desc { color: #7a6a4a; }
+  .ck-badge.premium {
+    left: auto;
+    right: 9px;
+    background: var(--tinta);
+    color: var(--mostaza);
   }
 
   /* ===== BOXES ===== */
@@ -396,6 +411,249 @@
   .box .stepper .step-num { color: #fff; }
   .box.lav .stepper .step-btn { border-color: var(--azul); color: var(--azul); }
   .box.lav .stepper .step-num { color: var(--azul); }
+
+  /* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
+  .cp-sec {
+    margin: 22px 0 6px;
+    padding: 20px 16px 18px;
+    border: 2px dashed var(--bordo);
+    border-radius: 22px;
+    background: #FAF0DA;
+  }
+  .cp-head { text-align: center; padding: 0 4px 16px; }
+  .cp-head h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--bordo);
+    line-height: 1.1;
+    letter-spacing: -.4px;
+  }
+  .cp-head p {
+    font-size: 13px;
+    color: #6d5a3d;
+    margin-top: 6px;
+    line-height: 1.45;
+  }
+  .cp-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .cp-card {
+    background: var(--bordo);
+    color: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .cp-ribbon {
+    position: absolute;
+    top: 10px; left: 10px;
+    z-index: 2;
+    background: var(--mostaza);
+    color: var(--bordo);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 11px;
+    border-radius: 100px;
+  }
+  .cp-media {
+    aspect-ratio: 4/3;
+    background: #6a1a26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 46px;
+    overflow: hidden;
+  }
+  .cp-media img { width: 100%; height: 100%; object-fit: cover; }
+  .cp-body {
+    padding: 12px 13px 14px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .cp-body h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.1;
+    letter-spacing: -.3px;
+  }
+  .cp-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,.78);
+    margin-top: 4px;
+    line-height: 1.35;
+  }
+  .cp-hint {
+    font-size: 11.5px;
+    color: var(--mostaza);
+    margin-top: 8px;
+    line-height: 1.4;
+    flex: 1;
+  }
+  .cp-btn {
+    margin-top: 12px;
+    background: var(--mostaza);
+    color: var(--bordo);
+    border: none;
+    border-radius: 100px;
+    padding: 12px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .12s;
+  }
+  .cp-btn:active { transform: scale(.96); }
+  @media (max-width: 400px) {
+    .cp-cards { grid-template-columns: 1fr; }
+  }
+
+  .cp-lista { margin-top: 14px; }
+  .cp-lista-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--bordo);
+    margin-bottom: 8px;
+  }
+  .cp-item {
+    background: #fff;
+    border: 1px solid #e8d7ae;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+  }
+  .cp-item-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--bordo);
+  }
+  .cp-item-det {
+    font-size: 12px;
+    color: var(--gris);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .cp-item-rm {
+    background: none;
+    border: none;
+    color: var(--bordo);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 6px 0 0;
+  }
+
+  /* modal de cajas personalizables */
+  .cp-slots-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--crema);
+    margin: 0 -18px;
+    padding: 10px 18px 10px;
+    border-bottom: 1px solid var(--linea);
+  }
+  .cp-slots-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--bordo);
+    margin-bottom: 8px;
+  }
+  .cp-slots { display: grid; gap: 6px; }
+  .cp-slot {
+    aspect-ratio: 1/1;
+    border-radius: 10px;
+    border: 2px dashed #c9b48a;
+    background: rgba(255,255,255,.5);
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+  }
+  .cp-slot.on { border: 2px solid var(--bordo); background: #fff; cursor: pointer; }
+  .cp-slot.on.prem { border-color: var(--mostaza); }
+  .cp-slot img { width: 100%; height: 100%; object-fit: cover; }
+  .cp-slot .x {
+    position: absolute;
+    top: 2px; right: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--bordo);
+    color: #fff;
+    font-size: 11px;
+    line-height: 16px;
+    text-align: center;
+  }
+  .cp-slots-hint { font-size: 11px; color: var(--gris); margin-top: 6px; }
+  .cp-group {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--bordo);
+    margin: 14px 0 8px;
+  }
+  .cp-prem-tag {
+    display: inline-block;
+    background: var(--tinta);
+    color: var(--mostaza);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 100px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .cp-precio {
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 14px 0 4px;
+  }
+  .cp-precio.wait {
+    border: 2px dashed #c9b48a;
+    background: rgba(255,255,255,.55);
+    text-align: center;
+    color: #6d5a3d;
+    font-size: 13.5px;
+    line-height: 1.45;
+  }
+  .cp-precio.done { background: var(--bordo); color: #fff; }
+  .cp-precio .r {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    padding: 2px 0;
+    opacity: .9;
+  }
+  .cp-precio .t {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid rgba(255,255,255,.3);
+    margin-top: 8px;
+    padding-top: 9px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .cp-precio .t b { font-size: 26px; color: var(--mostaza); }
 
   /* ===== PANELES ===== */
   .panel {
@@ -1202,7 +1460,7 @@
   <div class="loading">Horneando…</div>
 </div>
 
-<!-- MODAL BOX -->
+<!-- MODAL BOX (Box x4 / Box x6 de precio fijo) -->
 <div class="mbg" id="mbg">
   <div class="modal">
     <h3 id="mTitle">Armá tu Box</h3>
@@ -1211,6 +1469,23 @@
     <div class="mcount">Elegiste <b id="mCount">0</b> de <span id="mMax">4</span></div>
     <button class="cta" id="mConfirm">Confirmar Box</button>
     <button class="cta ghost" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CAJA PERSONALIZABLE (premium + clásicas, precio al final) -->
+<div class="mbg" id="cpMbg">
+  <div class="modal">
+    <h3 id="cpTitle">Armá tu caja</h3>
+    <div class="msub" id="cpSub"></div>
+    <div class="cp-slots-wrap">
+      <div class="cp-slots-title"><span>Tu caja</span><span id="cpCount">0 de 4</span></div>
+      <div class="cp-slots" id="cpSlots"></div>
+      <div class="cp-slots-hint">Tocá una cookie de tu caja para sacarla.</div>
+    </div>
+    <div id="cpList"></div>
+    <div id="cpPrecio"></div>
+    <button class="cta" id="cpConfirm" disabled>Agregar caja al pedido</button>
+    <button class="cta ghost" onclick="cpCerrar()">Cancelar</button>
   </div>
 </div>
 
@@ -1233,10 +1508,15 @@ var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/
 var REVIEWS_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Reviews";
 var WSP = "5492284353970";
 
+// true = las cajas personalizables también activan el % de descuento en cookies sueltas
+// (igual que las Box x4 / x6). Poné false si no querés que se acumulen.
+var CP_DESC_SUELTAS = true;
+
 var CFG = {
   productos: [],
   box: { activo:true, nombre:"Box x 4", cant:4, precio:17200, pctSueltas:10, foto:"" },
   box2: { activo:true, nombre:"Box x 6", cant:6, precio:25800, pctSueltas:10, foto:"" },
+  cajasPers: [],   // cajas personalizables (se configuran desde el admin)
   cookieDelMes: "nuevo_1777848533244",
   cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
   costoEnvio: 3000,
@@ -1257,6 +1537,8 @@ var CFG = {
 
 /* ===== ESTADO ===== */
 var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
+var cajasArmadas = [];   // cajas personalizables ya armadas: { uid, cajaId, nombre, cant, pct, fill, sum, precio }
+var cpSeq = 0;
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
 var cuponAplicado = null; // { codigo, tipo, valor, valido }
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
@@ -1276,6 +1558,9 @@ function driveImg(v){
     return m ? "https://drive.google.com/thumbnail?id="+m[0]+"&sz=w1200" : v;
   }
   return "https://drive.google.com/thumbnail?id="+v+"&sz=w1200";
+}
+function prodPorId(id){
+  return CFG.productos.find(function(x){ return x.id === id; });
 }
 
 /* ===== TRACKING (eventos anónimos, sin pixel) ===== */
@@ -1336,6 +1621,7 @@ function init(){
   CFG.productos.forEach(function(p){ qty[p.id] = 0; });
   // Inicializar boxes especiales
   if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
+  if(!Array.isArray(CFG.cajasPers)) CFG.cajasPers = [];
   
   // ===== LÓGICA PROMO DÍA DE LA PRIMAVERA =====
   var hoyDate = new Date();
@@ -1462,6 +1748,10 @@ function render(){
   // BANNER DE BOXES — arriba de todo, siempre lo primero que se ve
   app.appendChild(renderBoxesBanner());
 
+  // CAJAS PERSONALIZABLES — sección aparte (premium + clásicas, precio al final)
+  var cpSec = renderCajasPers();
+  if(cpSec) app.appendChild(cpSec);
+
   // PRODUCTOS ESPECIALES (minis, premium, etc.) — cada uno con su propio banner,
   // justo debajo de las boxes. Se marcan con "especial": true en el Sheet.
   (CFG.productos||[]).forEach(function(p){
@@ -1544,6 +1834,7 @@ function render(){
   app.appendChild(fe);
 
   renderDias();
+  renderCPLista();
   renderResumen();
   iniciarCarrusel();
 }
@@ -1564,12 +1855,245 @@ function renderBoxesBanner(){
   head.innerHTML =
     '<div class="bb-eyebrow">Packs</div>' +
     '<h2>Armá tu box a tu medida y pagá menos</h2>' +
-    '<p>Elegís los sabores que más te gusten y ahorrás vs. comprar sueltas.</p>';
+    '<p>Elegís entre las cookies clásicas y ahorrás vs. comprar sueltas.</p>';
   d.appendChild(head);
   if(CFG.box && CFG.box.activo) d.appendChild(renderBox(CFG.box, "box"));
   if(CFG.box2 && CFG.box2.activo) d.appendChild(renderBox(CFG.box2, "box2"));
   return d;
 }
+
+/* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
+function cajasPersActivas(){
+  return (CFG.cajasPers || []).filter(function(c){ return c && c.activo !== false && parseInt(c.cant) > 0; });
+}
+
+function renderCajasPers(){
+  var cajas = cajasPersActivas();
+  if(!cajas.length) return null;
+  var d = document.createElement("div");
+  d.className = "cp-sec";
+  var cards = cajas.map(function(c){
+    var cant = parseInt(c.cant) || 4;
+    var media = c.foto
+      ? '<img src="'+driveImg(c.foto)+'" alt="'+esc(c.nombre)+'" onerror="this.style.display=\'none\'">'
+      : esc(c.emoji || "🎁");
+    return '<div class="cp-card">' +
+      '<span class="cp-ribbon">Armá la tuya</span>' +
+      '<div class="cp-media">'+media+'</div>' +
+      '<div class="cp-body">' +
+        '<h3>'+esc(c.nombre)+'</h3>' +
+        '<div class="cp-sub">'+esc(c.descripcion || ("Caja para "+cant+" cookies · premium + clásicas"))+'</div>' +
+        '<div class="cp-hint">Agregá tus cookies y el precio con descuento lo ves al final.</div>' +
+        '<button class="cp-btn" onclick="cpAbrir(\''+c.id+'\')">Armar mi caja</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+  d.innerHTML =
+    '<div class="cp-head">' +
+      '<h2>Premium y clásicas, en la misma caja</h2>' +
+      '<p>A diferencia de las Box de arriba, acá podés sumar cookies premium y mezclarlas con las clásicas. Vos elegís cada una.</p>' +
+    '</div>' +
+    '<div class="cp-cards">'+cards+'</div>' +
+    '<div class="cp-lista" id="cpLista"></div>';
+  return d;
+}
+
+// Stock que ya reservaron las cajas personalizables armadas
+function cpFillTotal(id){
+  var n = 0;
+  cajasArmadas.forEach(function(c){ n += (c.fill[id] || 0); });
+  return n;
+}
+
+// Devuelve ["2 Pistacho y Frambuesa", "1 Nutella", ...]
+function fillLista(f){
+  var ps = [];
+  Object.keys(f).forEach(function(k){
+    if(f[k] > 0){
+      var p = prodPorId(k);
+      if(p) ps.push(f[k] + " " + p.nombre);
+    }
+  });
+  return ps;
+}
+
+function renderCPLista(){
+  var el = $("cpLista");
+  if(!el) return;
+  if(!cajasArmadas.length){ el.innerHTML = ""; return; }
+  el.innerHTML =
+    '<div class="cp-lista-title">Tus cajas armadas</div>' +
+    cajasArmadas.map(function(c){
+      return '<div class="cp-item">' +
+        '<div class="cp-item-top"><span>'+esc(c.nombre)+'</span><span>'+fmt(c.precio)+'</span></div>' +
+        '<div class="cp-item-det">'+esc(fillLista(c.fill).join(" · "))+'</div>' +
+        '<button class="cp-item-rm" onclick="cpQuitar('+c.uid+')">Quitar caja</button>' +
+      '</div>';
+    }).join("");
+}
+
+function cpQuitar(uid){
+  cajasArmadas = cajasArmadas.filter(function(c){ return c.uid !== uid; });
+  renderCPLista();
+  renderResumen();
+  toast("Caja quitada");
+}
+
+// Precio de una caja personalizable: suma de los precios individuales × (1 − descuento). Sin packaging.
+function cpCalc(caja, fill){
+  var sum = 0;
+  Object.keys(fill).forEach(function(k){
+    var n = fill[k] || 0;
+    if(n <= 0) return;
+    var p = prodPorId(k);
+    if(p) sum += n * (parseFloat(p.precio) || 0);
+  });
+  var pct = parseFloat(caja.pctDescuento) || 0;
+  var total = Math.round(sum * (1 - pct/100));
+  return { sum: sum, pct: pct, desc: sum - total, total: total };
+}
+
+function cpAbrir(id){
+  var caja = (CFG.cajasPers || []).find(function(c){ return c.id === id; });
+  if(!caja) return;
+  var cant = parseInt(caja.cant) || 4;
+  window._cp = { caja: caja, cant: cant, fill: {}, orden: [] };
+  $("cpTitle").textContent = "Armá tu " + caja.nombre;
+  $("cpSub").textContent = "Elegí " + cant + " cookies y mezclá premium con clásicas. El precio con descuento lo ves al final.";
+  cpArmarLista();
+  cpRefrescar();
+  $("cpMbg").classList.add("show");
+  trackEvento("abrio_caja_pers", caja.nombre);
+}
+
+function cpFila(p){
+  return '<div class="srow">' +
+    '<img src="'+driveImg(p.foto)+'" alt="" onerror="this.style.opacity=.3">' +
+    '<span class="sn">'+esc(p.nombre)+(p.premium ? '<span class="cp-prem-tag">Premium</span>' : '')+'</span>' +
+    '<div class="stepper">' +
+      '<button class="step-btn" id="cpm-'+p.id+'" onclick="cpSabor(\''+p.id+'\',-1)" disabled>−</button>' +
+      '<span class="step-num" id="cps-'+p.id+'">0</span>' +
+      '<button class="step-btn" onclick="cpSabor(\''+p.id+'\',1)">+</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function cpArmarLista(){
+  var items = CFG.productos.filter(function(p){ return p.activo && !p.noListable && !p.especial; });
+  var prem = items.filter(function(p){ return p.premium; });
+  var clas = items.filter(function(p){ return !p.premium; });
+  var h = "";
+  if(prem.length) h += '<div class="cp-group">Premium</div>' + prem.map(cpFila).join("");
+  if(clas.length) h += '<div class="cp-group">Clásicas</div>' + clas.map(cpFila).join("");
+  $("cpList").innerHTML = h;
+}
+
+function cpSabor(id, delta){
+  var s = window._cp;
+  if(!s) return;
+  var p = prodPorId(id);
+  if(!p) return;
+  if(delta > 0){
+    if(s.orden.length >= s.cant){ toast("Tu caja ya está completa"); return; }
+    var max = parseInt(p.maxPorCaja) || 0;
+    if(max > 0 && (s.fill[id] || 0) >= max){
+      toast("No hay más stock de " + p.nombre + " para caja");
+      return;
+    }
+    var usado = (qty[id]||0) + (boxFill[id]||0) + (box2Fill[id]||0) + cpFillTotal(id) + (s.fill[id]||0);
+    if(usado >= (parseInt(p.stock) || 0)){ toast("Sin stock de " + p.nombre); return; }
+    s.fill[id] = (s.fill[id] || 0) + 1;
+    s.orden.push(id);
+  } else if((s.fill[id] || 0) > 0){
+    s.fill[id]--;
+    var i = s.orden.lastIndexOf(id);
+    if(i > -1) s.orden.splice(i, 1);
+  }
+  cpRefrescar();
+}
+
+function cpQuitarSlot(idx){
+  var s = window._cp;
+  if(!s) return;
+  var id = s.orden[idx];
+  if(!id) return;
+  s.orden.splice(idx, 1);
+  s.fill[id] = Math.max(0, (s.fill[id] || 0) - 1);
+  cpRefrescar();
+}
+
+function cpRefrescar(){
+  var s = window._cp;
+  if(!s) return;
+  // contadores por cookie
+  CFG.productos.forEach(function(p){
+    var n = $("cps-"+p.id);
+    if(n) n.textContent = s.fill[p.id] || 0;
+    var m = $("cpm-"+p.id);
+    if(m) m.disabled = !(s.fill[p.id] > 0);
+  });
+  // mini carrito: una casilla por cookie de la caja
+  var slots = "";
+  for(var i = 0; i < s.cant; i++){
+    var id = s.orden[i];
+    if(id){
+      var p = prodPorId(id);
+      slots += '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
+        '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
+    } else {
+      slots += '<div class="cp-slot"></div>';
+    }
+  }
+  var slotsEl = $("cpSlots");
+  slotsEl.style.gridTemplateColumns = "repeat(" + Math.min(s.cant, 6) + ",1fr)";
+  slotsEl.innerHTML = slots;
+  $("cpCount").textContent = s.orden.length + " de " + s.cant;
+
+  // precio: recién aparece cuando la caja está completa
+  var completa = (s.orden.length === s.cant);
+  var pr = $("cpPrecio");
+  if(completa){
+    var c = cpCalc(s.caja, s.fill);
+    pr.innerHTML =
+      '<div class="cp-precio done">' +
+        (c.pct > 0
+          ? '<div class="r"><span>Cookies elegidas</span><span>'+fmt(c.sum)+'</span></div>' +
+            '<div class="r"><span>Descuento '+c.pct+'%</span><span>−'+fmt(c.desc)+'</span></div>'
+          : '') +
+        '<div class="t"><span>Tu caja</span><b>'+fmt(c.total)+'</b></div>' +
+      '</div>';
+  } else {
+    pr.innerHTML =
+      '<div class="cp-precio wait">Agregá tus cookies y el precio con descuento lo ves al final, cuando completes la caja.</div>';
+  }
+  $("cpConfirm").disabled = !completa;
+}
+
+function cpCerrar(){ $("cpMbg").classList.remove("show"); }
+
+$("cpConfirm").onclick = function(){
+  var s = window._cp;
+  if(!s) return;
+  if(s.orden.length !== s.cant){ toast("Completá tu caja: elegí " + s.cant + " cookies"); return; }
+  var c = cpCalc(s.caja, s.fill);
+  var fillCopia = {};
+  Object.keys(s.fill).forEach(function(k){ if(s.fill[k] > 0) fillCopia[k] = s.fill[k]; });
+  cajasArmadas.push({
+    uid: ++cpSeq,
+    cajaId: s.caja.id,
+    nombre: s.caja.nombre,
+    cant: s.cant,
+    pct: c.pct,
+    fill: fillCopia,
+    sum: c.sum,
+    precio: c.total
+  });
+  cpCerrar();
+  renderCPLista();
+  renderResumen();
+  toast("Caja agregada ✓");
+  trackEvento("agrego_caja_pers", s.caja.nombre);
+};
 
 /* ===== BANNER DE PRODUCTO ESPECIAL (minis, premium, etc.) ===== */
 function renderProductoBanner(p){
@@ -1896,7 +2420,7 @@ function addCDM(id){
 /* ===== COOKIE CARD ===== */
 function renderCookie(p){
   var d = document.createElement("div");
-  d.className = "ck";
+  d.className = "ck" + (p.premium ? " premium" : "");
   d.id = "ck-"+p.id;
   var stock = parseInt(p.stock)||0;
   var out = stock <= 0;
@@ -1906,6 +2430,7 @@ function renderCookie(p){
   if(out) badge = '<span class="ck-badge agot">Agotada</span>';
   else if(stock<=3) badge = '<span class="ck-badge pocas">Últimas '+stock+'</span>';
   else if(nueva) badge = '<span class="ck-badge nueva">Nueva</span>';
+  var premBadge = p.premium ? '<span class="ck-badge premium">Premium</span>' : '';
   var desc = (p.descripcion||"").replace(/^NUEVA\s*[-–]\s*/i,"");
 
   var foot = out
@@ -1916,7 +2441,7 @@ function renderCookie(p){
       '</div>';
 
   d.innerHTML =
-    '<div class="ck-imgwrap">'+badge+
+    '<div class="ck-imgwrap">'+badge+premBadge+
       '<img class="ck-img" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.3">' +
     '</div>' +
     '<div class="ck-body">' +
@@ -1938,7 +2463,7 @@ function ctrlHtml(id){
 }
 function dispo(id){
   var p = CFG.productos.find(function(x){ return x.id===id; });
-  return (parseInt(p.stock)||0) - (boxFill[id]||0) - (box2Fill[id]||0);
+  return (parseInt(p.stock)||0) - (boxFill[id]||0) - (box2Fill[id]||0) - cpFillTotal(id);
 }
 function chCookie(id, delta){
   var p = CFG.productos.find(function(x){ return x.id===id; });
@@ -1995,7 +2520,7 @@ function chBox(tipo, delta){
   renderResumen();
 }
 
-/* ===== MODAL ===== */
+/* ===== MODAL (Box x4 / Box x6 de precio fijo — solo cookies clásicas) ===== */
 function openModal(tipo){
   var box = tipo==="box" ? CFG.box : CFG.box2;
   window._mt = tipo; window._mb = box; window._mf = {};
@@ -2007,7 +2532,8 @@ function openModal(tipo){
   var list = $("mList");
   list.innerHTML = "";
   CFG.productos.forEach(function(p){
-    if(!p.activo || p.noListable) return;
+    // Las cookies premium NO entran en las Box x4 / x6 de precio fijo: van en las cajas personalizables
+    if(!p.activo || p.noListable || p.premium) return;
     var r = document.createElement("div");
     r.className = "srow";
     r.innerHTML =
@@ -2028,7 +2554,7 @@ function mSabor(id, delta){
   if(delta>0){
     if(tot >= box.cant){ toast("Ya elegiste "+box.cant); return; }
     var p = CFG.productos.find(function(x){ return x.id===id; });
-    var usado = (qty[id]||0)+(boxFill[id]||0)+(box2Fill[id]||0)+f[id];
+    var usado = (qty[id]||0)+(boxFill[id]||0)+(box2Fill[id]||0)+cpFillTotal(id)+f[id];
     if(usado >= (parseInt(p.stock)||0)){ toast("Sin stock de "+p.nombre); return; }
     f[id]++;
   } else if(f[id]>0){ f[id]--; }
@@ -2423,7 +2949,13 @@ function totales(){
     }
   });
   var boxes = boxQty*(CFG.box.precio||0) + box2Qty*(CFG.box2.precio||0);
-  var hayBox = (boxQty+box2Qty)>0;
+
+  // Cajas personalizables (cada una ya trae su precio final con descuento)
+  var cpTot = 0;
+  cajasArmadas.forEach(function(c){ cpTot += c.precio; });
+  var hayCP = cajasArmadas.length > 0;
+
+  var hayBox = (boxQty+box2Qty)>0 || (CP_DESC_SUELTAS && hayCP);
   var pct = CFG.box.pctSueltas||0;
   var desc = (hayBox && pct>0) ? sueltas*(pct/100) : 0;
 
@@ -2438,7 +2970,7 @@ function totales(){
     }
   });
 
-  var subtotal = boxes + sueltas - desc + bEsp;
+  var subtotal = boxes + cpTot + sueltas - desc + bEsp;
 
   // Cupón de descuento (se aplica sobre el subtotal, no sobre el envío)
   var descCupon = 0;
@@ -2451,9 +2983,10 @@ function totales(){
     descCupon = Math.round(descCupon);
   }
 
-  var hayAlgo = hayBox || items.length>0 || itemsBE.length>0;
+  var hayAlgo = hayBox || hayCP || items.length>0 || itemsBE.length>0;
   return {
     sueltas:sueltas, boxes:boxes, desc:desc,
+    cpTot:cpTot,
     bEsp:bEsp, itemsBE:itemsBE, requiereTrf:requiereTrf,
     subtotal: subtotal,
     descCupon: descCupon,
@@ -2482,6 +3015,11 @@ function renderResumen(){
       h += row(CFG.box2.nombre+" ×"+box2Qty, fmt(box2Qty*CFG.box2.precio));
       h += fillDet(box2Fill);
     }
+    // Cajas personalizables armadas
+    cajasArmadas.forEach(function(c){
+      h += row(c.nombre, fmt(c.precio));
+      h += '<div class="res-sub">↳ '+esc(fillLista(c.fill).join(" · "))+'</div>';
+    });
     t.items.forEach(function(it){ h += row(it.nombre+" ×"+it.cant, ""); });
     if(t.desc>0) h += row("Descuento sueltas ("+CFG.box.pctSueltas+"%)", "−"+fmt(t.desc));
 
@@ -2629,14 +3167,19 @@ function confirmar(){
     });
     ck.push(CFG.box2.nombre+" x"+box2Qty+" ("+bf2.join(" + ")+")");
   }
+  // Cajas personalizables: una línea por caja, con lo que eligió y el precio final de esa caja
+  cajasArmadas.forEach(function(c){
+    ck.push(c.nombre+" ("+fillLista(c.fill).join(" + ")+") "+fmt(c.precio));
+  });
   CFG.productos.forEach(function(p){ if(qty[p.id]>0) ck.push(p.nombre+" x"+qty[p.id]); });
 
   var unidades = boxQty*CFG.box.cant + box2Qty*CFG.box2.cant;
+  cajasArmadas.forEach(function(c){ unidades += c.cant; });
   CFG.productos.forEach(function(p){ unidades += qty[p.id]||0; });
 
   var stockChanges = {};
   CFG.productos.forEach(function(p){
-    var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0);
+    var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0)+cpFillTotal(p.id);
     if(u>0) stockChanges[p.id] = u;
   });
   // Stock de boxes especiales (clave: be_<id>)
@@ -2645,6 +3188,7 @@ function confirmar(){
   var packTxt = [];
   if(boxQty>0) packTxt.push("Box4 x"+boxQty);
   if(box2Qty>0) packTxt.push("Box6 x"+box2Qty);
+  cajasArmadas.forEach(function(c){ packTxt.push(c.nombre); });
   t.itemsBE.forEach(function(it){ packTxt.push(it.nombre+" x"+it.cant); });
 
   var destinatario = $("iDestin") ? $("iDestin").value.trim() : "";
