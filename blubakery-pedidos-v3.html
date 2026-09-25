@@ -1539,6 +1539,7 @@ var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
 var cajasArmadas = [];   // cajas personalizables ya armadas: { uid, cajaId, nombre, cant, pct, fill, sum, precio }
 var cpSeq = 0;
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
+var esRegalo = false;
 var cuponAplicado = null; // { codigo, tipo, valor, valido }
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
 var beQty = {};  // cantidad de cada box especial { idBoxEsp: cant }
@@ -1873,16 +1874,19 @@ function renderCajasPers(){
   d.className = "cp-sec";
   var cards = cajas.map(function(c){
     var cant = parseInt(c.cant) || 4;
+    var abierto = c.modo === "abierto";
     var media = c.foto
       ? '<img src="'+driveImg(c.foto)+'" alt="'+esc(c.nombre)+'" onerror="this.style.display=\'none\'">'
       : esc(c.emoji || "🎁");
+    var subDefault = abierto ? ("Desde "+cant+" cookies · premium + clásicas") : ("Caja para "+cant+" cookies · premium + clásicas");
+    var hint = abierto ? "Armá tu caja como quieras, sumá las que quieras, y el precio con descuento lo ves al llegar al mínimo." : "Agregá tus cookies y el precio con descuento lo ves al final.";
     return '<div class="cp-card">' +
       '<span class="cp-ribbon">Armá la tuya</span>' +
       '<div class="cp-media">'+media+'</div>' +
       '<div class="cp-body">' +
         '<h3>'+esc(c.nombre)+'</h3>' +
-        '<div class="cp-sub">'+esc(c.descripcion || ("Caja para "+cant+" cookies · premium + clásicas"))+'</div>' +
-        '<div class="cp-hint">Agregá tus cookies y el precio con descuento lo ves al final.</div>' +
+        '<div class="cp-sub">'+esc(c.descripcion || subDefault)+'</div>' +
+        '<div class="cp-hint">'+hint+'</div>' +
         '<button class="cp-btn" onclick="cpAbrir(\''+c.id+'\')">Armar mi caja</button>' +
       '</div>' +
     '</div>';
@@ -1940,25 +1944,37 @@ function cpQuitar(uid){
 
 // Precio de una caja personalizable: suma de los precios individuales × (1 − descuento). Sin packaging.
 function cpCalc(caja, fill){
-  var sum = 0;
+  var sum = 0, qtyTotal = 0;
   Object.keys(fill).forEach(function(k){
     var n = fill[k] || 0;
     if(n <= 0) return;
+    qtyTotal += n;
     var p = prodPorId(k);
     if(p) sum += n * (parseFloat(p.precio) || 0);
   });
-  var pct = parseFloat(caja.pctDescuento) || 0;
+  var pct;
+  if(caja.modo === "abierto"){
+    pct = 0;
+    (caja.tiers || []).slice().sort(function(a,b){ return a.desde - b.desde; }).forEach(function(t){
+      if(qtyTotal >= (parseInt(t.desde) || 0)) pct = parseFloat(t.pct) || 0;
+    });
+  } else {
+    pct = parseFloat(caja.pctDescuento) || 0;
+  }
   var total = Math.round(sum * (1 - pct/100));
-  return { sum: sum, pct: pct, desc: sum - total, total: total };
+  return { sum: sum, pct: pct, desc: sum - total, total: total, qty: qtyTotal };
 }
 
 function cpAbrir(id){
   var caja = (CFG.cajasPers || []).find(function(c){ return c.id === id; });
   if(!caja) return;
+  var abierto = caja.modo === "abierto";
   var cant = parseInt(caja.cant) || 4;
-  window._cp = { caja: caja, cant: cant, fill: {}, orden: [] };
+  window._cp = { caja: caja, cant: cant, abierto: abierto, fill: {}, orden: [] };
   $("cpTitle").textContent = "Armá tu " + caja.nombre;
-  $("cpSub").textContent = "Elegí " + cant + " cookies y mezclá premium con clásicas. El precio con descuento lo ves al final.";
+  $("cpSub").textContent = abierto
+    ? "Elegí mínimo " + cant + " cookies — podés sumar las que quieras — y mezclá premium con clásicas. El precio con descuento lo ves al llegar al mínimo."
+    : "Elegí " + cant + " cookies y mezclá premium con clásicas. El precio con descuento lo ves al final.";
   cpArmarLista();
   cpRefrescar();
   $("cpMbg").classList.add("show");
@@ -1993,7 +2009,7 @@ function cpSabor(id, delta){
   var p = prodPorId(id);
   if(!p) return;
   if(delta > 0){
-    if(s.orden.length >= s.cant){ toast("Tu caja ya está completa"); return; }
+    if(!s.abierto && s.orden.length >= s.cant){ toast("Tu caja ya está completa"); return; }
     var max = parseInt(p.maxPorCaja) || 0;
     if(max > 0 && (s.fill[id] || 0) >= max){
       toast("No hay más stock de " + p.nombre + " para caja");
@@ -2031,41 +2047,54 @@ function cpRefrescar(){
     var m = $("cpm-"+p.id);
     if(m) m.disabled = !(s.fill[p.id] > 0);
   });
-  // mini carrito: una casilla por cookie de la caja
-  var slots = "";
-  for(var i = 0; i < s.cant; i++){
-    var id = s.orden[i];
-    if(id){
-      var p = prodPorId(id);
-      slots += '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
-        '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
-    } else {
-      slots += '<div class="cp-slot"></div>';
-    }
-  }
-  var slotsEl = $("cpSlots");
-  slotsEl.style.gridTemplateColumns = "repeat(" + Math.min(s.cant, 6) + ",1fr)";
-  slotsEl.innerHTML = slots;
-  $("cpCount").textContent = s.orden.length + " de " + s.cant;
 
-  // precio: recién aparece cuando la caja está completa
-  var completa = (s.orden.length === s.cant);
+  var slotsEl = $("cpSlots");
+  if(s.abierto){
+    // sin techo: solo se muestran las casillas ya elegidas, sin espacios vacíos
+    var slotsA = s.orden.map(function(id, i){
+      var p = prodPorId(id);
+      return '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
+        '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
+    }).join("");
+    slotsEl.style.gridTemplateColumns = "repeat(4,1fr)";
+    slotsEl.innerHTML = slotsA || '<div class="cp-slots-hint" style="grid-column:1/-1">Todavía no agregaste cookies.</div>';
+    $("cpCount").textContent = s.orden.length + (s.orden.length===1 ? " cookie" : " cookies") + " · mínimo " + s.cant;
+  } else {
+    // mini carrito: una casilla por cookie de la caja
+    var slots = "";
+    for(var i = 0; i < s.cant; i++){
+      var id = s.orden[i];
+      if(id){
+        var p = prodPorId(id);
+        slots += '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
+          '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
+      } else {
+        slots += '<div class="cp-slot"></div>';
+      }
+    }
+    slotsEl.style.gridTemplateColumns = "repeat(" + Math.min(s.cant, 6) + ",1fr)";
+    slotsEl.innerHTML = slots;
+    $("cpCount").textContent = s.orden.length + " de " + s.cant;
+  }
+
+  // precio: recién aparece al completar (fija) o al llegar al mínimo (abierta)
+  var lista = s.abierto ? (s.orden.length >= s.cant) : (s.orden.length === s.cant);
   var pr = $("cpPrecio");
-  if(completa){
+  if(lista){
     var c = cpCalc(s.caja, s.fill);
     pr.innerHTML =
       '<div class="cp-precio done">' +
-        (c.pct > 0
-          ? '<div class="r"><span>Cookies elegidas</span><span>'+fmt(c.sum)+'</span></div>' +
-            '<div class="r"><span>Descuento '+c.pct+'%</span><span>−'+fmt(c.desc)+'</span></div>'
-          : '') +
         '<div class="t"><span>Tu caja</span><b>'+fmt(c.total)+'</b></div>' +
       '</div>';
   } else {
     pr.innerHTML =
-      '<div class="cp-precio wait">Agregá tus cookies y el precio con descuento lo ves al final, cuando completes la caja.</div>';
+      '<div class="cp-precio wait">' + (s.abierto
+        ? 'Agregá al menos ' + s.cant + ' cookies para ver el precio con descuento. Después podés seguir sumando las que quieras.'
+        : 'Agregá tus cookies y el precio con descuento lo ves al final, cuando completes la caja.') +
+      '</div>';
   }
-  $("cpConfirm").disabled = !completa;
+  $("cpConfirm").disabled = !lista;
+  $("cpConfirm").textContent = (s.abierto && lista) ? "Agregar caja al pedido (" + s.orden.length + ")" : "Agregar caja al pedido";
 }
 
 function cpCerrar(){ $("cpMbg").classList.remove("show"); }
@@ -2073,7 +2102,11 @@ function cpCerrar(){ $("cpMbg").classList.remove("show"); }
 $("cpConfirm").onclick = function(){
   var s = window._cp;
   if(!s) return;
-  if(s.orden.length !== s.cant){ toast("Completá tu caja: elegí " + s.cant + " cookies"); return; }
+  var lista = s.abierto ? (s.orden.length >= s.cant) : (s.orden.length === s.cant);
+  if(!lista){
+    toast(s.abierto ? "Agregá al menos " + s.cant + " cookies" : "Completá tu caja: elegí " + s.cant + " cookies");
+    return;
+  }
   var c = cpCalc(s.caja, s.fill);
   var fillCopia = {};
   Object.keys(s.fill).forEach(function(k){ if(s.fill[k] > 0) fillCopia[k] = s.fill[k]; });
@@ -2081,7 +2114,7 @@ $("cpConfirm").onclick = function(){
     uid: ++cpSeq,
     cajaId: s.caja.id,
     nombre: s.caja.nombre,
-    cant: s.cant,
+    cant: s.orden.length,
     pct: c.pct,
     fill: fillCopia,
     sum: c.sum,
@@ -2096,6 +2129,7 @@ $("cpConfirm").onclick = function(){
 
 /* ===== BANNER DE PRODUCTO ESPECIAL (minis, premium, etc.) ===== */
 function renderProductoBanner(p){
+
   var out = (parseInt(p.stock)||0) <= 0;
   var d = document.createElement("div");
   d.className = "cdm";
@@ -2742,14 +2776,25 @@ function renderDatos(){
     '<label>Nombre completo</label><input type="text" id="iNom" placeholder="María García">' +
     '<label>Teléfono (WhatsApp)</label><input type="tel" id="iTel" placeholder="2284 000000">' +
     '<label>Email (opcional)</label><input type="email" id="iMail" placeholder="tu@email.com">' +
-    '<label>¿Para quién es? <span style="color:var(--gris);font-weight:400;font-size:12px">(opcional — si es un regalo, este nombre va en la etiqueta)</span></label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)">' +
     '<div id="campoDir" style="display:none"><label>Dirección</label><input type="text" id="iDir" placeholder="Calle y número, barrio"></div>' +
-    '<label>Aclaraciones (opcional)</label><textarea id="iNotas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
+    '<label>¿Es para regalo?</label>' +
+    '<div class="pills"><button type="button" class="pill" id="pRegaloSi" onclick="setRegalo(true)">🎁 Sí, es un regalo</button><button type="button" class="pill" id="pRegaloNo" onclick="setRegalo(false)">No, es para mí</button></div>' +
+    '<div id="campoDestin" style="display:none;margin-top:14px"><label>¿Para quién es?</label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)"></div>' +
+    '<label>Notas o comentarios (opcional)</label><textarea id="iNotas" rows="2" placeholder="Especificaciones del pedido, alergias, instrucciones…"></textarea>';
   setTimeout(function(){
     var nom = $("iNom");
     if(nom) nom.addEventListener("focus", function(){ trackEvento("empezo_datos"); }, { once:true });
   }, 0);
   return d;
+}
+function setRegalo(v){
+  esRegalo = v;
+  $("pRegaloSi").classList.toggle("on", v===true);
+  $("pRegaloNo").classList.toggle("on", v===false);
+  $("campoDestin").style.display = v ? "block" : "none";
+  if(!v){
+    var el = $("iDestin"); if(el) el.value = "";
+  }
 }
 
 /* ===== PAGO ===== */
