@@ -347,8 +347,9 @@ const CONFIG = {
   box2: {activo:true, nombre:"Box x 6 cookies a elección", descripcion:"Elegí 6 sabores a gusto", cant:6, precio:25800, pctSueltas:10, emoji:"🎁", foto:""},
   // Cajas personalizables: premium + clásicas, precio = suma de cookies × (1 − descuento), se ve al final
   cajasPers: [
-    {id:"cp4", activo:true, nombre:"Box Personalizada x4", descripcion:"", cant:4, pctDescuento:10, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1TBhGUM02LGE3L_txi6mh4L3xT9DjUCKq&sz=w1200"},
-    {id:"cp6", activo:true, nombre:"Box Personalizada x6", descripcion:"", cant:6, pctDescuento:23, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1z4ErSdWXC0hg8z6lHw27BJ97pwQEw_Wu&sz=w1200"}
+    {id:"cp4", activo:true, nombre:"Box Personalizada x4", descripcion:"", modo:"fijo", cant:4, pctDescuento:10, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1TBhGUM02LGE3L_txi6mh4L3xT9DjUCKq&sz=w1200"},
+    {id:"cp6", activo:true, nombre:"Box Personalizada x6", descripcion:"", modo:"fijo", cant:6, pctDescuento:23, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1z4ErSdWXC0hg8z6lHw27BJ97pwQEw_Wu&sz=w1200"},
+    {id:"cp_mama", activo:true, nombre:"Caja Día de la Madre", descripcion:"", modo:"abierto", cant:4, tiers:[{desde:4,pct:10},{desde:6,pct:23}], emoji:"💐", foto:""}
   ],
   cookieDelMes: "",
   cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
@@ -488,11 +489,26 @@ function eliminarProducto(i){
 }
 
 /* ===== CAJAS PERSONALIZABLES ===== */
+function tierRowsHtml(c, i){
+  var tiers = Array.isArray(c.tiers) && c.tiers.length ? c.tiers : [{desde:c.cant||4, pct:10}];
+  return tiers.map(function(t, j){
+    return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">' +
+      '<div class="field" style="margin:0;flex:1"><label style="font-size:10px">Desde cuántas cookies</label>' +
+        '<input type="number" id="cp-tier-desde-'+i+'-'+j+'" value="'+(t.desde||0)+'" min="1"/></div>' +
+      '<div class="field" style="margin:0;flex:1"><label style="font-size:10px">Descuento (%)</label>' +
+        '<input type="number" id="cp-tier-pct-'+i+'-'+j+'" value="'+(t.pct||0)+'" min="0" max="100" step="0.5"/></div>' +
+      '<button type="button" onclick="quitarTierCP('+i+','+j+')" class="remove-btn" style="border:1px solid #ddd;padding:5px 10px;margin-top:14px">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
 function renderCajasPers(){
   const cont = document.getElementById("cajas-pers-admin");
   if(!cont) return;
   if(!Array.isArray(CONFIG.cajasPers)) CONFIG.cajasPers = [];
-  cont.innerHTML = CONFIG.cajasPers.map((c, i) => `
+  cont.innerHTML = CONFIG.cajasPers.map((c, i) => {
+    const esAbierto = c.modo === "abierto";
+    return `
     <div class="producto-row" style="border-left:4px solid #D7A13A">
       <div class="producto-header">
         <span class="producto-titulo">${c.emoji||'🎁'} ${c.nombre||'Caja personalizable'}</span>
@@ -501,18 +517,58 @@ function renderCajasPers(){
       <div class="field-row-4">
         <div class="field"><label>Nombre</label><input type="text" id="cp-nombre-${i}" value="${(c.nombre||'').replace(/"/g,'&quot;')}"/></div>
         <div class="field"><label>Emoji</label><input type="text" id="cp-emoji-${i}" value="${c.emoji||'🎁'}" style="text-align:center;font-size:18px"/></div>
-        <div class="field"><label>Cookies que entran</label><input type="number" id="cp-cant-${i}" value="${c.cant||4}" min="1"/></div>
-        <div class="field"><label>Descuento (%)</label><input type="number" id="cp-pct-${i}" value="${c.pctDescuento||0}" min="0" max="100" step="0.5" style="font-weight:700"/></div>
+        <div class="field"><label>Modo</label>
+          <select id="cp-modo-${i}" onchange="cambiarModoCP(${i})">
+            <option value="fijo" ${!esAbierto?'selected':''}>Cantidad exacta</option>
+            <option value="abierto" ${esAbierto?'selected':''}>Mínimo, sin límite</option>
+          </select>
+        </div>
+        <div class="field"><label>${esAbierto ? 'Cantidad mínima' : 'Cantidad exacta'}</label><input type="number" id="cp-cant-${i}" value="${c.cant||4}" min="1"/></div>
       </div>
+      ${esAbierto
+        ? `<div style="background:#fbf6ec;border:1px solid #ead8b0;border-radius:8px;padding:12px;margin:8px 0">
+             <div style="font-size:11px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Tramos de descuento — según cuántas cookies lleve en total</div>
+             <div id="cp-tiers-${i}">${tierRowsHtml(c, i)}</div>
+             <button type="button" onclick="agregarTierCP(${i})" style="margin-top:4px;background:#fff;border:1px dashed #7E1F2D;color:#7E1F2D;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600">+ Agregar tramo</button>
+             <div class="hint" style="margin-top:8px">Ej: desde 4 → 10%, desde 6 → 23%. Se aplica el tramo más alto que el cliente alcance; no hay techo de cantidad.</div>
+           </div>`
+        : `<div class="field"><label>Descuento (%)</label><input type="number" id="cp-pct-${i}" value="${c.pctDescuento||0}" min="0" max="100" step="0.5" style="font-weight:700"/></div>`
+      }
       <div class="field"><label>Descripción corta (opcional)</label><input type="text" id="cp-desc-${i}" value="${(c.descripcion||'').replace(/"/g,'&quot;')}" placeholder="Si lo dejás vacío: Caja para ${c.cant||4} cookies · premium + clásicas"/></div>
-      <div class="hint" style="margin:-4px 0 10px">El descuento no se muestra al cliente hasta que completa la caja. Precio final = suma de las cookies elegidas × (1 − descuento). No se suma packaging.</div>
+      <div class="hint" style="margin:-4px 0 10px">El descuento no se muestra al cliente hasta que ${esAbierto ? 'llega al mínimo' : 'completa la caja'}. Precio final = suma de las cookies elegidas × (1 − descuento). No se suma packaging.</div>
       <div class="field">
         <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
         <input type="text" id="cp-foto-${i}" value="" placeholder="https://drive.google.com/file/d/XXXXX/view..."/>
         ${c.foto ? `<div style="margin-top:8px;display:flex;align-items:center;gap:10px"><img src="${convertirLinkDrive(c.foto)}" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display='none'"/><span style="font-size:11px;color:#666">Foto actual — dejá el campo vacío para mantenerla</span></div>` : '<div class="hint">Sin foto: en la tienda se muestra el emoji.</div>'}
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+}
+
+function cambiarModoCP(i){
+  leerCajasPersDesdeDOM();
+  var modoSel = document.getElementById("cp-modo-"+i);
+  CONFIG.cajasPers[i].modo = modoSel.value;
+  if(modoSel.value === "abierto" && !Array.isArray(CONFIG.cajasPers[i].tiers)){
+    CONFIG.cajasPers[i].tiers = [{desde: CONFIG.cajasPers[i].cant||4, pct: CONFIG.cajasPers[i].pctDescuento||10}];
+  }
+  renderCajasPers();
+}
+
+function agregarTierCP(i){
+  leerCajasPersDesdeDOM();
+  if(!Array.isArray(CONFIG.cajasPers[i].tiers)) CONFIG.cajasPers[i].tiers = [];
+  var last = CONFIG.cajasPers[i].tiers[CONFIG.cajasPers[i].tiers.length-1];
+  CONFIG.cajasPers[i].tiers.push({desde: (last?last.desde:CONFIG.cajasPers[i].cant||4) + 2, pct: (last?last.pct:10) + 5});
+  renderCajasPers();
+}
+
+function quitarTierCP(i, j){
+  leerCajasPersDesdeDOM();
+  CONFIG.cajasPers[i].tiers.splice(j, 1);
+  if(!CONFIG.cajasPers[i].tiers.length) CONFIG.cajasPers[i].tiers.push({desde: CONFIG.cajasPers[i].cant||4, pct:10});
+  renderCajasPers();
 }
 
 // Lee los campos de las cajas personalizables desde el DOM y devuelve el array listo para guardar
@@ -523,8 +579,23 @@ function leerCajasPersDesdeDOM(){
     c.activo = get("cp-activo-"+i).checked;
     c.nombre = get("cp-nombre-"+i).value.trim() || c.nombre;
     c.emoji = get("cp-emoji-"+i).value.trim() || "🎁";
+    c.modo = get("cp-modo-"+i) ? get("cp-modo-"+i).value : (c.modo || "fijo");
     c.cant = parseInt(get("cp-cant-"+i).value) || c.cant || 4;
-    c.pctDescuento = parseFloat(get("cp-pct-"+i).value) || 0;
+    if(c.modo === "abierto"){
+      var tiers = [];
+      var j = 0;
+      while(get("cp-tier-desde-"+i+"-"+j)){
+        tiers.push({
+          desde: parseInt(get("cp-tier-desde-"+i+"-"+j).value) || 0,
+          pct: parseFloat(get("cp-tier-pct-"+i+"-"+j).value) || 0
+        });
+        j++;
+      }
+      tiers.sort(function(a,b){ return a.desde - b.desde; });
+      c.tiers = tiers;
+    } else if(get("cp-pct-"+i)) {
+      c.pctDescuento = parseFloat(get("cp-pct-"+i).value) || 0;
+    }
     c.descripcion = get("cp-desc-"+i).value.trim();
     const nf = get("cp-foto-"+i).value.trim();
     if(nf) c.foto = convertirLinkDrive(nf);
