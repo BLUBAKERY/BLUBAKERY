@@ -226,6 +226,23 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
     </div>
   </div>
 
+  <!-- FECHA DE ENTREGA ESPECIAL (puntual, además de los viernes) -->
+  <div class="section-card">
+    <div class="section-title">Fecha de entrega especial</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
+      Para sumar una entrega puntual además de los viernes de siempre (ej. un feriado, una fecha especial). Aparece como una opción más de fecha en la tienda, para cualquier pedido. Se apaga sola al día siguiente de la fecha elegida.
+    </div>
+    <label class="toggle" style="margin-bottom:14px">
+      <input type="checkbox" id="fx-activo"/><span>Fecha especial activa</span>
+    </label>
+    <div class="field-row">
+      <div class="field"><label>Fecha</label><input type="date" id="fx-fecha"></div>
+      <div class="field"><label>Horario</label><input type="text" id="fx-horario" placeholder="14 a 16:30hs"></div>
+    </div>
+    <div class="field"><label>Etiqueta (opcional)</label><input type="text" id="fx-etiqueta" placeholder="Ej: Entrega especial"></div>
+    <div class="hint">El cliente la va a ver como, por ejemplo: "Martes 29/09 · 14 a 16:30hs". Con la etiqueta cargada, se le suma al final.</div>
+  </div>
+
   <!-- ENVÍO -->
   <div class="section-card">
     <div class="section-title">Envío y retiro</div>
@@ -977,6 +994,12 @@ function getConfig() {
     msgTransferencia:document.getElementById("msg-transferencia").value.trim(),
     msgEfectivo:document.getElementById("msg-efectivo").value.trim(),
     diasEntrega:CONFIG.diasEntrega,
+    fechaExtra:{
+      activo: document.getElementById("fx-activo").checked,
+      fecha: document.getElementById("fx-fecha").value || "",
+      horario: document.getElementById("fx-horario").value.trim(),
+      etiqueta: document.getElementById("fx-etiqueta").value.trim()
+    },
     cupon:{
       activo: document.getElementById("cup-activo").checked,
       codigo: (document.getElementById("cup-codigo").value || "").trim().toUpperCase(),
@@ -1073,6 +1096,15 @@ function aplicarConfigAlFormulario(data){
   if (data.box2)       CONFIG.box2       = Object.assign({}, CONFIG.box2 || {}, data.box2);
   if (data.descuentos) CONFIG.descuentos = data.descuentos;
   if (data.horasCorte) CONFIG.horasCorte = data.horasCorte;
+
+  // Fecha de entrega especial (si nunca se guardó antes, sale precargada con el martes 29/9)
+  var fxDefault = {activo:true, fecha:"2026-09-29", horario:"14 a 16:30hs", etiqueta:""};
+  var fx = Object.assign({}, fxDefault, data.fechaExtra !== undefined ? data.fechaExtra : {});
+  var s0;
+  if ((s0=document.getElementById("fx-activo")))   s0.checked = !!fx.activo;
+  if ((s0=document.getElementById("fx-fecha")))    s0.value = fx.fecha || "";
+  if ((s0=document.getElementById("fx-horario")))  s0.value = fx.horario || "";
+  if ((s0=document.getElementById("fx-etiqueta"))) s0.value = fx.etiqueta || "";
   if (data.diasEntrega) CONFIG.diasEntrega = data.diasEntrega;
   if (data.cookieDelMes !== undefined) CONFIG.cookieDelMes = data.cookieDelMes;
   if (data.cookieDelMesFrase) CONFIG.cookieDelMesFrase = data.cookieDelMesFrase;
@@ -1210,11 +1242,9 @@ function aplicarConfigAlFormulario(data){
       // 2) Fallback a localStorage
       try {
         var saved = localStorage.getItem("blubakery_config");
-        if (saved) {
-          var data = JSON.parse(saved);
-          aplicarConfigAlFormulario(data);
-        }
-      } catch(e2) { console.error("Error cargando config:", e2); }
+        var data = saved ? JSON.parse(saved) : {};
+        aplicarConfigAlFormulario(data);
+      } catch(e2) { console.error("Error cargando config:", e2); aplicarConfigAlFormulario({}); }
     })
     .finally(function(){
       renderProductos();
