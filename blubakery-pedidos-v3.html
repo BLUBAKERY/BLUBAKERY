@@ -41,6 +41,7 @@
   .top {
     text-align: center;
     padding: 26px 16px 18px;
+    background: #fff;
   }
   .top-logo {
     width: min(500px, 94%);
@@ -1524,6 +1525,7 @@ var CFG = {
   banco: "Banco Galicia",
   horasCorte: 24,
   horarioViernes: "14 a 18hs",
+  fechaExtra: { activo:false, fecha:"", horario:"", etiqueta:"" },
   msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
   msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
   msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
@@ -2727,13 +2729,28 @@ function renderDias(){
     return;
   }
 
-  // FLUJO NORMAL: próximo viernes disponible + el siguiente, calculados en el momento
+  // FLUJO NORMAL: próximo viernes disponible + el siguiente, calculados en el momento,
+  // más una fecha extra puntual si está activa en el admin (ej. una entrega especial)
   var v0 = calcularViernes(0);
   var v1 = calcularViernes(1);
   var diasAuto = [
-    { id: "v0_" + fechaISO(v0), label: fechaLabel(v0), horario: CFG.horarioViernes },
-    { id: "v1_" + fechaISO(v1), label: fechaLabel(v1), horario: CFG.horarioViernes }
+    { id: "v0_" + fechaISO(v0), label: fechaLabel(v0), horario: CFG.horarioViernes, orden: v0.getTime() },
+    { id: "v1_" + fechaISO(v1), label: fechaLabel(v1), horario: CFG.horarioViernes, orden: v1.getTime() }
   ];
+
+  var fx = CFG.fechaExtra;
+  if(fx && fx.activo && fx.fecha){
+    var partes = fx.fecha.split("-"); // YYYY-MM-DD
+    var fechaFx = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), 23, 59, 59);
+    if(fechaFx >= new Date()){
+      var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+      var labelFx = dias[fechaFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || CFG.horarioViernes) +
+        (fx.etiqueta ? " · " + fx.etiqueta : "");
+      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || CFG.horarioViernes, orden: fechaFx.getTime() });
+    }
+  }
+  diasAuto.sort(function(a,b){ return a.orden - b.orden; });
+
   disp = diasAuto.map(function(d){ return { dia: d, ok: true }; });
 
   var row = document.createElement("div");
