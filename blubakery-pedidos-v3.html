@@ -41,7 +41,7 @@
   .top {
     text-align: center;
     padding: 26px 16px 18px;
-    background: #fff;
+    background: #FDF9E7;
   }
   .top-logo {
     width: min(500px, 94%);
@@ -1604,7 +1604,7 @@ function trackEvento(evento, detalle){
 /* ===== CARGAR CONFIG ===== */
 (function(){
   trackEvento("vista_pagina");
-  fetch(CONFIG_GVIZ)
+  fetch(CONFIG_GVIZ + "&_=" + Date.now())
     .then(function(r){ return r.text(); })
     .then(function(t){
       var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
