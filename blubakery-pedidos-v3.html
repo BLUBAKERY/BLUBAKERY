@@ -41,7 +41,6 @@
   .top {
     text-align: center;
     padding: 26px 16px 18px;
-    background: #FDF9E7;
   }
   .top-logo {
     width: min(500px, 94%);
@@ -312,7 +311,6 @@
     align-items: center;
     justify-content: center;
   }
-  .step-btn:disabled { opacity: .3; cursor: not-allowed; }
   .step-num {
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 700;
@@ -333,20 +331,6 @@
     border-radius: 100px;
     cursor: pointer;
     margin-top: 8px;
-  }
-
-  /* ===== COOKIES PREMIUM (en el menú) ===== */
-  .ck.premium {
-    background: linear-gradient(180deg, #F8EBCB 0%, #F0DAA2 100%);
-    border-color: var(--mostaza);
-  }
-  .ck.premium .ck-name { color: var(--bordo); }
-  .ck.premium .ck-desc { color: #7a6a4a; }
-  .ck-badge.premium {
-    left: auto;
-    right: 9px;
-    background: var(--tinta);
-    color: var(--mostaza);
   }
 
   /* ===== BOXES ===== */
@@ -412,248 +396,6 @@
   .box .stepper .step-num { color: #fff; }
   .box.lav .stepper .step-btn { border-color: var(--azul); color: var(--azul); }
   .box.lav .stepper .step-num { color: var(--azul); }
-
-  /* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
-  .cp-sec {
-    margin: 22px 0 6px;
-    padding: 20px 16px 18px;
-    border-radius: 22px;
-    background: #FAF0DA;
-  }
-  .cp-head { text-align: center; padding: 0 4px 16px; }
-  .cp-head h2 {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 800;
-    font-size: 24px;
-    color: var(--bordo);
-    line-height: 1.1;
-    letter-spacing: -.4px;
-  }
-  .cp-head p {
-    font-size: 13px;
-    color: #6d5a3d;
-    margin-top: 6px;
-    line-height: 1.45;
-  }
-  .cp-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-  .cp-card {
-    background: var(--bordo);
-    color: #fff;
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  .cp-ribbon {
-    position: absolute;
-    top: 10px; left: 10px;
-    z-index: 2;
-    background: var(--mostaza);
-    color: var(--bordo);
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 4px 11px;
-    border-radius: 100px;
-  }
-  .cp-media {
-    aspect-ratio: 4/3;
-    background: #6a1a26;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 46px;
-    overflow: hidden;
-  }
-  .cp-media img { width: 100%; height: 100%; object-fit: cover; }
-  .cp-body {
-    padding: 12px 13px 14px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  .cp-body h3 {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 17px;
-    line-height: 1.1;
-    letter-spacing: -.3px;
-  }
-  .cp-sub {
-    font-size: 12px;
-    color: rgba(255,255,255,.78);
-    margin-top: 4px;
-    line-height: 1.35;
-  }
-  .cp-hint {
-    font-size: 11.5px;
-    color: var(--mostaza);
-    margin-top: 8px;
-    line-height: 1.4;
-    flex: 1;
-  }
-  .cp-btn {
-    margin-top: 12px;
-    background: var(--mostaza);
-    color: var(--bordo);
-    border: none;
-    border-radius: 100px;
-    padding: 12px;
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: transform .12s;
-  }
-  .cp-btn:active { transform: scale(.96); }
-  @media (max-width: 400px) {
-    .cp-cards { grid-template-columns: 1fr; }
-  }
-
-  .cp-lista { margin-top: 14px; }
-  .cp-lista-title {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--bordo);
-    margin-bottom: 8px;
-  }
-  .cp-item {
-    background: #fff;
-    border: 1px solid #e8d7ae;
-    border-radius: 12px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-  }
-  .cp-item-top {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--bordo);
-  }
-  .cp-item-det {
-    font-size: 12px;
-    color: var(--gris);
-    margin-top: 3px;
-    line-height: 1.4;
-  }
-  .cp-item-rm {
-    background: none;
-    border: none;
-    color: var(--bordo);
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 6px 0 0;
-  }
-
-  /* modal de cajas personalizables */
-  .cp-slots-wrap {
-    position: sticky;
-    top: 0;
-    z-index: 3;
-    background: var(--crema);
-    margin: 0 -18px;
-    padding: 10px 18px 10px;
-    border-bottom: 1px solid var(--linea);
-  }
-  .cp-slots-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    color: var(--bordo);
-    margin-bottom: 8px;
-  }
-  .cp-slots { display: grid; gap: 6px; }
-  .cp-slot {
-    aspect-ratio: 1/1;
-    border-radius: 10px;
-    border: 2px dashed #c9b48a;
-    background: rgba(255,255,255,.5);
-    position: relative;
-    padding: 0;
-    overflow: hidden;
-  }
-  .cp-slot.on { border: 2px solid var(--bordo); background: #fff; cursor: pointer; }
-  .cp-slot.on.prem { border-color: var(--mostaza); }
-  .cp-slot img { width: 100%; height: 100%; object-fit: cover; }
-  .cp-slot .x {
-    position: absolute;
-    top: 2px; right: 2px;
-    width: 16px; height: 16px;
-    border-radius: 50%;
-    background: var(--bordo);
-    color: #fff;
-    font-size: 11px;
-    line-height: 16px;
-    text-align: center;
-  }
-  .cp-slots-hint { font-size: 11px; color: var(--gris); margin-top: 6px; }
-  .cp-group {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--bordo);
-    margin: 14px 0 8px;
-  }
-  .cp-prem-tag {
-    display: inline-block;
-    background: var(--tinta);
-    color: var(--mostaza);
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 9.5px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 100px;
-    margin-left: 6px;
-    vertical-align: middle;
-  }
-  .cp-precio {
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin: 14px 0 4px;
-  }
-  .cp-precio.wait {
-    border: 2px dashed #c9b48a;
-    background: rgba(255,255,255,.55);
-    text-align: center;
-    color: #6d5a3d;
-    font-size: 13.5px;
-    line-height: 1.45;
-  }
-  .cp-precio.done { background: var(--bordo); color: #fff; }
-  .cp-precio .r {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13.5px;
-    padding: 2px 0;
-    opacity: .9;
-  }
-  .cp-precio .t {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    border-top: 1px solid rgba(255,255,255,.3);
-    margin-top: 8px;
-    padding-top: 9px;
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 800;
-    font-size: 15px;
-  }
-  .cp-precio .t b { font-size: 26px; color: var(--mostaza); }
 
   /* ===== PANELES ===== */
   .panel {
@@ -1304,47 +1046,7 @@
   .block.eventos { background: var(--bordo); color: #fff; }
   .block.eventos .block-eyebrow { color: var(--mostaza); opacity: 1; }
   .block.eventos .block-btn { background: var(--mostaza); color: var(--azul); }
-  .block.mayoristas { background: var(--mostaza); color: var(--azul); }
-  .block.mayoristas .block-eyebrow { color: var(--bordo); opacity: 1; }
-  .block.mayoristas .block-btn { background: var(--azul); color: #fff; }
   .block.contacto { background: var(--lavanda); color: var(--azul); }
-
-  /* ===== BANNER DE BOXES (arriba de todo) ===== */
-  .boxes-banner {
-    background: var(--crema-card);
-    border: 2px solid var(--mostaza);
-    border-radius: 22px;
-    padding: 20px 16px 18px;
-    margin: 6px 0 4px;
-  }
-  .boxes-banner-head { text-align: center; margin-bottom: 16px; padding: 0 6px; }
-  .boxes-banner-head .bb-eyebrow {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    color: var(--bordo);
-  }
-  .boxes-banner-head h2 {
-    font-family: 'Bricolage Grotesque', sans-serif;
-    font-weight: 800;
-    font-size: 24px;
-    color: var(--azul);
-    line-height: 1.1;
-    margin-top: 4px;
-    letter-spacing: -.4px;
-  }
-  .boxes-banner-head p {
-    font-size: 13px;
-    color: var(--gris);
-    margin-top: 6px;
-    line-height: 1.4;
-  }
-  .boxes-banner .box:last-child { margin-bottom: 0; }
-  .cdm-ctrl .stepper .step-btn { border-color: rgba(255,255,255,.6); color: #fff; }
-  .cdm-ctrl .stepper .step-num { color: #fff; }
-  .cdm-ctrl .add-btn { background: var(--crema); color: var(--bordo); }
   .block.contacto .block-btn { background: var(--azul); color: #fff; }
 
   .footer-end {
@@ -1460,7 +1162,7 @@
   <div class="loading">Horneando…</div>
 </div>
 
-<!-- MODAL BOX (Box x4 / Box x6 de precio fijo) -->
+<!-- MODAL BOX -->
 <div class="mbg" id="mbg">
   <div class="modal">
     <h3 id="mTitle">Armá tu Box</h3>
@@ -1469,23 +1171,6 @@
     <div class="mcount">Elegiste <b id="mCount">0</b> de <span id="mMax">4</span></div>
     <button class="cta" id="mConfirm">Confirmar Box</button>
     <button class="cta ghost" onclick="closeModal()">Cancelar</button>
-  </div>
-</div>
-
-<!-- MODAL CAJA PERSONALIZABLE (premium + clásicas, precio al final) -->
-<div class="mbg" id="cpMbg">
-  <div class="modal">
-    <h3 id="cpTitle">Armá tu caja</h3>
-    <div class="msub" id="cpSub"></div>
-    <div class="cp-slots-wrap">
-      <div class="cp-slots-title"><span>Tu caja</span><span id="cpCount">0 de 4</span></div>
-      <div class="cp-slots" id="cpSlots"></div>
-      <div class="cp-slots-hint">Tocá una cookie de tu caja para sacarla.</div>
-    </div>
-    <div id="cpList"></div>
-    <div id="cpPrecio"></div>
-    <button class="cta" id="cpConfirm" disabled>Agregar caja al pedido</button>
-    <button class="cta ghost" onclick="cpCerrar()">Cancelar</button>
   </div>
 </div>
 
@@ -1508,15 +1193,10 @@ var CONFIG_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/
 var REVIEWS_GVIZ = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/gviz/tq?tqx=out:json&sheet=Reviews";
 var WSP = "5492284353970";
 
-// true = las cajas personalizables también activan el % de descuento en cookies sueltas
-// (igual que las Box x4 / x6). Poné false si no querés que se acumulen.
-var CP_DESC_SUELTAS = true;
-
 var CFG = {
   productos: [],
   box: { activo:true, nombre:"Box x 4", cant:4, precio:17200, pctSueltas:10, foto:"" },
   box2: { activo:true, nombre:"Box x 6", cant:6, precio:25800, pctSueltas:10, foto:"" },
-  cajasPers: [],   // cajas personalizables (se configuran desde el admin)
   cookieDelMes: "nuevo_1777848533244",
   cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
   costoEnvio: 3000,
@@ -1524,24 +1204,21 @@ var CFG = {
   alias: "BLU.BAKERY",
   banco: "Banco Galicia",
   horasCorte: 24,
-  horarioViernes: "14 a 18hs",
-  fechaExtra: { activo:false, fecha:"", horario:"", etiqueta:"" },
   msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
   msgEnvio: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el envío. El envío se abona a la mensajería al recibir.",
   msgTransferencia: "Enviá el comprobante por WhatsApp junto con tu número de pedido para confirmar.",
   msgEfectivo: "Por favor abonar con el importe justo.",
   diasEntrega: [],
   novedades: [
-    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." }
+    { emoji:"🍪", titulo:"Box de mini cookies con salsas", desc:"Se viene. Mini cookies para mojar en salsas irresistibles." },
+    { emoji:"👔", titulo:"Box Día del Padre", desc:"Una edición especial para regalar. Pronto." },
+    { emoji:"⚽", titulo:"Algo se viene para el Mundial", desc:"Atentos: una caja pensada para los días de partido." }
   ]
 };
 
 /* ===== ESTADO ===== */
 var qty = {}, boxQty = 0, box2Qty = 0, boxFill = {}, box2Fill = {};
-var cajasArmadas = [];   // cajas personalizables ya armadas: { uid, cajaId, nombre, cant, pct, fill, sum, precio }
-var cpSeq = 0;
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
-var esRegalo = false;
 var cuponAplicado = null; // { codigo, tipo, valor, valido }
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
 var beQty = {};  // cantidad de cada box especial { idBoxEsp: cant }
@@ -1561,50 +1238,10 @@ function driveImg(v){
   }
   return "https://drive.google.com/thumbnail?id="+v+"&sz=w1200";
 }
-function prodPorId(id){
-  return CFG.productos.find(function(x){ return x.id === id; });
-}
-
-/* ===== TRACKING (eventos anónimos, sin pixel) ===== */
-function getSesionId(){
-  try{
-    var s = sessionStorage.getItem("bb_sesion");
-    if(!s){
-      s = "s" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
-      sessionStorage.setItem("bb_sesion", s);
-    }
-    return s;
-  }catch(e){ return "s" + Date.now(); }
-}
-function getOrigen(){
-  try{
-    var p = new URLSearchParams(window.location.search);
-    var src = p.get("utm_source") || (document.referrer ? "referrer:" + document.referrer.split("/")[2] : "directo");
-    return src;
-  }catch(e){ return "directo"; }
-}
-function trackEvento(evento, detalle){
-  try{
-    var payload = {
-      tipo: "evento",
-      fecha: hoy(), hora: hora(),
-      sesion: getSesionId(),
-      evento: evento,
-      detalle: detalle || "",
-      origen: getOrigen()
-    };
-    fetch(APPS_SCRIPT_URL, {
-      method:"POST", mode:"no-cors",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body: JSON.stringify(payload)
-    }).catch(function(){});
-  }catch(e){}
-}
 
 /* ===== CARGAR CONFIG ===== */
 (function(){
-  trackEvento("vista_pagina");
-  fetch(CONFIG_GVIZ + "&_=" + Date.now() + Math.random().toString(36).slice(2), { cache: "no-store" })
+  fetch(CONFIG_GVIZ)
     .then(function(r){ return r.text(); })
     .then(function(t){
       var j = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
@@ -1615,7 +1252,7 @@ function trackEvento(evento, detalle){
         });
       }
     })
-    .catch(function(e){ console.warn("Config:", e); trackEvento("error_carga_menu", String(e)); })
+    .catch(function(e){ console.warn("Config:", e); })
     .finally(function(){ init(); });
 })();
 
@@ -1623,12 +1260,11 @@ function init(){
   CFG.productos.forEach(function(p){ qty[p.id] = 0; });
   // Inicializar boxes especiales
   if(!Array.isArray(CFG.boxesEspeciales)) CFG.boxesEspeciales = [];
-  if(!Array.isArray(CFG.cajasPers)) CFG.cajasPers = [];
   
   // ===== LÓGICA PROMO DÍA DE LA PRIMAVERA =====
-  var hoyDate = new Date();
+  var hoy = new Date();
   var diaPromo = new Date(2026, 8, 20, 23, 59, 59); // 20/9/2026 23:59:59
-  var estaEnPromo = hoyDate <= diaPromo;
+  var estaEnPromo = hoy <= diaPromo;
   window._promoActiva = estaEnPromo;
   
   // Mostrar/ocultar banner
@@ -1747,22 +1383,6 @@ function render(){
   var app = $("app");
   app.innerHTML = "";
 
-  // BANNER DE BOXES — arriba de todo, siempre lo primero que se ve
-  app.appendChild(renderBoxesBanner());
-
-  // CAJAS PERSONALIZABLES — sección aparte (premium + clásicas, precio al final)
-  var cpSec = renderCajasPers();
-  if(cpSec) app.appendChild(cpSec);
-
-  // PRODUCTOS ESPECIALES (minis, premium, etc.) — cada uno con su propio banner,
-  // justo debajo de las boxes. Se marcan con "especial": true en el Sheet.
-  (CFG.productos||[]).forEach(function(p){
-    if(p.activo && p.especial){
-      var pb = renderProductoBanner(p);
-      if(pb) app.appendChild(pb);
-    }
-  });
-
   // LANZAMIENTOS / BOXES ESPECIALES (arriba de todo)
   var lanzamientos = (CFG.boxesEspeciales || [])
     .filter(function(b){ return b.activo; })
@@ -1787,9 +1407,14 @@ function render(){
   var grid = document.createElement("div");
   grid.className = "grid";
   CFG.productos.forEach(function(p){
-    if(p.activo && !p.noListable && !p.especial) grid.appendChild(renderCookie(p));
+    if(p.activo && !p.noListable) grid.appendChild(renderCookie(p));
   });
   app.appendChild(grid);
+
+  // BOXES
+  app.appendChild(secHead("Para compartir", "Armá tu box"));
+  if(CFG.box && CFG.box.activo) app.appendChild(renderBox(CFG.box, "box"));
+  if(CFG.box2 && CFG.box2.activo) app.appendChild(renderBox(CFG.box2, "box2"));
 
   // RESUMEN (movido a justo después de las boxes)
   app.appendChild(secHead("Tu pedido", "Resumen"));
@@ -1819,9 +1444,8 @@ function render(){
   var spacer = document.createElement("div");
   spacer.style.height = "26px";
   app.appendChild(spacer);
-  if(CFG.mostrarNovedades !== false) app.appendChild(renderNov());
+  app.appendChild(renderNov());
   app.appendChild(renderEventos());
-  app.appendChild(renderMayoristas());
   app.appendChild(renderContacto());
 
   // RESEÑAS (lee de la pestaña Reviews del Sheet)
@@ -1836,7 +1460,6 @@ function render(){
   app.appendChild(fe);
 
   renderDias();
-  renderCPLista();
   renderResumen();
   iniciarCarrusel();
 }
@@ -1845,309 +1468,6 @@ function secHead(eyebrow, titulo){
   var d = document.createElement("div");
   d.className = "sec-head";
   d.innerHTML = '<div class="eyebrow">'+esc(eyebrow)+'</div><h2>'+esc(titulo)+'</h2>';
-  return d;
-}
-
-/* ===== BANNER DE BOXES (arriba de todo) ===== */
-function renderBoxesBanner(){
-  var d = document.createElement("div");
-  d.className = "boxes-banner";
-  var head = document.createElement("div");
-  head.className = "boxes-banner-head";
-  head.innerHTML =
-    '<div class="bb-eyebrow">Packs</div>' +
-    '<h2>Armá tu box a tu medida y pagá menos</h2>' +
-    '<p>Elegís los sabores que más te gusten y ahorrás vs. comprar sueltas.</p>';
-  d.appendChild(head);
-  if(CFG.box && CFG.box.activo) d.appendChild(renderBox(CFG.box, "box"));
-  if(CFG.box2 && CFG.box2.activo) d.appendChild(renderBox(CFG.box2, "box2"));
-  return d;
-}
-
-/* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
-function cajasPersActivas(){
-  return (CFG.cajasPers || []).filter(function(c){ return c && c.activo !== false && parseInt(c.cant) > 0; });
-}
-
-function renderCajasPers(){
-  var cajas = cajasPersActivas();
-  if(!cajas.length) return null;
-  var d = document.createElement("div");
-  d.className = "cp-sec";
-  var cards = cajas.map(function(c){
-    var cant = parseInt(c.cant) || 4;
-    var abierto = c.modo === "abierto";
-    var media = c.foto
-      ? '<img src="'+driveImg(c.foto)+'" alt="'+esc(c.nombre)+'" onerror="this.style.display=\'none\'">'
-      : esc(c.emoji || "🎁");
-    var subDefault = abierto ? ("Desde "+cant+" cookies · premium + clásicas") : ("Caja para "+cant+" cookies · premium + clásicas");
-    var hint = abierto ? "Armá tu caja como quieras, sumá las que quieras, y el precio con descuento lo ves al llegar al mínimo." : "Agregá tus cookies y el precio con descuento lo ves al final.";
-    return '<div class="cp-card">' +
-      '<span class="cp-ribbon">Armá la tuya</span>' +
-      '<div class="cp-media">'+media+'</div>' +
-      '<div class="cp-body">' +
-        '<h3>'+esc(c.nombre)+'</h3>' +
-        '<div class="cp-sub">'+esc(c.descripcion || subDefault)+'</div>' +
-        '<div class="cp-hint">'+hint+'</div>' +
-        '<button class="cp-btn" onclick="cpAbrir(\''+c.id+'\')">Armar mi caja</button>' +
-      '</div>' +
-    '</div>';
-  }).join("");
-  d.innerHTML =
-    '<div class="cp-head">' +
-      '<h2>Premium y clásicas, en la misma caja</h2>' +
-      '<p>A diferencia de las Box de arriba, acá podés sumar cookies premium y mezclarlas con las clásicas. Vos elegís cada una.</p>' +
-    '</div>' +
-    '<div class="cp-cards">'+cards+'</div>' +
-    '<div class="cp-lista" id="cpLista"></div>';
-  return d;
-}
-
-// Stock que ya reservaron las cajas personalizables armadas
-function cpFillTotal(id){
-  var n = 0;
-  cajasArmadas.forEach(function(c){ n += (c.fill[id] || 0); });
-  return n;
-}
-
-// Devuelve ["2 Pistacho y Frambuesa", "1 Nutella", ...]
-function fillLista(f){
-  var ps = [];
-  Object.keys(f).forEach(function(k){
-    if(f[k] > 0){
-      var p = prodPorId(k);
-      if(p) ps.push(f[k] + " " + p.nombre);
-    }
-  });
-  return ps;
-}
-
-function renderCPLista(){
-  var el = $("cpLista");
-  if(!el) return;
-  if(!cajasArmadas.length){ el.innerHTML = ""; return; }
-  el.innerHTML =
-    '<div class="cp-lista-title">Tus cajas armadas</div>' +
-    cajasArmadas.map(function(c){
-      return '<div class="cp-item">' +
-        '<div class="cp-item-top"><span>'+esc(c.nombre)+'</span><span>'+fmt(c.precio)+'</span></div>' +
-        '<div class="cp-item-det">'+esc(fillLista(c.fill).join(" · "))+'</div>' +
-        '<button class="cp-item-rm" onclick="cpQuitar('+c.uid+')">Quitar caja</button>' +
-      '</div>';
-    }).join("");
-}
-
-function cpQuitar(uid){
-  cajasArmadas = cajasArmadas.filter(function(c){ return c.uid !== uid; });
-  renderCPLista();
-  renderResumen();
-  toast("Caja quitada");
-}
-
-// Precio de una caja personalizable: suma de los precios individuales × (1 − descuento). Sin packaging.
-function cpCalc(caja, fill){
-  var sum = 0, qtyTotal = 0;
-  Object.keys(fill).forEach(function(k){
-    var n = fill[k] || 0;
-    if(n <= 0) return;
-    qtyTotal += n;
-    var p = prodPorId(k);
-    if(p) sum += n * (parseFloat(p.precio) || 0);
-  });
-  var pct;
-  if(caja.modo === "abierto"){
-    pct = 0;
-    (caja.tiers || []).slice().sort(function(a,b){ return a.desde - b.desde; }).forEach(function(t){
-      if(qtyTotal >= (parseInt(t.desde) || 0)) pct = parseFloat(t.pct) || 0;
-    });
-  } else {
-    pct = parseFloat(caja.pctDescuento) || 0;
-  }
-  var total = Math.round(sum * (1 - pct/100));
-  return { sum: sum, pct: pct, desc: sum - total, total: total, qty: qtyTotal };
-}
-
-function cpAbrir(id){
-  var caja = (CFG.cajasPers || []).find(function(c){ return c.id === id; });
-  if(!caja) return;
-  var abierto = caja.modo === "abierto";
-  var cant = parseInt(caja.cant) || 4;
-  window._cp = { caja: caja, cant: cant, abierto: abierto, fill: {}, orden: [] };
-  $("cpTitle").textContent = "Armá tu " + caja.nombre;
-  $("cpSub").textContent = abierto
-    ? "Elegí mínimo " + cant + " cookies — podés sumar las que quieras — y mezclá premium con clásicas. El precio con descuento lo ves al llegar al mínimo."
-    : "Elegí " + cant + " cookies y mezclá premium con clásicas. El precio con descuento lo ves al final.";
-  cpArmarLista();
-  cpRefrescar();
-  $("cpMbg").classList.add("show");
-  trackEvento("abrio_caja_pers", caja.nombre);
-}
-
-function cpFila(p){
-  return '<div class="srow">' +
-    '<img src="'+driveImg(p.foto)+'" alt="" onerror="this.style.opacity=.3">' +
-    '<span class="sn">'+esc(p.nombre)+(p.premium ? '<span class="cp-prem-tag">Premium</span>' : '')+'</span>' +
-    '<div class="stepper">' +
-      '<button class="step-btn" id="cpm-'+p.id+'" onclick="cpSabor(\''+p.id+'\',-1)" disabled>−</button>' +
-      '<span class="step-num" id="cps-'+p.id+'">0</span>' +
-      '<button class="step-btn" onclick="cpSabor(\''+p.id+'\',1)">+</button>' +
-    '</div>' +
-  '</div>';
-}
-
-function cpArmarLista(){
-  var items = CFG.productos.filter(function(p){ return p.activo && !p.noListable && !p.especial; });
-  var prem = items.filter(function(p){ return p.premium; });
-  var clas = items.filter(function(p){ return !p.premium; });
-  var h = "";
-  if(prem.length) h += '<div class="cp-group">Premium</div>' + prem.map(cpFila).join("");
-  if(clas.length) h += '<div class="cp-group">Clásicas</div>' + clas.map(cpFila).join("");
-  $("cpList").innerHTML = h;
-}
-
-function cpSabor(id, delta){
-  var s = window._cp;
-  if(!s) return;
-  var p = prodPorId(id);
-  if(!p) return;
-  if(delta > 0){
-    if(!s.abierto && s.orden.length >= s.cant){ toast("Tu caja ya está completa"); return; }
-    var max = parseInt(p.maxPorCaja) || 0;
-    if(max > 0 && (s.fill[id] || 0) >= max){
-      toast("No hay más stock de " + p.nombre + " para caja");
-      return;
-    }
-    var usado = (qty[id]||0) + (boxFill[id]||0) + (box2Fill[id]||0) + cpFillTotal(id) + (s.fill[id]||0);
-    if(usado >= (parseInt(p.stock) || 0)){ toast("Sin stock de " + p.nombre); return; }
-    s.fill[id] = (s.fill[id] || 0) + 1;
-    s.orden.push(id);
-  } else if((s.fill[id] || 0) > 0){
-    s.fill[id]--;
-    var i = s.orden.lastIndexOf(id);
-    if(i > -1) s.orden.splice(i, 1);
-  }
-  cpRefrescar();
-}
-
-function cpQuitarSlot(idx){
-  var s = window._cp;
-  if(!s) return;
-  var id = s.orden[idx];
-  if(!id) return;
-  s.orden.splice(idx, 1);
-  s.fill[id] = Math.max(0, (s.fill[id] || 0) - 1);
-  cpRefrescar();
-}
-
-function cpRefrescar(){
-  var s = window._cp;
-  if(!s) return;
-  // contadores por cookie
-  CFG.productos.forEach(function(p){
-    var n = $("cps-"+p.id);
-    if(n) n.textContent = s.fill[p.id] || 0;
-    var m = $("cpm-"+p.id);
-    if(m) m.disabled = !(s.fill[p.id] > 0);
-  });
-
-  var slotsEl = $("cpSlots");
-  if(s.abierto){
-    // sin techo: solo se muestran las casillas ya elegidas, sin espacios vacíos
-    var slotsA = s.orden.map(function(id, i){
-      var p = prodPorId(id);
-      return '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
-        '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
-    }).join("");
-    slotsEl.style.gridTemplateColumns = "repeat(4,1fr)";
-    slotsEl.innerHTML = slotsA || '<div class="cp-slots-hint" style="grid-column:1/-1">Todavía no agregaste cookies.</div>';
-    $("cpCount").textContent = s.orden.length + (s.orden.length===1 ? " cookie" : " cookies") + " · mínimo " + s.cant;
-  } else {
-    // mini carrito: una casilla por cookie de la caja
-    var slots = "";
-    for(var i = 0; i < s.cant; i++){
-      var id = s.orden[i];
-      if(id){
-        var p = prodPorId(id);
-        slots += '<button type="button" class="cp-slot on'+(p && p.premium ? ' prem' : '')+'" onclick="cpQuitarSlot('+i+')" aria-label="Sacar '+esc(p ? p.nombre : "")+'">' +
-          '<img src="'+driveImg(p ? p.foto : "")+'" alt=""><span class="x">×</span></button>';
-      } else {
-        slots += '<div class="cp-slot"></div>';
-      }
-    }
-    slotsEl.style.gridTemplateColumns = "repeat(" + Math.min(s.cant, 6) + ",1fr)";
-    slotsEl.innerHTML = slots;
-    $("cpCount").textContent = s.orden.length + " de " + s.cant;
-  }
-
-  // precio: recién aparece al completar (fija) o al llegar al mínimo (abierta)
-  var lista = s.abierto ? (s.orden.length >= s.cant) : (s.orden.length === s.cant);
-  var pr = $("cpPrecio");
-  if(lista){
-    var c = cpCalc(s.caja, s.fill);
-    pr.innerHTML =
-      '<div class="cp-precio done">' +
-        '<div class="t"><span>Tu caja</span><b>'+fmt(c.total)+'</b></div>' +
-      '</div>';
-  } else {
-    pr.innerHTML =
-      '<div class="cp-precio wait">' + (s.abierto
-        ? 'Agregá al menos ' + s.cant + ' cookies para ver el precio con descuento. Después podés seguir sumando las que quieras.'
-        : 'Agregá tus cookies y el precio con descuento lo ves al final, cuando completes la caja.') +
-      '</div>';
-  }
-  $("cpConfirm").disabled = !lista;
-  $("cpConfirm").textContent = (s.abierto && lista) ? "Agregar caja al pedido (" + s.orden.length + ")" : "Agregar caja al pedido";
-}
-
-function cpCerrar(){ $("cpMbg").classList.remove("show"); }
-
-$("cpConfirm").onclick = function(){
-  var s = window._cp;
-  if(!s) return;
-  var lista = s.abierto ? (s.orden.length >= s.cant) : (s.orden.length === s.cant);
-  if(!lista){
-    toast(s.abierto ? "Agregá al menos " + s.cant + " cookies" : "Completá tu caja: elegí " + s.cant + " cookies");
-    return;
-  }
-  var c = cpCalc(s.caja, s.fill);
-  var fillCopia = {};
-  Object.keys(s.fill).forEach(function(k){ if(s.fill[k] > 0) fillCopia[k] = s.fill[k]; });
-  cajasArmadas.push({
-    uid: ++cpSeq,
-    cajaId: s.caja.id,
-    nombre: s.caja.nombre,
-    cant: s.orden.length,
-    pct: c.pct,
-    fill: fillCopia,
-    sum: c.sum,
-    precio: c.total
-  });
-  cpCerrar();
-  renderCPLista();
-  renderResumen();
-  toast("Caja agregada ✓");
-  trackEvento("agrego_caja_pers", s.caja.nombre);
-};
-
-/* ===== BANNER DE PRODUCTO ESPECIAL (minis, premium, etc.) ===== */
-function renderProductoBanner(p){
-
-  var out = (parseInt(p.stock)||0) <= 0;
-  var d = document.createElement("div");
-  d.className = "cdm";
-  d.innerHTML =
-    '<div class="cdm-inner">' +
-      '<span class="cdm-tag"><span class="dot"></span>Producto especial</span>' +
-      '<img class="cdm-photo" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.25">' +
-      '<h3>'+esc(p.nombre)+'</h3>' +
-      (p.descripcion ? '<div class="cdm-desc">'+esc(p.descripcion)+'</div>' : '') +
-      '<div class="cdm-buy">' +
-        '<span class="cdm-price">'+fmt(p.precio)+'</span>' +
-        (out
-          ? '<button class="cdm-btn" onclick="avisar(\''+p.id+'\')">Avisame cuando vuelva</button>'
-          : '<div class="cdm-ctrl" id="prodBannerCtrl-'+p.id+'">'+ctrlHtml(p.id)+'</div>') +
-      '</div>' +
-    '</div>';
   return d;
 }
 
@@ -2291,7 +1611,6 @@ function beMas(id){
   renderResumen();
   renderDias(); // ACTUALIZAR FECHAS DISPONIBLES
   renderFranjas();
-  trackEvento("agrego_box_especial", b.nombre);
 }
 
 function beMenos(id){
@@ -2449,13 +1768,12 @@ function addCDM(id){
   syncCookie(id);
   renderResumen();
   toast(p.nombre + " sumada 🍪");
-  trackEvento("agrego_cookie", p.nombre);
 }
 
 /* ===== COOKIE CARD ===== */
 function renderCookie(p){
   var d = document.createElement("div");
-  d.className = "ck" + (p.premium ? " premium" : "");
+  d.className = "ck";
   d.id = "ck-"+p.id;
   var stock = parseInt(p.stock)||0;
   var out = stock <= 0;
@@ -2465,7 +1783,6 @@ function renderCookie(p){
   if(out) badge = '<span class="ck-badge agot">Agotada</span>';
   else if(stock<=3) badge = '<span class="ck-badge pocas">Últimas '+stock+'</span>';
   else if(nueva) badge = '<span class="ck-badge nueva">Nueva</span>';
-  var premBadge = p.premium ? '<span class="ck-badge premium">Premium</span>' : '';
   var desc = (p.descripcion||"").replace(/^NUEVA\s*[-–]\s*/i,"");
 
   var foot = out
@@ -2476,7 +1793,7 @@ function renderCookie(p){
       '</div>';
 
   d.innerHTML =
-    '<div class="ck-imgwrap">'+badge+premBadge+
+    '<div class="ck-imgwrap">'+badge+
       '<img class="ck-img" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.3">' +
     '</div>' +
     '<div class="ck-body">' +
@@ -2498,15 +1815,13 @@ function ctrlHtml(id){
 }
 function dispo(id){
   var p = CFG.productos.find(function(x){ return x.id===id; });
-  return (parseInt(p.stock)||0) - (boxFill[id]||0) - (box2Fill[id]||0) - cpFillTotal(id);
+  return (parseInt(p.stock)||0) - (boxFill[id]||0) - (box2Fill[id]||0);
 }
 function chCookie(id, delta){
   var p = CFG.productos.find(function(x){ return x.id===id; });
   if(delta>0){
     if((qty[id]||0) >= dispo(id)){ toast("Sin más stock de "+p.nombre); return; }
-    var eraCero = !qty[id];
     qty[id] = (qty[id]||0)+1;
-    if(eraCero) trackEvento("agrego_cookie", p.nombre);
   } else if((qty[id]||0)>0){
     qty[id]--;
   }
@@ -2516,14 +1831,11 @@ function chCookie(id, delta){
 function syncCookie(id){
   var c = $("ckctrl-"+id);
   if(c) c.innerHTML = ctrlHtml(id);
-  var b = $("prodBannerCtrl-"+id);
-  if(b) b.innerHTML = ctrlHtml(id);
 }
 
 /* ===== AVISAR ===== */
 function avisar(id){
   var p = CFG.productos.find(function(x){ return x.id===id; });
-  trackEvento("aviso_agotado", p ? p.nombre : id);
   var m = "Hola Blu Bakery! Quiero que me avisen cuando vuelva la cookie "+(p?p.nombre:"")+" 🍪";
   window.open("https://wa.me/"+WSP+"?text="+encodeURIComponent(m), "_blank");
 }
@@ -2555,7 +1867,7 @@ function chBox(tipo, delta){
   renderResumen();
 }
 
-/* ===== MODAL (Box x4 / Box x6 de precio fijo — solo cookies clásicas) ===== */
+/* ===== MODAL ===== */
 function openModal(tipo){
   var box = tipo==="box" ? CFG.box : CFG.box2;
   window._mt = tipo; window._mb = box; window._mf = {};
@@ -2567,8 +1879,7 @@ function openModal(tipo){
   var list = $("mList");
   list.innerHTML = "";
   CFG.productos.forEach(function(p){
-    // Las cookies premium NO entran en las Box x4 / x6 de precio fijo: van en las cajas personalizables
-    if(!p.activo || p.noListable || p.premium) return;
+    if(!p.activo || p.noListable) return;
     var r = document.createElement("div");
     r.className = "srow";
     r.innerHTML =
@@ -2589,7 +1900,7 @@ function mSabor(id, delta){
   if(delta>0){
     if(tot >= box.cant){ toast("Ya elegiste "+box.cant); return; }
     var p = CFG.productos.find(function(x){ return x.id===id; });
-    var usado = (qty[id]||0)+(boxFill[id]||0)+(box2Fill[id]||0)+cpFillTotal(id)+f[id];
+    var usado = (qty[id]||0)+(boxFill[id]||0)+(box2Fill[id]||0)+f[id];
     if(usado >= (parseInt(p.stock)||0)){ toast("Sin stock de "+p.nombre); return; }
     f[id]++;
   } else if(f[id]>0){ f[id]--; }
@@ -2613,7 +1924,6 @@ $("mConfirm").onclick = function(){
   closeModal();
   renderResumen();
   toast("Box agregada ✓");
-  trackEvento("agrego_box", box.nombre);
 };
 function closeModal(){ $("mbg").classList.remove("show"); }
 
@@ -2655,42 +1965,15 @@ function setEnt(t, punto){
   var dir = $("campoDir");
   if(dir) dir.style.display = t==="envio" ? "block" : "none";
   renderResumen();
-  trackEvento("eligio_entrega", t + (punto ? " · " + punto : ""));
 }
 
-/* ===== DÍAS — VIERNES AUTOMÁTICO ===== */
-// Regla: se entrega los viernes. El corte de pedidos de cada semana es el
-// jueves anterior a las 21:00hs. Después de ese corte, el "próximo viernes"
-// pasa a ser el de la semana siguiente. El horario (CFG.horarioViernes) es
-// editable en cualquier momento desde la pestaña Config del Sheet.
-function calcularViernes(base){
-  // Devuelve la fecha del viernes de la semana de "base", respetando el
-  // corte del jueves 21:00. base=0 → próximo viernes disponible; base=1 → el siguiente.
-  var ahora = new Date();
-  var diaSemana = ahora.getDay(); // 0=dom .. 5=vie .. 6=sab
-  var diasHastaViernes = (5 - diaSemana + 7) % 7;
-  var viernes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + diasHastaViernes);
-  var corte = new Date(viernes.getFullYear(), viernes.getMonth(), viernes.getDate() - 1, 21, 0, 0);
-  if(ahora > corte){
-    // ya cerró el pedido de este viernes → arrancamos desde el siguiente
-    viernes.setDate(viernes.getDate() + 7);
-  }
-  viernes.setDate(viernes.getDate() + (base * 7));
-  return viernes;
-}
-function fechaLabel(d){
-  var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  return dias[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2) + " · " + CFG.horarioViernes;
-}
-function fechaISO(d){
-  return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
-}
-
-// Detectar si hay box especial en el carrito con fechas fijas (lanzamientos puntuales)
+/* ===== DÍAS ===== */
+// Detectar si hay box especial en el carrito con fechas fijas
 function obtenerFechasForzadas(){
   if(!Array.isArray(CFG.boxesEspeciales)) return null;
   var boxesEnCarrito = CFG.boxesEspeciales.filter(function(b){ return (beQty[b.id]||0) > 0 && b.fechasEntrega && b.fechasEntrega.trim(); });
   if(boxesEnCarrito.length === 0) return null;
+  // Tomo las fechas de la primera (en práctica casi nunca habrá dos)
   var b = boxesEnCarrito[0];
   var fechas = b.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
   return { fechas: fechas, nombreBox: b.nombre };
@@ -2702,13 +1985,58 @@ function renderDias(){
   wrap.innerHTML = "";
   wrap.appendChild(secHead("Día", "¿Cuándo lo querés?"));
 
-  // ¿Hay fechas forzadas por una box especial (lanzamiento con fecha propia)?
+  // ===== LÓGICA ESPECIAL: Restricciones por promo =====
+  // Detectar si hay MINI COOKIES en el carrito
+  var hayMinis = Object.keys(beQty).some(function(id){ return (beQty[id]||0) > 0; });
+  
+  var ahora = new Date();
+  var cierreMañana = new Date(2026, 8, 17, 21, 0, 0); // 17/9 21:00
+  var cierreJueves = new Date(2026, 8, 23, 21, 0, 0);  // 23/9 21:00
+  var cierreMartes = new Date(2026, 8, 29, 12, 0, 0); // 29/9 12:00
+
+  var puedeMañana = ahora <= cierreMañana;
+  var puedeProximo = ahora <= cierreJueves;
+  var puedeMartes = ahora <= cierreMartes;
+  
+  // Si hay minis: mostrar SOLO lunes 21/9
+  if(hayMinis){
+    var aviso = document.createElement("div");
+    aviso.style.cssText = "background:#7E1F2D;color:#F3EBDD;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;line-height:1.5;text-align:left";
+    aviso.innerHTML = '⚡ <b>Entrega exclusiva de mini cookies.</b> El lunes 21/9 entregamos solo pedidos de Box de minis (se requiere 24hs de anticipación mínimo).';
+    wrap.appendChild(aviso);
+    
+    var row = document.createElement("div");
+    row.className = "pills";
+    var b = document.createElement("button");
+    b.className = "pill on"; b.id = "d-lun21";
+    b.textContent = "Lunes 21/9 · 14:00-16:00";
+    b.onclick = function(){ setDia("lun21"); };
+    row.appendChild(b);
+    wrap.appendChild(row);
+    
+    diaId = "lun21";
+    franja = "14:00-16:00";
+    renderFranjas();
+    return;
+  }
+  
+  // Si NO hay minis: mostrar martes 29, viernes 18 y 24
+  var diasRestringidos = [
+    { id: "mar29", label: "Martes 29/9", franjas: ["15:00", "18:00"], disponible: puedeMartes },
+    { id: "vie18", label: "Viernes 18/9", franjas: ["15:00", "18:00"], disponible: puedeMañana },
+    { id: "vie24", label: "Viernes 24/9", franjas: ["15:00", "18:00"], disponible: puedeProximo }
+  ];
+
+  // ¿Hay fechas forzadas por una box especial?
   var forzado = obtenerFechasForzadas();
+
   if(forzado){
+    // Mostrar AVISO al cliente
     var aviso = document.createElement("div");
     aviso.style.cssText = "background:#fbeede;border:1px solid var(--mostaza);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7a4f0e;line-height:1.5";
-    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
+    aviso.innerHTML = '⚠️ <b>Tu pedido se entrega ' + (forzado.fechas.length === 1 ? 'el ' + forzado.fechas[0] : 'en una de estas fechas: ' + forzado.fechas.join(' · ')) + '</b> porque incluye <b>' + esc(forzado.nombreBox) + '</b>. Si querés recibir las otras cookies en las otras fechas disponibles que hay antes, <a href="https://wa.me/' + WSP + '" target="_blank" style="color:var(--azul);font-weight:600;text-decoration:underline">escribinos por WhatsApp</a> y coordinamos.';
     wrap.appendChild(aviso);
+    // Generar pills con las fechas forzadas
     var row = document.createElement("div");
     row.className = "pills";
     forzado.fechas.forEach(function(f, i){
@@ -2720,69 +2048,114 @@ function renderDias(){
       row.appendChild(b);
     });
     wrap.appendChild(row);
+    // Crear diasEntrega virtual para que el resto del código funcione
+    // IMPORTANTE: usar las franjas/horarios REALES cargados en el admin para los días normales
+    // (no inventar valores). Tomamos la configuración del primer día normal si existe.
+    var franjasReales = [];
+    var horarioReal = "";
+    var primerDiaNormal = (CFG.diasEntrega && CFG.diasEntrega.length > 0) ? CFG.diasEntrega[0] : null;
+    if(primerDiaNormal){
+      if(primerDiaNormal.franjas && primerDiaNormal.franjas.length) franjasReales = primerDiaNormal.franjas;
+      if(primerDiaNormal.horario) horarioReal = primerDiaNormal.horario;
+    }
     disp = forzado.fechas.map(function(f, i){
-      return { dia: { id: "forzado_" + i, label: f, horario: CFG.horarioViernes }, ok: true };
+      return { dia: { id: "forzado_" + i, label: f, franjas: franjasReales, horario: horarioReal }, ok: true };
     });
+    // Auto-seleccionar la primera
     diaId = "forzado_0";
     var fb = $("d-forzado_0"); if(fb) fb.classList.add("on");
     renderFranjas();
     return;
   }
 
-  // FLUJO NORMAL: próximo viernes disponible + el siguiente, calculados en el momento,
-  // más una fecha extra puntual si está activa en el admin (ej. una entrega especial)
-  var v0 = calcularViernes(0);
-  var v1 = calcularViernes(1);
-  var diasAuto = [
-    { id: "v0_" + fechaISO(v0), label: fechaLabel(v0), horario: CFG.horarioViernes, orden: v0.getTime() },
-    { id: "v1_" + fechaISO(v1), label: fechaLabel(v1), horario: CFG.horarioViernes, orden: v1.getTime() }
-  ];
-
-  var fx = CFG.fechaExtra;
-  if(fx && fx.activo && fx.fecha){
-    var partes = fx.fecha.split("-"); // YYYY-MM-DD
-    var fechaFx = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), 23, 59, 59);
-    if(fechaFx >= new Date()){
-      var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-      var labelFx = dias[fechaFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || CFG.horarioViernes) +
-        (fx.etiqueta ? " · " + fx.etiqueta : "");
-      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || CFG.horarioViernes, orden: fechaFx.getTime() });
-    }
+  // FLUJO NORMAL (sin fechas forzadas)
+  // Usar los días restringidos en lugar de CFG.diasEntrega
+  disp = diasRestringidos.map(function(d){
+    return { dia: d, ok: d.disponible };
+  });
+  
+  var oks = disp.filter(function(x){ return x.ok; });
+  if(!oks.length){
+    var w = document.createElement("div");
+    w.className = "warn";
+    w.textContent = "⚠ Los días ya cerraron para compra. Los pedidos solo se pueden hacer dentro de los horarios establecidos.";
+    wrap.appendChild(w);
   }
-  diasAuto.sort(function(a,b){ return a.orden - b.orden; });
-
-  disp = diasAuto.map(function(d){ return { dia: d, ok: true }; });
-
   var row = document.createElement("div");
   row.className = "pills";
   disp.forEach(function(it){
     var b = document.createElement("button");
-    b.className = "pill"; b.id = "d-"+it.dia.id;
-    b.textContent = it.dia.label;
-    b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
+    if(it.ok){
+      b.className = "pill"; b.id = "d-"+it.dia.id;
+      b.textContent = it.dia.label;
+      b.onclick = (function(id){ return function(){ setDia(id); }; })(it.dia.id);
+    } else {
+      b.className = "pill off";
+      var msg;
+      if(it.dia.id === "mar29") msg = "cerrado (hasta las 12hs)";
+      else if(it.dia.id === "vie18") msg = "cerrado (hasta 21hs del 17)";
+      else msg = "cerrado (hasta 21hs del 23)";
+      b.textContent = it.dia.label + " · " + msg;
+      b.onclick = function(){ toast("Ese día ya cerró."); };
+    }
     row.appendChild(b);
   });
   wrap.appendChild(row);
-
-  diaId = disp[0].dia.id;
-  var fb2 = $("d-"+diaId); if(fb2) fb2.classList.add("on");
-  renderFranjas();
+  if(oks.length){
+    diaId = oks[0].dia.id;
+    var fb = $("d-"+diaId); if(fb) fb.classList.add("on");
+    renderFranjas();
+  } else {
+    diaId = null;
+    $("frSec").innerHTML = "";
+  }
 }
 function setDia(id){
   diaId = id;
   disp.forEach(function(it){
-    var b = $("d-"+it.dia.id); if(b) b.classList.toggle("on", it.dia.id===id);
+    if(it.ok){ var b = $("d-"+it.dia.id); if(b) b.classList.toggle("on", it.dia.id===id); }
   });
   renderFranjas();
 }
 function renderFranjas(){
-  // El horario ya va incluido en la etiqueta del día (fechaLabel), así que
-  // acá solo fijamos la variable franja — no se dibuja nada aparte.
   var wrap = $("frSec");
-  if(wrap) wrap.innerHTML = "";
+  if(!wrap) return;
+  wrap.innerHTML = "";
+  
+  // Si es lunes, el horario es fijo: no mostrar selector
+  if(diaId === "lun21"){
+    franja = "14:00-16:00";
+    return;
+  }
+  
+  // Buscar el día en disp (que incluye los días restringidos)
+  var d = null;
   var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
-  var d = dispMatch ? dispMatch.dia : null;
-  franja = (d && d.horario) ? d.horario : CFG.horarioViernes;
+  if(dispMatch) d = dispMatch.dia;
+  
+  var fr = [];
+  if(d && d.franjas && d.franjas.length) fr = d.franjas;
+  else if(d && d.horario) fr = [d.horario];
+  
+  if(!fr.length){ franja = null; return; }
+  
+  wrap.appendChild(secHead("Horario", "¿A qué hora?"));
+  var row = document.createElement("div");
+  row.className = "pills";
+  fr.forEach(function(f, i){
+    var b = document.createElement("button");
+    b.className = "pill" + (i===0?" on":"");
+    b.textContent = f;
+    b.onclick = (function(val, el){
+      return function(){
+        row.querySelectorAll(".pill").forEach(function(x){ x.classList.remove("on"); });
+        el.classList.add("on"); franja = val;
+      };
+    })(f, b);
+    row.appendChild(b);
+  });
+  wrap.appendChild(row);
+  franja = fr[0];
 }
 
 /* ===== DATOS ===== */
@@ -2793,25 +2166,10 @@ function renderDatos(){
     '<label>Nombre completo</label><input type="text" id="iNom" placeholder="María García">' +
     '<label>Teléfono (WhatsApp)</label><input type="tel" id="iTel" placeholder="2284 000000">' +
     '<label>Email (opcional)</label><input type="email" id="iMail" placeholder="tu@email.com">' +
+    '<label>¿Para quién es? <span style="color:var(--gris);font-weight:400;font-size:12px">(opcional — si es un regalo, este nombre va en la etiqueta)</span></label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)">' +
     '<div id="campoDir" style="display:none"><label>Dirección</label><input type="text" id="iDir" placeholder="Calle y número, barrio"></div>' +
-    '<label>¿Es para regalo?</label>' +
-    '<div class="pills"><button type="button" class="pill" id="pRegaloSi" onclick="setRegalo(true)">🎁 Sí, es un regalo</button><button type="button" class="pill" id="pRegaloNo" onclick="setRegalo(false)">No, es para mí</button></div>' +
-    '<div id="campoDestin" style="display:none;margin-top:14px"><label>¿Para quién es?</label><input type="text" id="iDestin" placeholder="Nombre para la etiqueta (ej. Juan)"></div>' +
-    '<label>Notas o comentarios (opcional)</label><textarea id="iNotas" rows="2" placeholder="Especificaciones del pedido, alergias, instrucciones…"></textarea>';
-  setTimeout(function(){
-    var nom = $("iNom");
-    if(nom) nom.addEventListener("focus", function(){ trackEvento("empezo_datos"); }, { once:true });
-  }, 0);
+    '<label>Aclaraciones (opcional)</label><textarea id="iNotas" rows="2" placeholder="Alergias, instrucciones…"></textarea>';
   return d;
-}
-function setRegalo(v){
-  esRegalo = v;
-  $("pRegaloSi").classList.toggle("on", v===true);
-  $("pRegaloNo").classList.toggle("on", v===false);
-  $("campoDestin").style.display = v ? "block" : "none";
-  if(!v){
-    var el = $("iDestin"); if(el) el.value = "";
-  }
 }
 
 /* ===== PAGO ===== */
@@ -2904,28 +2262,6 @@ function eventoWsp(){
   return "https://wa.me/"+WSP+"?text="+encodeURIComponent(m);
 }
 
-/* ===== MAYORISTAS ===== */
-function renderMayoristas(){
-  var d = document.createElement("div");
-  d.className = "block mayoristas";
-  d.innerHTML =
-    '<div class="block-eyebrow">Mayoristas</div>' +
-    '<h3>¿Tenés un comercio?</h3>' +
-    '<p>Sumá Blu Bakery a tu local. Te contamos cómo funciona la reventa y armamos una propuesta a tu medida.</p>' +
-    '<a class="block-btn" href="'+mayoristaWsp()+'" target="_blank" rel="noopener">💬 Quiero vender Blu</a>';
-  return d;
-}
-function mayoristaWsp(){
-  var m =
-    "Hola Blu Bakery! Tengo un comercio y me gustaría vender sus cookies 🍪\n\n" +
-    "Les cuento un poco:\n" +
-    "• Nombre del comercio: \n" +
-    "• Rubro: \n" +
-    "• Ciudad: \n\n" +
-    "¡Quedo atenta/o a la propuesta!";
-  return "https://wa.me/"+WSP+"?text="+encodeURIComponent(m);
-}
-
 /* ===== CONTACTO ===== */
 function renderContacto(){
   var d = document.createElement("div");
@@ -2958,10 +2294,10 @@ function aplicarCupon(){
 
   // Verificar vencimiento
   if(cup.vence){
-    var hoyChk = new Date();
-    hoyChk.setHours(0,0,0,0);
+    var hoy = new Date();
+    hoy.setHours(0,0,0,0);
     var venc = new Date(cup.vence + "T23:59:59");
-    if(hoyChk > venc){
+    if(hoy > venc){
       cuponAplicado = { valido:false, error:"Este código venció el " + fechaBonita(cup.vence) };
       renderResumen();
       return;
@@ -3010,13 +2346,7 @@ function totales(){
     }
   });
   var boxes = boxQty*(CFG.box.precio||0) + box2Qty*(CFG.box2.precio||0);
-
-  // Cajas personalizables (cada una ya trae su precio final con descuento)
-  var cpTot = 0;
-  cajasArmadas.forEach(function(c){ cpTot += c.precio; });
-  var hayCP = cajasArmadas.length > 0;
-
-  var hayBox = (boxQty+box2Qty)>0 || (CP_DESC_SUELTAS && hayCP);
+  var hayBox = (boxQty+box2Qty)>0;
   var pct = CFG.box.pctSueltas||0;
   var desc = (hayBox && pct>0) ? sueltas*(pct/100) : 0;
 
@@ -3031,7 +2361,7 @@ function totales(){
     }
   });
 
-  var subtotal = boxes + cpTot + sueltas - desc + bEsp;
+  var subtotal = boxes + sueltas - desc + bEsp;
 
   // Cupón de descuento (se aplica sobre el subtotal, no sobre el envío)
   var descCupon = 0;
@@ -3044,10 +2374,9 @@ function totales(){
     descCupon = Math.round(descCupon);
   }
 
-  var hayAlgo = hayBox || hayCP || items.length>0 || itemsBE.length>0;
+  var hayAlgo = hayBox || items.length>0 || itemsBE.length>0;
   return {
     sueltas:sueltas, boxes:boxes, desc:desc,
-    cpTot:cpTot,
     bEsp:bEsp, itemsBE:itemsBE, requiereTrf:requiereTrf,
     subtotal: subtotal,
     descCupon: descCupon,
@@ -3076,11 +2405,6 @@ function renderResumen(){
       h += row(CFG.box2.nombre+" ×"+box2Qty, fmt(box2Qty*CFG.box2.precio));
       h += fillDet(box2Fill);
     }
-    // Cajas personalizables armadas
-    cajasArmadas.forEach(function(c){
-      h += row(c.nombre, fmt(c.precio));
-      h += '<div class="res-sub">↳ '+esc(fillLista(c.fill).join(" · "))+'</div>';
-    });
     t.items.forEach(function(it){ h += row(it.nombre+" ×"+it.cant, ""); });
     if(t.desc>0) h += row("Descuento sueltas ("+CFG.box.pctSueltas+"%)", "−"+fmt(t.desc));
 
@@ -3199,9 +2523,12 @@ function confirmar(){
     return;
   }
 
-  // Buscar el día elegido dentro de disp (siempre viene de ahí ahora)
-  var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
-  var dia = dispMatch ? dispMatch.dia : null;
+  // Buscar el día: primero en CFG.diasEntrega normales, después en disp (que incluye fechas forzadas)
+  var dia = CFG.diasEntrega.find(function(d){ return d.id===diaId; });
+  if(!dia){
+    var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
+    if(dispMatch) dia = dispMatch.dia;
+  }
 
   // BLINDAJE FINAL: si después de todo no encontramos día, abortar
   if(!dia || !dia.label){
@@ -3228,19 +2555,14 @@ function confirmar(){
     });
     ck.push(CFG.box2.nombre+" x"+box2Qty+" ("+bf2.join(" + ")+")");
   }
-  // Cajas personalizables: una línea por caja, con lo que eligió y el precio final de esa caja
-  cajasArmadas.forEach(function(c){
-    ck.push(c.nombre+" ("+fillLista(c.fill).join(" + ")+") "+fmt(c.precio));
-  });
   CFG.productos.forEach(function(p){ if(qty[p.id]>0) ck.push(p.nombre+" x"+qty[p.id]); });
 
   var unidades = boxQty*CFG.box.cant + box2Qty*CFG.box2.cant;
-  cajasArmadas.forEach(function(c){ unidades += c.cant; });
   CFG.productos.forEach(function(p){ unidades += qty[p.id]||0; });
 
   var stockChanges = {};
   CFG.productos.forEach(function(p){
-    var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0)+cpFillTotal(p.id);
+    var u = (qty[p.id]||0)+(boxFill[p.id]||0)+(box2Fill[p.id]||0);
     if(u>0) stockChanges[p.id] = u;
   });
   // Stock de boxes especiales (clave: be_<id>)
@@ -3249,7 +2571,6 @@ function confirmar(){
   var packTxt = [];
   if(boxQty>0) packTxt.push("Box4 x"+boxQty);
   if(box2Qty>0) packTxt.push("Box6 x"+box2Qty);
-  cajasArmadas.forEach(function(c){ packTxt.push(c.nombre); });
   t.itemsBE.forEach(function(it){ packTxt.push(it.nombre+" x"+it.cant); });
 
   var destinatario = $("iDestin") ? $("iDestin").value.trim() : "";
@@ -3285,7 +2606,6 @@ function confirmar(){
   var btn = $("btnGo");
   btn.disabled = true;
   btn.textContent = "Enviando…";
-  trackEvento("completo_pedido", fmt(t.total));
   fetch(APPS_SCRIPT_URL, {
     method:"POST", mode:"no-cors",
     headers:{ "Content-Type":"text/plain;charset=utf-8" },
@@ -3310,7 +2630,7 @@ function exito(p){
   if(p.destinatario){
     lineas.push("🎁 Para: " + p.destinatario + " (nombre para la etiqueta)");
   }
-  lineas.push("📅 " + p.entrega + ": " + p.dia_entrega);
+  lineas.push("📅 " + p.entrega + ": " + p.dia_entrega + " " + p.horario);
   lineas.push("🏠 " + p.direccion);
   lineas.push("💳 Pago: " + p.pago);
   if(p.pago === "Transferencia"){
@@ -3355,7 +2675,7 @@ function exito(p){
         '<b>Pedido:</b> '+esc(p.cookies)+'<br>' +
         (p.destinatario ? '<b>🎁 Para:</b> '+esc(p.destinatario)+' <span style="font-size:11px;color:var(--gris)">(nombre en la etiqueta)</span><br>' : '') +
         '<b>Total:</b> '+fmt(p.total)+'<br>' +
-        '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+'<br>' +
+        '<b>Entrega:</b> '+esc(p.entrega)+' · '+esc(p.dia_entrega)+' '+esc(p.horario)+'<br>' +
         '<b>'+(p.entrega==="Envio"?"Dirección":"Punto")+':</b> '+esc(p.direccion)+'<br>' +
         '<b>Pago:</b> '+esc(p.pago)+
       '</div>' +
