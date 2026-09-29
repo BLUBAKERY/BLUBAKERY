@@ -1097,8 +1097,8 @@ function aplicarConfigAlFormulario(data){
   if (data.descuentos) CONFIG.descuentos = data.descuentos;
   if (data.horasCorte) CONFIG.horasCorte = data.horasCorte;
 
-  // Fecha de entrega especial (si nunca se guardó antes, sale precargada con el martes 29/9)
-  var fxDefault = {activo:true, fecha:"2026-09-29", horario:"14 a 16:30hs", etiqueta:""};
+  // Fecha de entrega especial (ya se usó la del 29/9, así que el default ahora es inactivo)
+  var fxDefault = {activo:false, fecha:"", horario:"", etiqueta:""};
   var fx = Object.assign({}, fxDefault, data.fechaExtra !== undefined ? data.fechaExtra : {});
   var s0;
   if ((s0=document.getElementById("fx-activo")))   s0.checked = !!fx.activo;
