@@ -2659,18 +2659,35 @@ function setEnt(t, punto){
 }
 
 /* ===== DÍAS — VIERNES AUTOMÁTICO ===== */
-// Regla: se entrega los viernes. El corte de pedidos de cada semana es el
-// jueves anterior a las 21:00hs. Después de ese corte, el "próximo viernes"
+// Regla: se entrega los viernes. El corte de pedidos es configurable desde
+// el Sheet (CFG.horasCorte = cantidad de horas antes del horario de entrega
+// en que se cierran los pedidos). Después de ese corte, el "próximo viernes"
 // pasa a ser el de la semana siguiente. El horario (CFG.horarioViernes) es
 // editable en cualquier momento desde la pestaña Config del Sheet.
+function horaInicioDesdeTexto(horario){
+  // Extrae la hora (y minutos, si los hay) de inicio de un texto libre tipo
+  // "14 a 18hs" o "14:00 a 16:30hs". Si no encuentra nada, asume 00:00.
+  var m = /(\d{1,2})(?::(\d{2}))?/.exec(horario || "");
+  if(!m) return { h: 0, m: 0 };
+  return { h: parseInt(m[1], 10), m: m[2] ? parseInt(m[2], 10) : 0 };
+}
+function horasCorteConfiguradas(){
+  var h = CFG.horasCorte;
+  if(h === undefined || h === null || h === "") return 24;
+  var n = parseFloat(h);
+  return isNaN(n) ? 24 : n;
+}
 function calcularViernes(base){
   // Devuelve la fecha del viernes de la semana de "base", respetando el
-  // corte del jueves 21:00. base=0 → próximo viernes disponible; base=1 → el siguiente.
+  // corte configurado (CFG.horasCorte horas antes del horario de entrega).
+  // base=0 → próximo viernes disponible; base=1 → el siguiente.
   var ahora = new Date();
   var diaSemana = ahora.getDay(); // 0=dom .. 5=vie .. 6=sab
   var diasHastaViernes = (5 - diaSemana + 7) % 7;
   var viernes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + diasHastaViernes);
-  var corte = new Date(viernes.getFullYear(), viernes.getMonth(), viernes.getDate() - 1, 21, 0, 0);
+  var hi = horaInicioDesdeTexto(CFG.horarioViernes);
+  var inicioEntrega = new Date(viernes.getFullYear(), viernes.getMonth(), viernes.getDate(), hi.h, hi.m, 0);
+  var corte = new Date(inicioEntrega.getTime() - horasCorteConfiguradas() * 60 * 60 * 1000);
   if(ahora > corte){
     // ya cerró el pedido de este viernes → arrancamos desde el siguiente
     viernes.setDate(viernes.getDate() + 7);
@@ -2741,12 +2758,17 @@ function renderDias(){
   var fx = CFG.fechaExtra;
   if(fx && fx.activo && fx.fecha){
     var partes = fx.fecha.split("-"); // YYYY-MM-DD
-    var fechaFx = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), 23, 59, 59);
-    if(fechaFx >= new Date()){
+    var hiFx = horaInicioDesdeTexto(fx.horario || CFG.horarioViernes);
+    var inicioFx = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), hiFx.h, hiFx.m, 0);
+    var corteFx = new Date(inicioFx.getTime() - horasCorteConfiguradas() * 60 * 60 * 1000);
+    // Igual que con los viernes: se deja de ofrecer esta fecha en cuanto
+    // pasa su propio corte (CFG.horasCorte antes del horario de entrega),
+    // no recién a la medianoche del mismo día.
+    if(new Date() < corteFx){
       var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-      var labelFx = dias[fechaFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || CFG.horarioViernes) +
+      var labelFx = dias[inicioFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || CFG.horarioViernes) +
         (fx.etiqueta ? " · " + fx.etiqueta : "");
-      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || CFG.horarioViernes, orden: fechaFx.getTime() });
+      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || CFG.horarioViernes, orden: inicioFx.getTime() });
     }
   }
   diasAuto.sort(function(a,b){ return a.orden - b.orden; });
