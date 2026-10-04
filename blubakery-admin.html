@@ -366,7 +366,12 @@ const CONFIG = {
   cajasPers: [
     {id:"cp4", activo:true, nombre:"Box Personalizada x4", descripcion:"", modo:"fijo", cant:4, pctDescuento:10, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1TBhGUM02LGE3L_txi6mh4L3xT9DjUCKq&sz=w1200"},
     {id:"cp6", activo:true, nombre:"Box Personalizada x6", descripcion:"", modo:"fijo", cant:6, pctDescuento:23, emoji:"🎁", foto:"https://drive.google.com/thumbnail?id=1z4ErSdWXC0hg8z6lHw27BJ97pwQEw_Wu&sz=w1200"},
-    {id:"cp_mama", activo:true, nombre:"Caja Día de la Madre", descripcion:"", modo:"abierto", cant:4, tiers:[{desde:4,pct:10},{desde:6,pct:23}], emoji:"💐", foto:""}
+    {id:"cp_mama", activo:true, nombre:"Caja Día de la Madre", descripcion:"", modo:"abierto", cant:4, tiers:[{desde:4,pct:10},{desde:6,pct:23}], emoji:"💐", foto:"",
+      fechasEntrega:"16/10/2026", soloTransferencia:true,
+      limiteSabor:{patron:"nutella", tramos:[{desde:4,max:1},{desde:6,max:2}]},
+      bannerActivo:true, bannerTag:"Edición especial",
+      bannerTitulo:"¡Feliz día, Ma!",
+      bannerTexto:"Armá la caja para mamá con los sabores que más te gustan. El precio se muestra al final según los sabores y la cantidad que elijas. Viene con cookies decoradas especialmente para mamá, un sticker del Día de la Madre y una mini tarjeta para tu mensaje."}
   ],
   cookieDelMes: "",
   cookieDelMesFrase: "La icónica. La que todo el mundo pide una y otra vez. La que se agota siempre.",
@@ -553,6 +558,34 @@ function renderCajasPers(){
       }
       <div class="field"><label>Descripción corta (opcional)</label><input type="text" id="cp-desc-${i}" value="${(c.descripcion||'').replace(/"/g,'&quot;')}" placeholder="Si lo dejás vacío: Caja para ${c.cant||4} cookies · premium + clásicas"/></div>
       <div class="hint" style="margin:-4px 0 10px">El descuento no se muestra al cliente hasta que ${esAbierto ? 'llega al mínimo' : 'completa la caja'}. Precio final = suma de las cookies elegidas × (1 − descuento). No se suma packaging.</div>
+
+      <div style="background:#fbf6ec;border:1px solid #ead8b0;border-radius:8px;padding:12px;margin:10px 0">
+        <div style="font-size:11px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">⚙️ Configuración de lanzamiento (opcional)</div>
+
+        <label class="toggle" style="margin-bottom:10px"><input type="checkbox" id="cp-trf-${i}" ${c.soloTransferencia?'checked':''}/><span>Solo se reserva por transferencia</span></label>
+
+        <label style="font-size:11px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block">📅 Fechas de entrega permitidas (solo para esta caja)</label>
+        <input type="text" id="cp-fechas-${i}" value="${(c.fechasEntrega||'').replace(/"/g,'&quot;')}" placeholder="Ejemplos: 16/10/2026  ó  09/10/2026, 16/10/2026" style="width:100%"/>
+        <div class="hint" style="margin-top:4px">Si lo dejás vacío, se usan los viernes automáticos normales.</div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #ead8b0">
+          <label style="font-size:11px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block">🚫 Límite de un sabor (sin avisarle al cliente)</label>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px">
+            <div class="field" style="margin:0"><label style="font-size:10px">Sabor (texto que aparece en el nombre)</label><input type="text" id="cp-lim-patron-${i}" value="${(c.limiteSabor&&c.limiteSabor.patron||'').replace(/"/g,'&quot;')}" placeholder="nutella"/></div>
+            <div class="field" style="margin:0"><label style="font-size:10px">Máx. en caja de ${(c.tiers&&c.tiers[0]&&c.tiers[0].desde)||4}</label><input type="number" id="cp-lim-max1-${i}" value="${(c.limiteSabor&&c.limiteSabor.tramos&&c.limiteSabor.tramos[0]&&c.limiteSabor.tramos[0].max)||''}" min="0"/></div>
+            <div class="field" style="margin:0"><label style="font-size:10px">Máx. en caja de ${(c.tiers&&c.tiers[1]&&c.tiers[1].desde)||6}</label><input type="number" id="cp-lim-max2-${i}" value="${(c.limiteSabor&&c.limiteSabor.tramos&&c.limiteSabor.tramos[1]&&c.limiteSabor.tramos[1].max)||''}" min="0"/></div>
+          </div>
+          <div class="hint" style="margin-top:6px">Si dejás "Sabor" vacío, no se aplica ningún límite. Al cliente se le muestra el mismo aviso genérico de "sin stock", nunca el motivo real.</div>
+        </div>
+
+        <div style="margin-top:14px;padding-top:12px;border-top:1px dashed #ead8b0">
+          <label class="toggle" style="margin-bottom:10px"><input type="checkbox" id="cp-ban-activo-${i}" ${c.bannerActivo?'checked':''}/><span>Mostrar banner especial arriba de todo en la web</span></label>
+          <div class="field" style="margin-bottom:8px"><label style="font-size:10px">Etiqueta de la esquina</label><input type="text" id="cp-ban-tag-${i}" value="${(c.bannerTag||'').replace(/"/g,'&quot;')}" placeholder="Edición especial"/></div>
+          <div class="field" style="margin-bottom:8px"><label style="font-size:10px">Título grande del banner</label><input type="text" id="cp-ban-titulo-${i}" value="${(c.bannerTitulo||'').replace(/"/g,'&quot;')}" placeholder="¡Feliz día, Ma!"/></div>
+          <div class="field"><label style="font-size:10px">Texto del banner</label><textarea id="cp-ban-texto-${i}" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical">${(c.bannerTexto||'').replace(/</g,'&lt;')}</textarea></div>
+        </div>
+      </div>
+
       <div class="field">
         <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
         <input type="text" id="cp-foto-${i}" value="" placeholder="https://drive.google.com/file/d/XXXXX/view..."/>
@@ -616,6 +649,29 @@ function leerCajasPersDesdeDOM(){
     c.descripcion = get("cp-desc-"+i).value.trim();
     const nf = get("cp-foto-"+i).value.trim();
     if(nf) c.foto = convertirLinkDrive(nf);
+
+    // Configuración de lanzamiento (opcional)
+    if(get("cp-trf-"+i)) c.soloTransferencia = get("cp-trf-"+i).checked;
+    if(get("cp-fechas-"+i)) c.fechasEntrega = get("cp-fechas-"+i).value.trim();
+
+    const limPatron = get("cp-lim-patron-"+i) ? get("cp-lim-patron-"+i).value.trim() : "";
+    if(limPatron){
+      const desde1 = (c.tiers && c.tiers[0] && c.tiers[0].desde) || c.cant || 4;
+      const desde2 = (c.tiers && c.tiers[1] && c.tiers[1].desde) || (desde1 + 2);
+      const max1 = parseInt(get("cp-lim-max1-"+i) ? get("cp-lim-max1-"+i).value : "") ;
+      const max2 = parseInt(get("cp-lim-max2-"+i) ? get("cp-lim-max2-"+i).value : "");
+      const tramos = [];
+      if(!isNaN(max1)) tramos.push({desde: desde1, max: max1});
+      if(!isNaN(max2)) tramos.push({desde: desde2, max: max2});
+      c.limiteSabor = { patron: limPatron, tramos: tramos };
+    } else {
+      c.limiteSabor = null;
+    }
+
+    if(get("cp-ban-activo-"+i)) c.bannerActivo = get("cp-ban-activo-"+i).checked;
+    if(get("cp-ban-tag-"+i)) c.bannerTag = get("cp-ban-tag-"+i).value.trim();
+    if(get("cp-ban-titulo-"+i)) c.bannerTitulo = get("cp-ban-titulo-"+i).value.trim();
+    if(get("cp-ban-texto-"+i)) c.bannerTexto = get("cp-ban-texto-"+i).value.trim();
   });
   return CONFIG.cajasPers;
 }
