@@ -582,7 +582,12 @@ function renderCajasPers(){
           <label class="toggle" style="margin-bottom:10px"><input type="checkbox" id="cp-ban-activo-${i}" ${c.bannerActivo?'checked':''}/><span>Mostrar banner especial arriba de todo en la web</span></label>
           <div class="field" style="margin-bottom:8px"><label style="font-size:10px">Etiqueta de la esquina</label><input type="text" id="cp-ban-tag-${i}" value="${(c.bannerTag||'').replace(/"/g,'&quot;')}" placeholder="Edición especial"/></div>
           <div class="field" style="margin-bottom:8px"><label style="font-size:10px">Título grande del banner</label><input type="text" id="cp-ban-titulo-${i}" value="${(c.bannerTitulo||'').replace(/"/g,'&quot;')}" placeholder="¡Feliz día, Ma!"/></div>
-          <div class="field"><label style="font-size:10px">Texto del banner</label><textarea id="cp-ban-texto-${i}" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical">${(c.bannerTexto||'').replace(/</g,'&lt;')}</textarea></div>
+          <div class="field" style="margin-bottom:8px"><label style="font-size:10px">Texto del banner</label><textarea id="cp-ban-texto-${i}" rows="3" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:13px;resize:vertical">${(c.bannerTexto||'').replace(/</g,'&lt;')}</textarea></div>
+
+          <label style="font-size:10px;font-weight:700;color:#7E1F2D;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:block">📸 Fotos del banner — hasta 6, pegá los links de Drive (uno por línea)</label>
+          <textarea id="cp-ban-fotos-${i}" rows="4" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:12px;resize:vertical" placeholder="https://drive.google.com/file/d/AAAA/view...&#10;https://drive.google.com/file/d/BBBB/view..."></textarea>
+          <div class="hint" style="margin-top:4px">Dejalo vacío para mantener las fotos que ya guardaste. Para sacarlas todas, escribí la palabra "ninguna" y guardá. Se convierten solo al guardar.</div>
+          ${(c.bannerFotos && c.bannerFotos.length) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">${c.bannerFotos.map(f => `<img src="${f}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;border:1px solid #ddd" onerror="this.style.display='none'"/>`).join('')}</div>` : '<div class="hint" style="margin-top:4px">Todavía no cargaste fotos para el banner.</div>'}
         </div>
       </div>
 
@@ -672,6 +677,15 @@ function leerCajasPersDesdeDOM(){
     if(get("cp-ban-tag-"+i)) c.bannerTag = get("cp-ban-tag-"+i).value.trim();
     if(get("cp-ban-titulo-"+i)) c.bannerTitulo = get("cp-ban-titulo-"+i).value.trim();
     if(get("cp-ban-texto-"+i)) c.bannerTexto = get("cp-ban-texto-"+i).value.trim();
+
+    const fotosRaw = get("cp-ban-fotos-"+i) ? get("cp-ban-fotos-"+i).value.trim() : "";
+    if(fotosRaw){
+      if(fotosRaw.toLowerCase() === "ninguna"){
+        c.bannerFotos = [];
+      } else {
+        c.bannerFotos = fotosRaw.split("\n").map(s => s.trim()).filter(Boolean).slice(0,6).map(convertirLinkDrive);
+      }
+    }
   });
   return CONFIG.cajasPers;
 }
