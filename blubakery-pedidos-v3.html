@@ -10,7 +10,7 @@
 <title>Blu Bakery</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=Erica+One&family=Nothing+You+Could+Do&display=swap" rel="stylesheet">
 <style>
   :root {
     --azul: #004e64;
@@ -94,6 +94,57 @@
     to { transform: translateX(-50%); }
   }
   .marquee b { font-weight: 600; margin: 0 6px; color: var(--mostaza); }
+
+  /* ===== BANNER DE CAJA ESPECIAL (ej. Día de la Madre) ===== */
+  .dm-banner {
+    position: relative;
+    padding: 28px 18px 30px;
+    text-align: center;
+    overflow: hidden;
+    background:
+      repeating-linear-gradient(90deg,
+        #e88aa6 0px, #e88aa6 18px,
+        #7a0f17 18px, #7a0f17 36px);
+    cursor: pointer;
+  }
+  .dm-tag {
+    position: absolute; top: 12px; right: 14px;
+    background: var(--mostaza); color: var(--azul);
+    font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 10.5px;
+    letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 11px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  }
+  .dm-card {
+    position: relative;
+    max-width: 480px; margin: 0 auto;
+    background: #7a0f17;
+    border-radius: 22px;
+    padding: 30px 26px 26px;
+    box-shadow: 0 14px 34px rgba(0,0,0,.28);
+  }
+  .dm-card h2 {
+    font-family: 'Erica One', sans-serif;
+    font-weight: 400;
+    font-size: 40px;
+    color: #fff3c4;
+    line-height: 1.05;
+    margin: 0 0 10px;
+  }
+  .dm-card p {
+    font-family: 'Inter', sans-serif;
+    color: #f6c3d1;
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+  .dm-cta {
+    margin-top: 16px;
+    display: inline-block;
+    font-family: 'Nothing You Could Do', cursive;
+    font-size: 24px;
+    color: #fff3c4;
+  }
 
   /* ===== APP WRAP ===== */
   .wrap {
@@ -1456,6 +1507,16 @@
   <span id="marqueeText"></span>
 </div>
 
+<!-- BANNER DE CAJA ESPECIAL (ej. Día de la Madre) — controlado por CFG.cajasPers, campos banner* -->
+<div id="bannerCajaEspecial" class="dm-banner" style="display:none">
+  <div id="bceTag" class="dm-tag"></div>
+  <div class="dm-card">
+    <h2 id="bceTitulo"></h2>
+    <p id="bceTexto"></p>
+    <div class="dm-cta">Armar mi caja →</div>
+  </div>
+</div>
+
 <div class="wrap" id="app">
   <div class="loading">Horneando…</div>
 </div>
@@ -1665,7 +1726,9 @@ function init(){
   }
   
   CFG.boxesEspeciales.forEach(function(b){ beQty[b.id] = 0; });
-  
+
+  renderBannerCajaEspecial();
+
   // marquee
   var mt = "Nuevas cookies todas las semanas <b>•</b> Hechas en el día <b>•</b> Ingredientes reales <b>•</b> Hecho a mano en Olavarría <b>•</b> ";
   $("marqueeText").innerHTML = mt + mt;
@@ -1864,6 +1927,23 @@ function renderBoxesBanner(){
   return d;
 }
 
+/* ===== BANNER DE CAJA ESPECIAL (arriba de todo, ej. Día de la Madre) ===== */
+function cajaBannerActiva(){
+  // Busca, entre las cajas personalizables activas, la primera que tenga su banner prendido
+  return (CFG.cajasPers || []).find(function(c){ return c && c.activo !== false && c.bannerActivo; }) || null;
+}
+function renderBannerCajaEspecial(){
+  var el = $("bannerCajaEspecial");
+  if(!el) return;
+  var c = cajaBannerActiva();
+  if(!c){ el.style.display = "none"; return; }
+  $("bceTag").textContent = c.bannerTag || "Edición especial";
+  $("bceTitulo").textContent = c.bannerTitulo || c.nombre;
+  $("bceTexto").textContent = c.bannerTexto || "";
+  el.style.display = "block";
+  el.onclick = function(){ cpAbrir(c.id); };
+}
+
 /* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
 function cajasPersActivas(){
   return (CFG.cajasPers || []).filter(function(c){ return c && c.activo !== false && parseInt(c.cant) > 0; });
@@ -2005,6 +2085,23 @@ function cpArmarLista(){
   $("cpList").innerHTML = h;
 }
 
+function normTxt(s){
+  return (s||"").toString().normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+}
+// Límite de un sabor particular dentro de UNA caja, según cuántas cookies lleve en total
+// (ej. Nutella: máx 1 en la caja de 4, máx 2 en la de 6). Se configura por caja en el admin
+// (caja.limiteSabor) y nunca se le explica al cliente el motivo del tope.
+function limiteSaborCP(caja, producto, totalProyectado){
+  var L = caja && caja.limiteSabor;
+  if(!L || !L.patron) return null;
+  if(normTxt(producto.nombre).indexOf(normTxt(L.patron)) === -1) return null;
+  var tramos = (L.tramos || []).slice().sort(function(a,b){ return (a.desde||0) - (b.desde||0); });
+  var max = null;
+  tramos.forEach(function(t){
+    if(totalProyectado >= (parseInt(t.desde) || 0)) max = parseInt(t.max);
+  });
+  return max;
+}
 function cpSabor(id, delta){
   var s = window._cp;
   if(!s) return;
@@ -2014,6 +2111,11 @@ function cpSabor(id, delta){
     if(!s.abierto && s.orden.length >= s.cant){ toast("Tu caja ya está completa"); return; }
     var max = parseInt(p.maxPorCaja) || 0;
     if(max > 0 && (s.fill[id] || 0) >= max){
+      toast("No hay más stock de " + p.nombre + " para caja");
+      return;
+    }
+    var limCaja = limiteSaborCP(s.caja, p, s.orden.length + 1);
+    if(limCaja !== null && (s.fill[id] || 0) >= limCaja){
       toast("No hay más stock de " + p.nombre + " para caja");
       return;
     }
@@ -2705,12 +2807,26 @@ function fechaISO(d){
 
 // Detectar si hay box especial en el carrito con fechas fijas (lanzamientos puntuales)
 function obtenerFechasForzadas(){
-  if(!Array.isArray(CFG.boxesEspeciales)) return null;
-  var boxesEnCarrito = CFG.boxesEspeciales.filter(function(b){ return (beQty[b.id]||0) > 0 && b.fechasEntrega && b.fechasEntrega.trim(); });
-  if(boxesEnCarrito.length === 0) return null;
-  var b = boxesEnCarrito[0];
-  var fechas = b.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
-  return { fechas: fechas, nombreBox: b.nombre };
+  // 1) Boxes especiales (lanzamientos) con fecha fija
+  if(Array.isArray(CFG.boxesEspeciales)){
+    var boxesEnCarrito = CFG.boxesEspeciales.filter(function(b){ return (beQty[b.id]||0) > 0 && b.fechasEntrega && b.fechasEntrega.trim(); });
+    if(boxesEnCarrito.length > 0){
+      var b = boxesEnCarrito[0];
+      var fechas = b.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
+      return { fechas: fechas, nombreBox: b.nombre };
+    }
+  }
+  // 2) Cajas personalizables (armá la tuya) con fecha fija, ej. Caja Día de la Madre
+  if(cajasArmadas && cajasArmadas.length){
+    for(var i=0;i<cajasArmadas.length;i++){
+      var cajaCfg = (CFG.cajasPers || []).find(function(c){ return c.id === cajasArmadas[i].cajaId; });
+      if(cajaCfg && cajaCfg.fechasEntrega && cajaCfg.fechasEntrega.trim()){
+        var fechasCP = cajaCfg.fechasEntrega.split(",").map(function(f){ return f.trim(); }).filter(function(f){ return f; });
+        return { fechas: fechasCP, nombreBox: cajaCfg.nombre };
+      }
+    }
+  }
+  return null;
 }
 
 function renderDias(){
@@ -3051,6 +3167,12 @@ function totales(){
       itemsBE.push({ id:b.id, nombre:b.nombre, cant:c, precio:b.precio||0 });
       if(b.soloTransferencia) requiereTrf = true;
     }
+  });
+
+  // Cajas personalizables que exigen transferencia (ej. Caja Día de la Madre)
+  cajasArmadas.forEach(function(c){
+    var cajaCfg = (CFG.cajasPers || []).find(function(x){ return x.id === c.cajaId; });
+    if(cajaCfg && cajaCfg.soloTransferencia) requiereTrf = true;
   });
 
   var subtotal = boxes + cpTot + sueltas - desc + bEsp;
