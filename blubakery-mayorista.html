@@ -95,6 +95,9 @@
   .hist-btn.edit{color:var(--azul);border-color:var(--azul)}.hist-btn.edit:hover{background:var(--azul);color:#fff}
   .hist-btn.pdf{color:var(--verde);border-color:var(--verde)}.hist-btn.pdf:hover{background:var(--verde);color:#fff}
   .hist-btn.del{color:var(--bordo);border-color:var(--bordo)}.hist-btn.del:hover{background:var(--bordo);color:#fff}
+  .hist-badge{display:inline-block;font-family:'Bricolage Grotesque',sans-serif;font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;padding:3px 9px;border-radius:100px;margin-bottom:6px}
+  .hist-badge.ok{background:rgba(78,101,70,.14);color:var(--verde)}
+  .hist-badge.pend{background:rgba(215,161,58,.16);color:#8a5a14}
   .reset-zone{background:rgba(126,31,45,.05);border:1px dashed var(--bordo);border-radius:10px;padding:14px;margin-top:20px;text-align:center}
   .btn-reset{background:none;border:1px solid var(--bordo);color:var(--bordo);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-family:'Bricolage Grotesque',sans-serif;font-weight:600}
   .btn-reset:hover{background:var(--bordo);color:#fff}
@@ -898,12 +901,24 @@ function verHistorialComercio(comId){
       html += '<div class="hist-desc">'+esc(e.desc)+'</div>';
       if(e.monto != null) html += '<div class="hist-monto">'+fmt(e.monto)+' <span style="font-size:10px;color:var(--gris);font-weight:400">a '+esc(e.caja||"")+'</span></div>';
       if(e.motivo) html += '<div style="font-size:11px;color:var(--gris);font-style:italic">Motivo: '+esc(e.motivo)+'</div>';
+      var cobrosVinc = e.tipo === "remito" ? cobrosDeRemito(e.nro, comId) : [];
+      if(e.tipo === "remito"){
+        if(cobrosVinc.length > 0){
+          html += '<span class="hist-badge ok">✅ Con comprobante (' + cobrosVinc.map(function(cv){ return "N° "+cv.nro; }).join(", ") + ')</span>';
+        } else {
+          html += '<span class="hist-badge pend">⏳ Sin comprobante todavía</span>';
+        }
+      }
       html += '<div class="hist-actions">';
       html += '<button class="hist-btn edit" onclick="editarEvento(\''+e.tipo+'\','+e.row+')">✏️ Editar</button>';
-      if(e.tipo === "remito") html += '<button class="hist-btn pdf" onclick="reimprimirRemito('+e.row+')">📄 PDF</button>';
+      if(e.tipo === "remito") html += '<button class="hist-btn pdf" onclick="reimprimirRemito('+e.row+')">📄 PDF remito</button>';
       if(e.tipo === "cobro") html += '<button class="hist-btn pdf" onclick="reimprimirComprobante('+e.row+')">📄 PDF</button>';
       html += '<button class="hist-btn del" onclick="eliminarEvento(\''+e.tipo+'\','+e.row+')">🗑</button>';
-      html += '</div></div>';
+      html += '</div>';
+      if(e.tipo === "remito"){
+        html += '<button class="hist-btn" style="width:100%;margin-top:5px;color:var(--verde);border-color:var(--verde)" onclick="crearComprobanteDesdeRemito('+e.row+')">🧾 Crear comprobante de este remito</button>';
+      }
+      html += '</div>';
     });
   }
   abrirModal(html);
@@ -1017,6 +1032,81 @@ function editSetCaja(el, val){
   window._editCaja = val;
 }
 
+/* ============ COMPROBANTE GENERADO DESDE UN REMITO ============ */
+// El vínculo remito↔comprobante se guarda dentro del campo "notas" del cobro,
+// como una etiqueta "[Remito #N]" al principio. No requiere tocar el Apps Script
+// ni ninguna columna nueva del Sheet, así que no hay riesgo sobre los datos ya cargados.
+function remitoLinkTag(nro){ return "[Remito #" + nro + "]"; }
+
+function cobrosDeRemito(remNro, comId){
+  var tag = remitoLinkTag(remNro);
+  return DATA.cobros.filter(function(c){
+    return String(c.comercioId) === String(comId) && String(c.notas||"").indexOf(tag) !== -1;
+  });
+}
+
+function crearComprobanteDesdeRemito(row){
+  var r = DATA.remitos.find(function(x){ return x.row === row; });
+  if(!r){ toast("Esperá a que termine de recargar y probá de nuevo", "err"); return; }
+  var comOpts = DATA.comercios.map(function(c){ return '<option value="'+esc(c.id)+'"'+(c.id===r.comercioId?" selected":"")+'>'+esc(c.nombre)+'</option>'; }).join("");
+  var itemsHTML = itemsEditHTML(r.items, "remcob", true);
+  var html = '<button class="modal-close" onclick="cerrarModal()">✕</button>' +
+    '<h3>Comprobante del Remito N° '+r.nro+'</h3>' +
+    '<div class="panel-sub">Revisá las cantidades antes de generar — si vendieron menos (o más) de lo que dejaste, ajustalas acá. Podés generar varios comprobantes del mismo remito si cobra en partes.</div>' +
+    '<label>Comercio</label><select id="rc-com">'+comOpts+'</select>' +
+    '<label>Fecha del cobro</label><input type="date" id="rc-fecha" value="'+hoyISO()+'">' +
+    '<label>Cookies vendidas</label>' + itemsHTML +
+    '<label>Comisión (%)</label><input type="number" id="rc-com-pct" value="'+(parseFloat(r.comision)||20)+'" min="0" max="100" step="0.5" oninput="recalcEdit(\'remcob\')">' +
+    '<label>¿Cómo cobraste?</label><div class="pills">' +
+      '<button class="pill on" onclick="editSetCaja(this,\'Efectivo\')">💵 Efectivo</button>' +
+      '<button class="pill" onclick="editSetCaja(this,\'Banco\')">🏦 Banco</button>' +
+    '</div>' +
+    '<label>Notas (opcional)</label><textarea id="rc-notas" placeholder="Se vincula automático al Remito N° '+r.nro+'"></textarea>' +
+    '<div class="calc" id="remcob-calc">' +
+      '<div class="calc-row"><span class="lbl">Total precio público</span><span id="remcob-bruto">$0</span></div>' +
+      '<div class="calc-row neg"><span class="lbl">Comisión</span><span id="remcob-comis">−$0</span></div>' +
+      '<div class="calc-row total"><span class="lbl">Neto para Blu</span><span id="remcob-neto">$0</span></div>' +
+    '</div>' +
+    '<button class="btn-main verde" onclick="guardarComprobanteDesdeRemito('+row+')">📄 Generar comprobante y registrar</button>';
+  abrirModal(html);
+  window._editCaja = "Efectivo";
+  recalcEdit("remcob");
+}
+
+function guardarComprobanteDesdeRemito(remRow){
+  var r = DATA.remitos.find(function(x){ return x.row === remRow; }); if(!r) return;
+  var items = leerItemsEdit("remcob", true);
+  if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
+  var comId = $("rc-com").value;
+  var com = DATA.comercios.find(function(c){ return c.id === comId; });
+  var comNombre = com ? com.nombre : "";
+  var pct = parseFloat($("rc-com-pct").value) || 20;
+  var bruto = items.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+  var comisMonto = bruto * pct / 100;
+  var neto = bruto - comisMonto;
+  var caja = window._editCaja || "Efectivo";
+  var fecha = $("rc-fecha").value;
+  var notasUsuario = $("rc-notas").value.trim();
+  var notas = remitoLinkTag(r.nro) + (notasUsuario ? " " + notasUsuario : "");
+  var maxNro = 0;
+  DATA.cobros.forEach(function(c){ var n = parseInt(c.nro); if(!isNaN(n) && n > maxNro) maxNro = n; });
+  var nroLocal = maxNro + 1;
+  var itemsPayload = items.map(function(it){ return { id:it.id, nombre:it.nombre, cantidad:it.cantidad, precio:it.precio }; });
+  var payload = {
+    tipo:"cobro", fecha:fecha, comercioId:comId, comercio:comNombre,
+    items: itemsPayload, comision_pct: pct, bruto: bruto, comision_monto: comisMonto, neto: neto, caja: caja, notas: notas
+  };
+  fetch(APPS_SCRIPT_URL, { method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body: JSON.stringify(payload) })
+    .finally(function(){
+      DATA.cobros.push({ row:-1, nro:nroLocal, refId:"tmp", fecha:fecha, comercioId:comId, comercio:comNombre,
+        items:itemsPayload, comision:pct, bruto:bruto, comisionMonto:comisMonto, neto:neto, caja:caja, notas:notas });
+      generarComprobantePDF(nroLocal, comNombre, fecha, items, notas, pct, bruto, comisMonto, neto, caja);
+      toast("Comprobante N° " + nroLocal + " generado, vinculado al Remito N° " + r.nro + " ✓", "ok");
+      cerrarModal();
+      setTimeout(cargarTodo, 1500);
+    });
+}
+
 function guardarEditCobro(row){
   var items = leerItemsEdit("cobedit", true);
   if(items.length === 0){ toast("Agregá al menos una cookie", "err"); return; }
@@ -1104,6 +1194,16 @@ function recalcEdit(prefix){
     $("cobedit-bruto").textContent = fmt(bruto);
     $("cobedit-comis").textContent = "−" + fmt(comis);
     $("cobedit-neto").textContent = fmt(neto);
+  }
+  if(prefix === "remcob"){
+    var items2 = leerItemsEdit("remcob", true);
+    var pct2 = parseFloat($("rc-com-pct").value) || 0;
+    var bruto2 = items2.reduce(function(s,it){ return s + it.precio*it.cantidad; }, 0);
+    var comis2 = bruto2 * pct2 / 100;
+    var neto2 = bruto2 - comis2;
+    $("remcob-bruto").textContent = fmt(bruto2);
+    $("remcob-comis").textContent = "−" + fmt(comis2);
+    $("remcob-neto").textContent = fmt(neto2);
   }
 }
 
