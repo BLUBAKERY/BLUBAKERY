@@ -592,43 +592,75 @@ async function cargarPedidos() {
   const json = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}") + 1));
   const cols = json.table.cols.map(c => c.label || c.id);
   pedidos = json.table.rows.map(row => {
-    const obj = {};
+    const raw = {};
     row.c.forEach((cell, i) => {
-      obj[cols[i]] = cell ? cell.v : "";
+      // Guardamos .v (valor tipado) Y .f (texto formateado por Sheets), porque
+      // en columnas con tipos de dato mezclados gviz a veces deja .v vacío
+      // aunque la celda tenga contenido visible — en ese caso usamos .f.
+      raw[cols[i]] = cell ? { v: cell.v, f: (cell.f !== undefined ? cell.f : null) } : { v: "", f: null };
     });
-    return normalizarPedido(obj);
+    return normalizarPedido(raw);
   });
 }
 
-function normalizarPedido(p) {
-  const map = {
-    "Fecha":"Fecha","Hora":"Hora",
-    "N ORDEN":"NroOrden","Nro Orden":"NroOrden","Nº Orden":"NroOrden",
-    "Nombre":"Nombre",
-    "Teléfono":"Telefono","Telefono":"Telefono",
-    "Email":"Email",
-    "Cookies":"Cookies",
-    "Cantidad":"Unidades","Unidades":"Unidades",
-    "Subtotal":"Subtotal",
-    "Envío":"Pack","Envio":"Pack","Pack":"Pack",
-    "Dirección":"Direccion","Direccion":"Direccion",
-    "Día de entrega":"DiaEntrega","Dia de entrega":"DiaEntrega","Dia entrega":"DiaEntrega",
-    "Horario":"Horario",
-    "Pago de envío":"CostoEnvio","Pago de envio":"CostoEnvio","Costo envio":"CostoEnvio",
-    "Total":"Total",
-    "Forma de pago":"Pago","Pago":"Pago",
-    "Aclaraciones":"Notas","Notas":"Notas",
-    "Estado":"Estado",
-    "Cobrado":"Cobrado",
-    "Fecha cobro":"FechaCobro",
-    "Cobrado en":"CobradoEn"
+// Normaliza un nombre de columna para que el match no dependa de mayúsculas,
+// acentos o espacios extra (ej: "Día de entrega" === "dia  de Entrega ")
+function normalizarClave(s) {
+  return String(s || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function normalizarPedido(raw) {
+  const mapClaves = {
+    "fecha":"Fecha","hora":"Hora",
+    "n orden":"NroOrden","nro orden":"NroOrden","n° orden":"NroOrden","nº orden":"NroOrden",
+    "nombre":"Nombre",
+    "telefono":"Telefono",
+    "email":"Email",
+    "cookies":"Cookies",
+    "cantidad":"Unidades","unidades":"Unidades",
+    "subtotal":"Subtotal",
+    "envio":"Pack","pack":"Pack",
+    "direccion":"Direccion",
+    "dia de entrega":"DiaEntrega","dia entrega":"DiaEntrega",
+    "horario":"Horario",
+    "pago de envio":"CostoEnvio","costo envio":"CostoEnvio",
+    "total":"Total",
+    "forma de pago":"Pago","pago":"Pago",
+    "aclaraciones":"Notas","notas":"Notas",
+    "estado":"Estado",
+    "cobrado":"Cobrado",
+    "fecha cobro":"FechaCobro",
+    "cobrado en":"CobradoEn"
   };
   const out = {};
-  Object.keys(p).forEach(k => { out[map[k] || k] = p[k]; });
+  const diaEntregaCell = { v: undefined, f: undefined };
+  Object.keys(raw).forEach(k => {
+    const cell = raw[k] || { v: "", f: null };
+    const destino = mapClaves[normalizarClave(k)] || k;
+    // Preferimos el valor tipado (.v); si viene vacío, caemos al texto formateado (.f)
+    let val = cell.v;
+    if (val === null || val === undefined || val === "") {
+      val = (cell.f !== undefined && cell.f !== null) ? cell.f : val;
+    }
+    out[destino] = val;
+    if (destino === "DiaEntrega") {
+      diaEntregaCell.v = cell.v;
+      diaEntregaCell.f = cell.f;
+    }
+  });
   const dirText = String(out.Direccion || "");
   out.TipoEntrega = dirText.toLowerCase().includes("retiro") ? "Retiro" : "Envio";
-  // Normalizar campo DiaEntrega si vino como Date de gviz
-  out.DiaEntrega = formatearFechaSheet(out.DiaEntrega);
+  // Normalizar campo DiaEntrega: si el valor crudo es una fecha de gviz la formateamos;
+  // si no se puede interpretar, usamos el texto formateado de Sheets (.f) antes de
+  // rendirnos y mostrar "(Sin fecha)".
+  let diaFormateado = formatearFechaSheet(diaEntregaCell.v);
+  if (!diaFormateado && diaEntregaCell.f) diaFormateado = diaEntregaCell.f;
+  if (!diaFormateado && out.DiaEntrega) diaFormateado = String(out.DiaEntrega);
+  out.DiaEntrega = diaFormateado || "";
   return out;
 }
 
@@ -707,7 +739,10 @@ function renderPedidos() {
     let proximoDia = null;
     for (const d of diasOrdenados) {
       const f = parsearFechaDeLabel(d);
-      if (!f || f >= hoy) { proximoDia = d; break; }
+      // Solo tomamos un día como "próxima tanda" si pudimos parsear su fecha
+      // y es hoy o futura. Un label sin fecha parseable (ej: "(Sin fecha)")
+      // ya NO se confunde con "la próxima entrega".
+      if (f && f >= hoy) { proximoDia = d; break; }
     }
     if (!proximoDia) proximoDia = diasOrdenados[0];
 
