@@ -90,54 +90,37 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
     <div id="productos-admin"></div>
   </div>
 
-  <!-- BOX (producto especial) -->
-  <div class="section-card">
-    <div class="section-title">Box — producto especial</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
-      La Box aparece en la tienda como un producto más. El cliente la compra y después elige qué sabores le pone adentro. Vos ponés el precio final (ya con descuento aplicado) para que el cliente lo vea directo.
-    </div>
+  <!-- BOX y BOX 6 "a elección" (solo clásicas) — DISCONTINUADAS a pedido de Julieta (16/10).
+       Se dejan los campos ocultos (no se muestran en la tienda, ver blubakery-pedidos-v3.html)
+       para no romper nada si en algún momento se quieren reactivar. -->
+  <div class="section-card" style="display:none">
     <div class="field-row-4">
       <div class="field"><label>Nombre del producto</label><input type="text" id="box-nombre" value="Box x 4 cookies a elección"></div>
       <div class="field"><label>Emoji</label><input type="text" id="box-emoji" value="🎁" style="text-align:center;font-size:18px"></div>
       <div class="field"><label>Cookies que entran</label><input type="number" id="box-cant" value="4" min="1"></div>
       <div class="field"><label>Precio final ($)</label><input type="number" id="box-precio" value="16200" min="0" style="font-weight:700"></div>
     </div>
-    <div class="field"><label>Descripción corta (aparece debajo del nombre)</label><input type="text" id="box-descripcion" value="Elegí 4 sabores a gusto"></div>
+    <div class="field"><label>Descripción corta</label><input type="text" id="box-descripcion" value="Elegí 4 sabores a gusto"></div>
+    <div class="field"><input type="text" id="box-foto" value=""></div>
     <div class="field">
-      <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-      <input type="text" id="box-foto" value="" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-    </div>
-    <div class="field">
-      <label>Descuento % en cookies sueltas cuando hay Box en el pedido</label>
       <input type="number" id="box-pct-sueltas" value="10" min="0" max="100" step="0.5">
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">Si el cliente lleva Box + cookies sueltas extra, a las sueltas se les aplica este %. Poné 0 para no aplicar ningún descuento a las sueltas.</div>
     </div>
-    <div class="toggle" style="margin-top:10px">
-      <input type="checkbox" id="box-activo" checked="">
-      <span style="font-size:13px;color:var(--ink)">Box visible en la tienda</span>
-    </div>
+    <div class="toggle"><input type="checkbox" id="box-activo"><span>Box visible en la tienda</span></div>
   </div>
-
-  <!-- BOX 6 (producto especial) -->
-  <div class="section-card">
-    <div class="section-title">Box x 6 — producto especial</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
-      Igual que la Box de 4, pero con 6 cookies. El stock se descuenta del stock general de cada cookie elegida.
-    </div>
+  <div class="section-card" style="display:none">
     <div class="field-row-4">
       <div class="field"><label>Nombre del producto</label><input type="text" id="box2-nombre" value="Box x 6 cookies a elección"></div>
       <div class="field"><label>Emoji</label><input type="text" id="box2-emoji" value="🎁" style="text-align:center;font-size:18px"></div>
       <div class="field"><label>Cookies que entran</label><input type="number" id="box2-cant" value="6" min="1"></div>
       <div class="field"><label>Precio final ($)</label><input type="number" id="box2-precio" value="25800" min="0" style="font-weight:700"></div>
     </div>
-    <div class="field"><label>Descripción corta (aparece debajo del nombre)</label><input type="text" id="box2-descripcion" value="Elegí 6 sabores a gusto"></div>
-    <div class="field">
-      <label>Foto — pegá el link de Google Drive (se convierte solo al guardar)</label>
-      <input type="text" id="box2-foto" value="" placeholder="https://drive.google.com/file/d/XXXXX/view...">
-    </div>
-    <div class="toggle" style="margin-top:10px">
-      <input type="checkbox" id="box2-activo" checked="">
-      <span style="font-size:13px;color:var(--ink)">Box x 6 visible en la tienda</span>
+    <div class="field"><label>Descripción corta</label><input type="text" id="box2-descripcion" value="Elegí 6 sabores a gusto"></div>
+    <div class="field"><input type="text" id="box2-foto" value=""></div>
+    <div class="toggle"><input type="checkbox" id="box2-activo"><span>Box x 6 visible en la tienda</span></div>
+  </div>
+  <div class="section-card" style="background:#f5f0e6;border-left:4px solid #8a8478">
+    <div style="font-size:13px;color:var(--muted);line-height:1.5">
+      Las boxes de 4 y 6 "a elección" (solo clásicas, precio fijo) ya no se muestran en la tienda — ahora solo quedan las <b>Cajas personalizables</b> de abajo, que mezclan clásicas y premium.
     </div>
   </div>
 
@@ -145,7 +128,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
   <div class="section-card" style="border-left:4px solid #7E1F2D">
     <div class="section-title">Cajas personalizables — armá la tuya</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.5">
-      Cajas donde el cliente mezcla cookies <b>premium y clásicas</b>. No tienen precio fijo: el precio es la <b>suma de las cookies elegidas menos el descuento</b> (sin packaging), y el cliente lo ve recién cuando completa la caja. En la tienda aparecen en una sección aparte, debajo de las Box x 4 y x 6.
+      Ahora son las únicas boxes de la tienda. El cliente mezcla cookies <b>premium y clásicas</b>. No tienen precio fijo: el precio es la <b>suma de las cookies elegidas menos el descuento</b> (sin packaging), y el cliente lo ve recién cuando completa la caja. El % de descuento que pongas acá es el que se muestra como cintilla sobre la foto en la tienda.
     </div>
     <div id="cajas-pers-admin"></div>
     <div class="hint" style="margin-top:8px">Para marcar una cookie como premium, o limitar cuántas entran por caja (ej. Nutella máx. 2), usá los campos de cada producto, arriba.</div>
@@ -213,16 +196,14 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--ink);min-
       <button class="add-btn" onclick="agregarDia()">+ Agregar día</button>
     </div>
     <div id="dias-admin"></div>
+    <div class="hint" style="margin:-2px 0 10px">Si no agregás ningún día, se usa por defecto Viernes de 14 a 18hs.</div>
     <div style="margin-top:14px">
       <div class="field">
         <label>Horas de anticipación mínima para pedir</label>
-        <select id="horas-corte">
-          <option value="24">24 horas antes (recomendado)</option>
-          <option value="48">48 horas antes</option>
-          <option value="12">12 horas antes</option>
-        </select>
+        <input type="number" id="horas-corte" min="1" max="168" step="1" value="18" oninput="actualizarCortePreview()">
+        <div class="hint" style="margin-top:4px">Por defecto 18 horas antes del horario de entrega. Después de ese corte, esa fecha deja de poder pedirse y pasa a la semana siguiente.</div>
       </div>
-      <div class="cutoff-info" id="corte-preview">Con 24hs de anticipación: <strong>Miércoles 29/4</strong>: pedidos hasta 24hs antes. Si ya pasó ese límite, el día no aparece como opción.</div>
+      <div class="cutoff-info" id="corte-preview"></div>
     </div>
   </div>
 
@@ -355,11 +336,10 @@ const CONFIG = {
     {id:"pistachio",nombre:"Cookie Pistachio",precio:5200,emoji:"🌿",activo:true,stock:20,foto:"",descripcion:"Pistachio con chocolate blanco"}
   ],
   diasEntrega:[
-    {id:"viernes",label:"Viernes",horario:"15:00 – 19:00 hs"},
-    {id:"sabado",label:"Sábado",horario:"15:00 – 19:00 hs"}
+    {id:"viernes",diaSemana:5,label:"Viernes",horario:"14:00 – 18:00 hs"}
   ],
   descuentos:[],
-  horasCorte:24,
+  horasCorte:18,
   box: {activo:true, nombre:"Box x 4 cookies a elección", descripcion:"Elegí 4 sabores a gusto", cant:4, precio:16200, pctSueltas:10, emoji:"🎁", foto:""},
   box2: {activo:true, nombre:"Box x 6 cookies a elección", descripcion:"Elegí 6 sabores a gusto", cant:6, precio:25800, pctSueltas:10, emoji:"🎁", foto:""},
   // Cajas personalizables: premium + clásicas, precio = suma de cookies × (1 − descuento), se ve al final
@@ -408,6 +388,7 @@ function leerEstadoProductosDesdeDOM(){
     if(get("pnolist-"+i)) p.noListable = get("pnolist-"+i).checked;
     if(get("pespecial-"+i)) p.especial = get("pespecial-"+i).checked;
     if(get("ppremium-"+i)) p.premium = get("ppremium-"+i).checked;
+    if(get("pcintilla-"+i)) p.cintilla = get("pcintilla-"+i).value.trim();
     if(get("pmax-"+i)){
       const mv = parseInt(get("pmax-"+i).value);
       p.maxPorCaja = (mv > 0) ? mv : 0;   // 0 = sin límite
@@ -467,11 +448,16 @@ function renderProductos(){
       <div class="field"><label>Descripción</label><input type="text" id="pdesc-${i}" value="${(p.descripcion||'').replace(/"/g,'&quot;')}"/></div>
       <div style="background:#f5f0e6;border-radius:8px;padding:10px 12px;margin:8px 0">
         <label class="toggle"><input type="checkbox" id="pnolist-${i}" ${p.noListable?'checked':''}/><span><b>No mostrar como cookie suelta</b></span></label>
-        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo si este producto NO debería poder elegirse por separado (ej. la Box de minis, que sólo se vende como caja completa). No aparece en el menú ni dentro de las boxes x4/x6, pero igual existe como producto.</div>
+        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo si este producto NO debería poder elegirse por separado (ej. la Box de minis, que sólo se vende como caja completa). No aparece en el menú, pero igual existe como producto.</div>
       </div>
       <div style="background:#fbf6ec;border:1px solid #ead8b0;border-radius:8px;padding:10px 12px;margin:8px 0">
         <label class="toggle"><input type="checkbox" id="pespecial-${i}" ${p.especial?'checked':''}/><span><b>Producto especial (banner propio)</b></span></label>
-        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo para que aparezca con su propio banner grande, arriba de todo (junto a las boxes x4/x6), en vez de mezclado en el menú de cookies. Ideal para la Box de minis. <b>No lo uses para las cookies premium</b>: ellas tienen su propia opción, acá abajo.</div>
+        <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Marcalo para que aparezca con su propio banner grande, arriba de todo, en vez de mezclado en el menú de cookies. Ideal para la Box de minis. <b>No lo uses para las cookies premium</b>: ellas tienen su propia opción, acá abajo.</div>
+        <div class="field" style="margin:10px 0 0">
+          <label>Cintilla sobre la foto (opcional)</label>
+          <input type="text" id="pcintilla-${i}" value="${(p.cintilla||'').replace(/"/g,'&quot;')}" placeholder="Ej: Ideal para compartir"/>
+          <div style="font-size:11px;color:#777;margin-top:4px;line-height:1.4">Aparece como una etiqueta destacada sobre la foto del banner. Dejalo vacío si no querés ninguna.</div>
+        </div>
       </div>
       <div style="background:#f3ecfa;border:1px solid #d9ccec;border-radius:8px;padding:10px 12px;margin:8px 0">
         <label class="toggle"><input type="checkbox" id="ppremium-${i}" ${p.premium?'checked':''}/><span><b>Cookie premium</b></span></label>
@@ -500,7 +486,7 @@ function renderProductos(){
 
 function agregarProducto(){
   leerEstadoProductosDesdeDOM();
-  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:"",noListable:false,especial:false,premium:false,maxPorCaja:0,fotosExtra:[]});
+  CONFIG.productos.push({id:"nuevo_"+Date.now(),nombre:"Nuevo producto",precio:0,emoji:"🍪",activo:true,stock:0,foto:"",descripcion:"",noListable:false,especial:false,premium:false,cintilla:"",maxPorCaja:0,fotosExtra:[]});
   renderProductos();
 }
 
@@ -917,36 +903,54 @@ function eliminarDescuento(i){
   renderDescuentos();
 }
 
+var NOMBRES_DIA_SEMANA = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+
 function renderDias(){
   const cont=document.getElementById("dias-admin");
-  cont.innerHTML=CONFIG.diasEntrega.map((d,i)=>`
+  if(!Array.isArray(CONFIG.diasEntrega) || CONFIG.diasEntrega.length===0){
+    CONFIG.diasEntrega=[{id:"viernes",diaSemana:5,label:"Viernes",horario:"14:00 – 18:00 hs"}];
+  }
+  cont.innerHTML=CONFIG.diasEntrega.map((d,i)=>{
+    const ds = (d.diaSemana!==undefined && d.diaSemana!==null && d.diaSemana!=="") ? parseInt(d.diaSemana) : 5;
+    const opciones = NOMBRES_DIA_SEMANA.map((n,idx)=>`<option value="${idx}" ${idx===ds?'selected':''}>${n}</option>`).join('');
+    return `
     <div class="dia-row">
-      <input type="text" id="dialabel-${i}" value="${d.label}" style="width:100px;flex-shrink:0" placeholder="Día"/>
-      <input type="text" id="diahora-${i}" value="${d.horario}" placeholder="Ej: 15:00 – 19:00 hs"/>
+      <select id="diasemana-${i}" style="width:130px;flex-shrink:0" onchange="actualizarCortePreview()">${opciones}</select>
+      <input type="text" id="diahora-${i}" value="${d.horario||''}" placeholder="Ej: 14:00 – 18:00 hs" oninput="actualizarCortePreview()"/>
       <button class="remove-btn" onclick="eliminarDia(${i})">✕</button>
     </div>
-  `).join('');
+  `;}).join('');
+  actualizarCortePreview();
 }
 
 function agregarDia(){
-  CONFIG.diasEntrega.push({id:"dia_"+Date.now(),label:"",horario:""});
+  CONFIG.diasEntrega.push({id:"dia_"+Date.now(),diaSemana:5,label:"Viernes",horario:"14:00 – 18:00 hs"});
   renderDias();
 }
 
 function eliminarDia(i){
   CONFIG.diasEntrega.splice(i,1);
+  if(CONFIG.diasEntrega.length===0){
+    CONFIG.diasEntrega=[{id:"viernes",diaSemana:5,label:"Viernes",horario:"14:00 – 18:00 hs"}];
+  }
   renderDias();
 }
 
 function actualizarCortePreview(){
-  const horas=parseInt(document.getElementById("horas-corte").value)||24;
-  const dias=CONFIG.diasEntrega.filter(d=>d.label);
-  if(!dias.length){document.getElementById("corte-preview").textContent="";return;}
-  const ejemplos=dias.map(d=>`<strong>${d.label}</strong>: pedidos hasta ${horas}hs antes`).join(' · ');
-  document.getElementById("corte-preview").innerHTML="Con "+horas+"hs de anticipación: "+ejemplos+". Si ya pasó ese límite, el día no aparece como opción.";
+  const horas=parseInt(document.getElementById("horas-corte").value)||18;
+  const filas=document.querySelectorAll("#dias-admin .dia-row");
+  const dias=[];
+  filas.forEach((row,i)=>{
+    const sel=document.getElementById("diasemana-"+i);
+    const hor=document.getElementById("diahora-"+i);
+    if(sel && hor && hor.value.trim()) dias.push({ nombre: NOMBRES_DIA_SEMANA[parseInt(sel.value)], horario: hor.value.trim() });
+  });
+  const preview = document.getElementById("corte-preview");
+  if(!preview) return;
+  if(!dias.length){preview.textContent="";return;}
+  const ejemplos=dias.map(d=>`<strong>${d.nombre}</strong> (${d.horario}): pedidos hasta ${horas}hs antes de esa hora`).join(' · ');
+  preview.innerHTML="Con "+horas+"hs de anticipación — "+ejemplos+". Si ya pasó ese límite, esa fecha deja de aparecer como opción y pasa a ofrecerse la semana siguiente.";
 }
-
-document.getElementById("horas-corte").addEventListener("change",actualizarCortePreview);
 
 async function cargarClientes(){
   try{
@@ -995,9 +999,11 @@ function getConfig() {
     d.descripcion=document.getElementById("ddesc-"+i)?.value;
   });
   CONFIG.diasEntrega.forEach((d,i)=>{
-    d.label=document.getElementById("dialabel-"+i)?.value;
-    d.horario=document.getElementById("diahora-"+i)?.value;
-    d.id=d.label.toLowerCase().replace(/\s+/g,"-");
+    const ds=document.getElementById("diasemana-"+i)?.value;
+    d.diaSemana=(ds!==undefined && ds!=="")?parseInt(ds):5;
+    d.horario=document.getElementById("diahora-"+i)?.value||"";
+    d.label=NOMBRES_DIA_SEMANA[d.diaSemana];
+    d.id=d.label.toLowerCase().replace(/\s+/g,"-")+"-"+i;
   });
   // Box (producto especial). Si el campo foto viene con valor nuevo, lo convertimos; si no, dejamos el valor anterior.
   const boxFotoInput = document.getElementById("box-foto")?.value.trim();
@@ -1053,7 +1059,7 @@ function getConfig() {
     mostrarNovedades:mostrarNov,
     novedades:novedades,
     descuentos:CONFIG.descuentos,
-    horasCorte:parseInt(document.getElementById("horas-corte").value)||24,
+    horasCorte:parseInt(document.getElementById("horas-corte").value)||18,
     costoEnvio:parseInt(document.getElementById("envio-precio").value)||4000,
     envioGratisDesde:parseInt(document.getElementById("envio-gratis-desde").value)||0,
     alias:document.getElementById("pago-alias").value.trim(),
@@ -1175,7 +1181,20 @@ function aplicarConfigAlFormulario(data){
   if ((s0=document.getElementById("fx-fecha")))    s0.value = fx.fecha || "";
   if ((s0=document.getElementById("fx-horario")))  s0.value = fx.horario || "";
   if ((s0=document.getElementById("fx-etiqueta"))) s0.value = fx.etiqueta || "";
-  if (data.diasEntrega) CONFIG.diasEntrega = data.diasEntrega;
+  if (data.diasEntrega) {
+    // Migración: entradas viejas guardadas sin diaSemana (solo label de texto libre)
+    var NOMBRES_MIG = {"domingo":0,"lunes":1,"martes":2,"miercoles":3,"miércoles":3,"jueves":4,"viernes":5,"sabado":6,"sábado":6};
+    CONFIG.diasEntrega = (data.diasEntrega || []).map(function(d){
+      if (d && (d.diaSemana === undefined || d.diaSemana === null || d.diaSemana === "")) {
+        var key = String(d.label || "").trim().toLowerCase();
+        d.diaSemana = (NOMBRES_MIG[key] !== undefined) ? NOMBRES_MIG[key] : 5;
+      }
+      return d;
+    });
+    if (CONFIG.diasEntrega.length === 0) {
+      CONFIG.diasEntrega = [{id:"viernes",diaSemana:5,label:"Viernes",horario:"14:00 – 18:00 hs"}];
+    }
+  }
   if (data.cookieDelMes !== undefined) CONFIG.cookieDelMes = data.cookieDelMes;
   if (data.cookieDelMesFrase) CONFIG.cookieDelMesFrase = data.cookieDelMesFrase;
   if (data.mostrarCDM !== undefined) CONFIG.mostrarCDM = data.mostrarCDM;
