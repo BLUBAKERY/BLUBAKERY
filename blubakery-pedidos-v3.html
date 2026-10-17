@@ -234,6 +234,21 @@
     margin: 16px 0;
     background: #6a1a26;
   }
+  .cdm-photo-wrap { position: relative; margin: 16px 0; }
+  .cdm-photo-wrap .cdm-photo { margin: 0; }
+  .cdm-ribbon {
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 2;
+    background: #fff;
+    color: var(--bordo);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 100px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  }
   .cdm h3 {
     font-family: 'Bricolage Grotesque', sans-serif;
     font-weight: 800;
@@ -534,6 +549,19 @@
     font-weight: 800;
     padding: 4px 11px;
     border-radius: 100px;
+  }
+  .cp-discount-ribbon {
+    position: absolute;
+    top: 10px; right: 10px;
+    z-index: 2;
+    background: #3FBE62;
+    color: #fff;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 11px;
+    border-radius: 100px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.25);
   }
   .cp-media {
     aspect-ratio: 4/3;
@@ -1610,7 +1638,7 @@ var CFG = {
   envioGratisDesde: 0,
   alias: "BLU.BAKERY",
   banco: "Banco Galicia",
-  horasCorte: 24,
+  horasCorte: 18,
   horarioViernes: "14 a 18hs",
   fechaExtra: { activo:false, fecha:"", horario:"", etiqueta:"" },
   msgRetiro: "Esperá nuestro mensaje por WhatsApp para confirmar tu pedido y coordinar el retiro.",
@@ -1836,8 +1864,9 @@ function render(){
   var app = $("app");
   app.innerHTML = "";
 
-  // BANNER DE BOXES — arriba de todo, siempre lo primero que se ve
-  app.appendChild(renderBoxesBanner());
+  // Las Box x4 / x6 "a elección" (solo clásicas, precio fijo) se discontinuaron:
+  // ahora sólo quedan las cajas personalizables (mezclan clásicas + premium) de abajo.
+  // app.appendChild(renderBoxesBanner());
 
   // CAJAS PERSONALIZABLES — sección aparte (premium + clásicas, precio al final)
   var cpSec = renderCajasPers();
@@ -1955,8 +1984,11 @@ function renderBoxesBanner(){
 
 /* ===== BANNER DE CAJA ESPECIAL (arriba de todo, ej. Día de la Madre) ===== */
 function cajaBannerActiva(){
-  // Busca, entre las cajas personalizables activas, la primera que tenga su banner prendido
-  return (CFG.cajasPers || []).find(function(c){ return c && c.activo !== false && c.bannerActivo; }) || null;
+  // Busca, entre las cajas personalizables activas, la primera que tenga su banner prendido.
+  // La "Caja Día de la Madre" (cp_mama) se excluye a propósito: esa promo ya se dio de baja.
+  return (CFG.cajasPers || []).find(function(c){
+    return c && c.activo !== false && c.bannerActivo && c.id !== "cp_mama";
+  }) || null;
 }
 function renderBannerCajaEspecial(){
   var outer = $("bannerCajaEspecialOuter");
@@ -1984,7 +2016,10 @@ function renderBannerCajaEspecial(){
 
 /* ===== CAJAS PERSONALIZABLES (armá la tuya) ===== */
 function cajasPersActivas(){
-  return (CFG.cajasPers || []).filter(function(c){ return c && c.activo !== false && parseInt(c.cant) > 0; });
+  // La "Caja Día de la Madre" (cp_mama) se excluye a propósito: esa promo ya se dio de baja.
+  return (CFG.cajasPers || []).filter(function(c){
+    return c && c.activo !== false && parseInt(c.cant) > 0 && c.id !== "cp_mama";
+  });
 }
 
 function renderCajasPers(){
@@ -1998,10 +2033,16 @@ function renderCajasPers(){
     var media = c.foto
       ? '<img src="'+driveImg(c.foto)+'" alt="'+esc(c.nombre)+'" onerror="this.style.display=\'none\'">'
       : esc(c.emoji || "🎁");
-    var subDefault = abierto ? ("Desde "+cant+" cookies · premium + clásicas") : ("Caja para "+cant+" cookies · premium + clásicas");
+    var subDefault = abierto ? ("Desde "+cant+" cookies — mezclá clásicas y premium") : ("Caja para "+cant+" cookies — mezclá clásicas y premium");
     var hint = abierto ? "Armá tu caja como quieras, sumá las que quieras, y el precio con descuento lo ves al llegar al mínimo." : "Agregá tus cookies y el precio con descuento lo ves al final.";
+    // Ribbon de descuento sobre la foto: toma el % fijo (modo "fijo") o, si no hay,
+    // el primer tramo de descuento (modo "abierto" con tiers).
+    var pctDesc = parseFloat(c.pctDescuento);
+    if(!pctDesc && Array.isArray(c.tiers) && c.tiers.length) pctDesc = parseFloat(c.tiers[0].pct);
+    var ribbonDesc = pctDesc ? '<span class="cp-discount-ribbon">'+pctDesc+'% descuento</span>' : '';
     return '<div class="cp-card">' +
       '<span class="cp-ribbon">Armá la tuya</span>' +
+      ribbonDesc +
       '<div class="cp-media">'+media+'</div>' +
       '<div class="cp-body">' +
         '<h3>'+esc(c.nombre)+'</h3>' +
@@ -2013,8 +2054,8 @@ function renderCajasPers(){
   }).join("");
   d.innerHTML =
     '<div class="cp-head">' +
-      '<h2>Premium y clásicas, en la misma caja</h2>' +
-      '<p>A diferencia de las Box de arriba, acá podés sumar cookies premium y mezclarlas con las clásicas. Vos elegís cada una.</p>' +
+      '<h2>Armá tu box a tu medida y pagá menos</h2>' +
+      '<p>Elegís los sabores que más te gusten —podés mezclar las clásicas con las premium— y cuanto más pedís, mayor el descuento.</p>' +
     '</div>' +
     '<div class="cp-cards">'+cards+'</div>' +
     '<div class="cp-lista" id="cpLista"></div>';
@@ -2275,10 +2316,16 @@ function renderProductoBanner(p){
   var out = (parseInt(p.stock)||0) <= 0;
   var d = document.createElement("div");
   d.className = "cdm";
+  // Cintilla sobre la foto: editable desde el admin (p.cintilla); si no se configuró
+  // nada y es la Box de minis, usamos un default razonable.
+  var cintillaTexto = p.cintilla || (String(p.nombre||"").toLowerCase().includes("mini") ? "Ideal para compartir" : "");
   d.innerHTML =
     '<div class="cdm-inner">' +
       '<span class="cdm-tag"><span class="dot"></span>Producto especial</span>' +
-      '<img class="cdm-photo" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.25">' +
+      '<div class="cdm-photo-wrap">' +
+        '<img class="cdm-photo" src="'+driveImg(p.foto)+'" alt="'+esc(p.nombre)+'" onerror="this.style.opacity=.25">' +
+        (cintillaTexto ? '<span class="cdm-ribbon">'+esc(cintillaTexto)+'</span>' : '') +
+      '</div>' +
       '<h3>'+esc(p.nombre)+'</h3>' +
       (p.descripcion ? '<div class="cdm-desc">'+esc(p.descripcion)+'</div>' : '') +
       '<div class="cdm-buy">' +
@@ -2798,12 +2845,29 @@ function setEnt(t, punto){
   trackEvento("eligio_entrega", t + (punto ? " · " + punto : ""));
 }
 
-/* ===== DÍAS — VIERNES AUTOMÁTICO ===== */
-// Regla: se entrega los viernes. El corte de pedidos es configurable desde
-// el Sheet (CFG.horasCorte = cantidad de horas antes del horario de entrega
-// en que se cierran los pedidos). Después de ese corte, el "próximo viernes"
-// pasa a ser el de la semana siguiente. El horario (CFG.horarioViernes) es
-// editable en cualquier momento desde la pestaña Config del Sheet.
+/* ===== DÍAS DE ENTREGA — CONFIGURABLES DESDE EL ADMIN ===== */
+// Regla: CFG.diasEntrega es una lista de { id, diaSemana (0=domingo..6=sábado),
+// label, horario } cargada desde el admin. Si está vacía (nunca se configuró
+// nada), se usa por defecto un solo día: Viernes 14 a 18hs.
+// El corte de pedidos es configurable (CFG.horasCorte = cantidad de horas
+// antes del horario de entrega en que se cierran los pedidos; default 18).
+// Después de ese corte, la fecha deja de ofrecerse y pasa a la semana siguiente.
+var DIAS_SEMANA = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+
+function diasEntregaConfigurados(){
+  var lista = (Array.isArray(CFG.diasEntrega) ? CFG.diasEntrega : []).filter(function(d){
+    return d && d.horario && d.diaSemana !== undefined && d.diaSemana !== null && d.diaSemana !== "";
+  });
+  if(lista.length === 0){
+    // Nada configurado en el admin todavía → default: Viernes 14 a 18hs
+    return [{ id:"viernes", diaSemana:5, label:"Viernes", horario:"14 a 18hs" }];
+  }
+  return lista;
+}
+function horarioDefault(){
+  var lista = diasEntregaConfigurados();
+  return (lista[0] && lista[0].horario) || "14 a 18hs";
+}
 function horaInicioDesdeTexto(horario){
   // Extrae la hora (y minutos, si los hay) de inicio de un texto libre tipo
   // "14 a 18hs" o "14:00 a 16:30hs". Si no encuentra nada, asume 00:00.
@@ -2813,31 +2877,30 @@ function horaInicioDesdeTexto(horario){
 }
 function horasCorteConfiguradas(){
   var h = CFG.horasCorte;
-  if(h === undefined || h === null || h === "") return 24;
+  if(h === undefined || h === null || h === "") return 18;
   var n = parseFloat(h);
-  return isNaN(n) ? 24 : n;
+  return isNaN(n) ? 18 : n;
 }
-function calcularViernes(base){
-  // Devuelve la fecha del viernes de la semana de "base", respetando el
-  // corte configurado (CFG.horasCorte horas antes del horario de entrega).
-  // base=0 → próximo viernes disponible; base=1 → el siguiente.
+function calcularProximaFecha(diaCfg, base){
+  // Devuelve la próxima fecha en que cae diaCfg.diaSemana, respetando el
+  // corte configurado. base=0 → próxima disponible; base=1 → la siguiente.
   var ahora = new Date();
-  var diaSemana = ahora.getDay(); // 0=dom .. 5=vie .. 6=sab
-  var diasHastaViernes = (5 - diaSemana + 7) % 7;
-  var viernes = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + diasHastaViernes);
-  var hi = horaInicioDesdeTexto(CFG.horarioViernes);
-  var inicioEntrega = new Date(viernes.getFullYear(), viernes.getMonth(), viernes.getDate(), hi.h, hi.m, 0);
+  var diaSemanaActual = ahora.getDay(); // 0=dom .. 6=sab
+  var diaObjetivo = parseInt(diaCfg.diaSemana, 10);
+  var diasHasta = (diaObjetivo - diaSemanaActual + 7) % 7;
+  var fecha = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + diasHasta);
+  var hi = horaInicioDesdeTexto(diaCfg.horario);
+  var inicioEntrega = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate(), hi.h, hi.m, 0);
   var corte = new Date(inicioEntrega.getTime() - horasCorteConfiguradas() * 60 * 60 * 1000);
   if(ahora > corte){
-    // ya cerró el pedido de este viernes → arrancamos desde el siguiente
-    viernes.setDate(viernes.getDate() + 7);
+    // ya cerró el pedido de esta fecha → arrancamos desde la semana siguiente
+    fecha.setDate(fecha.getDate() + 7);
   }
-  viernes.setDate(viernes.getDate() + (base * 7));
-  return viernes;
+  fecha.setDate(fecha.getDate() + (base * 7));
+  return fecha;
 }
-function fechaLabel(d){
-  var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-  return dias[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2) + " · " + CFG.horarioViernes;
+function fechaLabel(d, horario){
+  return DIAS_SEMANA[d.getDay()] + " " + ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2) + " · " + (horario || horarioDefault());
 }
 function fechaISO(d){
   return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0"+d.getDate()).slice(-2);
@@ -2892,7 +2955,7 @@ function renderDias(){
     });
     wrap.appendChild(row);
     disp = forzado.fechas.map(function(f, i){
-      return { dia: { id: "forzado_" + i, label: f, horario: CFG.horarioViernes }, ok: true };
+      return { dia: { id: "forzado_" + i, label: f, horario: horarioDefault() }, ok: true };
     });
     diaId = "forzado_0";
     var fb = $("d-forzado_0"); if(fb) fb.classList.add("on");
@@ -2900,29 +2963,39 @@ function renderDias(){
     return;
   }
 
-  // FLUJO NORMAL: próximo viernes disponible + el siguiente, calculados en el momento,
-  // más una fecha extra puntual si está activa en el admin (ej. una entrega especial)
-  var v0 = calcularViernes(0);
-  var v1 = calcularViernes(1);
-  var diasAuto = [
-    { id: "v0_" + fechaISO(v0), label: fechaLabel(v0), horario: CFG.horarioViernes, orden: v0.getTime() },
-    { id: "v1_" + fechaISO(v1), label: fechaLabel(v1), horario: CFG.horarioViernes, orden: v1.getTime() }
-  ];
+  // FLUJO NORMAL: la próxima fecha disponible de cada día configurado en el admin
+  // (por defecto, solo Viernes). Si hay un único día configurado, se muestran sus
+  // próximas dos ocurrencias (esta semana / la siguiente); si hay varios días
+  // configurados, se muestra solo la próxima ocurrencia de cada uno, para no saturar
+  // de opciones. Más una fecha extra puntual si está activa en el admin.
+  var diasCfg = diasEntregaConfigurados();
+  var ocurrenciasPorDia = diasCfg.length === 1 ? 2 : 1;
+  var diasAuto = [];
+  diasCfg.forEach(function(diaCfg){
+    for(var b = 0; b < ocurrenciasPorDia; b++){
+      var f = calcularProximaFecha(diaCfg, b);
+      diasAuto.push({
+        id: (diaCfg.id || "dia") + "_" + fechaISO(f),
+        label: fechaLabel(f, diaCfg.horario),
+        horario: diaCfg.horario,
+        orden: f.getTime()
+      });
+    }
+  });
 
   var fx = CFG.fechaExtra;
   if(fx && fx.activo && fx.fecha){
     var partes = fx.fecha.split("-"); // YYYY-MM-DD
-    var hiFx = horaInicioDesdeTexto(fx.horario || CFG.horarioViernes);
+    var hiFx = horaInicioDesdeTexto(fx.horario || horarioDefault());
     var inicioFx = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]), hiFx.h, hiFx.m, 0);
     var corteFx = new Date(inicioFx.getTime() - horasCorteConfiguradas() * 60 * 60 * 1000);
-    // Igual que con los viernes: se deja de ofrecer esta fecha en cuanto
+    // Igual que con los días normales: se deja de ofrecer esta fecha en cuanto
     // pasa su propio corte (CFG.horasCorte antes del horario de entrega),
     // no recién a la medianoche del mismo día.
     if(new Date() < corteFx){
-      var dias = ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
-      var labelFx = dias[inicioFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || CFG.horarioViernes) +
+      var labelFx = DIAS_SEMANA[inicioFx.getDay()] + " " + partes[2] + "/" + partes[1] + " · " + (fx.horario || horarioDefault()) +
         (fx.etiqueta ? " · " + fx.etiqueta : "");
-      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || CFG.horarioViernes, orden: inicioFx.getTime() });
+      diasAuto.push({ id: "fx_" + fx.fecha, label: labelFx, horario: fx.horario || horarioDefault(), orden: inicioFx.getTime() });
     }
   }
   diasAuto.sort(function(a,b){ return a.orden - b.orden; });
@@ -2958,7 +3031,7 @@ function renderFranjas(){
   if(wrap) wrap.innerHTML = "";
   var dispMatch = disp.find(function(x){ return x.dia && x.dia.id === diaId; });
   var d = dispMatch ? dispMatch.dia : null;
-  franja = (d && d.horario) ? d.horario : CFG.horarioViernes;
+  franja = (d && d.horario) ? d.horario : horarioDefault();
 }
 
 /* ===== DATOS ===== */
