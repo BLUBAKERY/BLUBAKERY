@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Blu Bakery x Churro Manía</title>
+<style>
+  :root{ --rosa:#ffb3c7; --azul:#2a3570; --mostaza:#f2b632; --lila:#cdbfe8; --papel:#fffaf0; --tinta:#161616; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ min-height:100%; }
+  body{
+    background:var(--rosa); color:var(--tinta);
+    font-family:'Courier New',Courier,monospace; font-weight:700;
+    padding:34px 18px 60px; position:relative; overflow-x:hidden;
+  }
+  body:before,body:after{ content:''; position:fixed; border-radius:50%; z-index:0; pointer-events:none; }
+  body:before{ width:340px; height:340px; background:var(--mostaza); top:-150px; right:-130px; }
+  body:after{ width:380px; height:380px; background:var(--azul); bottom:-190px; left:-150px; }
+  .paper{
+    position:relative; z-index:1; max-width:520px; margin:34px auto 0; background:var(--papel);
+    border:4px solid var(--tinta); box-shadow:10px 10px 0 var(--tinta);
+    padding:46px 24px 28px; transform:rotate(-1deg);
+  }
+  .tape{ position:absolute; top:-20px; left:50%; width:130px; height:34px; background:var(--azul); border:3px solid var(--tinta); transform:translateX(-50%) rotate(2.5deg); }
+  .stamp{ position:absolute; top:-26px; right:-12px; background:var(--mostaza); border:3px solid var(--tinta); font-size:13px; letter-spacing:.08em; padding:5px 10px; transform:rotate(6deg); font-weight:900; }
+  .eyebrow{ font-size:12px; letter-spacing:.2em; font-weight:900; margin-bottom:8px; }
+  h1{ font-family:'Arial Black',Arial,sans-serif; font-size:clamp(26px,7.4vw,40px); line-height:1; letter-spacing:-.02em; margin-bottom:18px; }
+  p{ font-size:17px; line-height:1.5; margin-bottom:14px; }
+  mark{ background:var(--mostaza); padding:0 6px; border:2px solid var(--tinta); }
+  label{ display:block; font-size:12px; letter-spacing:.14em; font-weight:900; margin:16px 0 6px; }
+  input{
+    width:100%; font:inherit; font-size:18px; padding:13px 14px; background:#fff;
+    border:3px solid var(--tinta); border-radius:0; outline:none; color:var(--tinta);
+  }
+  input:focus{ box-shadow:4px 4px 0 var(--azul); }
+  #codigo{ text-align:center; letter-spacing:.12em; text-transform:uppercase; font-size:22px; }
+  button{
+    display:block; width:100%; margin-top:18px; font:inherit; font-size:17px; font-weight:900; letter-spacing:.06em;
+    background:var(--azul); color:var(--papel); border:3px solid var(--tinta); box-shadow:5px 5px 0 var(--tinta);
+    padding:15px; cursor:pointer;
+  }
+  button:active{ transform:translate(3px,3px); box-shadow:2px 2px 0 var(--tinta); }
+  button[disabled]{ opacity:.6; cursor:wait; }
+  .msg{ margin-top:16px; padding:12px 14px; border:3px solid var(--tinta); background:var(--lila); font-size:15px; line-height:1.45; }
+  .msg.err{ background:#ffd6d6; }
+  .hidden{ display:none !important; }
+  .big{ font-family:'Arial Black',Arial,sans-serif; font-size:clamp(22px,6.6vw,28px); line-height:1.05; margin-bottom:14px; }
+  .box{ border:3px dashed var(--tinta); padding:14px; margin:16px 0; background:#fff; }
+  .codebox{ background:var(--mostaza); border:3px solid var(--tinta); font-family:'Arial Black',Arial,sans-serif; font-size:30px; text-align:center; padding:14px 8px; margin:14px 0; letter-spacing:.08em; word-break:break-all; }
+  ol{ padding-left:22px; font-size:15px; line-height:1.5; }
+  ol li{ margin-bottom:8px; }
+  .foot{ margin-top:22px; border-top:3px dashed var(--tinta); padding-top:12px; font-size:12px; letter-spacing:.12em; text-align:center; }
+</style>
+</head>
+<body>
+<main class="paper">
+  <div class="tape"></div>
+  <div class="stamp">CONFIDENCIAL</div>
+
+  <!-- PANTALLA 1: ingresar código -->
+  <section id="pantalla-codigo">
+    <div class="eyebrow">EXPEDIENTE Nº 01</div>
+    <h1>¡FELICITACIONES!</h1>
+    <p>Descifraste las adivinanzas. <mark>Ya estás cerca.</mark></p>
+    <p>Ahora necesitás el código. Estate atentx a las historias, porque en breve lo vamos a cantar.</p>
+    <form id="form-codigo" autocomplete="off">
+      <label for="codigo">CÓDIGO PARA DESACTIVAR EL QR</label>
+      <input id="codigo" name="codigo" type="text" inputmode="text" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="40" placeholder="ESCRIBILO ACÁ" required>
+      <button id="btn-codigo" type="submit">DESACTIVAR QR</button>
+    </form>
+    <div id="aviso" class="msg hidden" role="status"></div>
+  </section>
+
+  <!-- PANTALLA 2: ganó -->
+  <section id="pantalla-ganador" class="hidden">
+    <div class="eyebrow">EXPEDIENTE Nº 01 · CASO RESUELTO</div>
+    <div class="big">¡SOS QUIEN GANÓ!</div>
+    <p>Fuiste la primera persona en desactivar el QR. <mark>El MEGA premio es tuyo.</mark></p>
+    <p>Dejanos tus datos así coordinamos:</p>
+    <form id="form-datos" autocomplete="on">
+      <label for="nombre">NOMBRE Y APELLIDO</label>
+      <input id="nombre" name="name" type="text" maxlength="80" autocomplete="name" required>
+      <label for="instagram">INSTAGRAM (@usuario)</label>
+      <input id="instagram" name="instagram" type="text" maxlength="60" autocapitalize="none" placeholder="@">
+      <label for="whatsapp">WHATSAPP</label>
+      <input id="whatsapp" name="tel" type="tel" maxlength="30" autocomplete="tel" required>
+      <button id="btn-datos" type="submit">ENVIAR MIS DATOS</button>
+    </form>
+    <div id="aviso-datos" class="msg err hidden" role="status"></div>
+    <div class="box">
+      <p style="font-size:14px;margin-bottom:8px">Para cobrar el premio:</p>
+      <ol>
+        <li>Seguir a @blubakery.bb y a @churromania.</li>
+        <li>Retirarlo por la churrería (acordamos el día).</li>
+        <li>Subir a historias, de manera pública, el día que lo retirás, etiquetando a ambas cuentas.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PANTALLA 3: datos enviados -->
+  <section id="pantalla-listo" class="hidden">
+    <div class="eyebrow">EXPEDIENTE Nº 01 · CASO CERRADO</div>
+    <div class="big">¡LISTO!</div>
+    <p>Recibimos tus datos. <mark>Te escribimos muy pronto</mark> para acordar cuándo retirar tu premio.</p>
+    <p>Mientras tanto, acordate de seguir a las dos cuentas.</p>
+  </section>
+
+  <!-- PANTALLA 4: llegó tarde -->
+  <section id="pantalla-tarde" class="hidden">
+    <div class="eyebrow">EXPEDIENTE Nº 01 · CASO CERRADO</div>
+    <div class="big">¡LAMENTABLEMENTE YA TENEMOS GANADOR!</div>
+    <p>Pero tenemos un premio por haber llegado hasta acá:</p>
+    <p><mark>15% de descuento</mark> en tu compra, usando el mismo código en la web de Blu Bakery. Aplica a cookies sueltas y caja de minis.</p>
+    <div id="cupon" class="codebox"></div>
+    <p style="font-size:14px">Código válido solo por una semana.</p>
+    <p><a href="https://blubakery.github.io/BLUBAKERY/blubakery-pedidos-v3.html" style="color:var(--azul)">Ir a la web de Blu Bakery</a></p>
+  </section>
+
+  <div class="foot">BLU BAKERY x CHURRO MANÍA</div>
+</main>
+
+<script>
+(function(){
+  // Dirección de la aplicación web de Apps Script (se completa al publicarla).
+  var API_URL = 'https://script.google.com/macros/s/AKfycby87OjasNg8rMmrarWuh8-GVSJh48-AlTdnX-IKgKtAcGEOQ-zrMcA2OPBFXzjTPmkQVA/exec';
+
+  var $ = function(id){ return document.getElementById(id); };
+  var ficha = null;
+  var codigoIngresado = '';
+
+  function mostrar(id){
+    ['pantalla-codigo','pantalla-ganador','pantalla-listo','pantalla-tarde'].forEach(function(p){
+      $(p).classList.toggle('hidden', p !== id);
+    });
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  function aviso(el, texto, error){
+    el.textContent = texto;
+    el.classList.remove('hidden');
+    el.classList.toggle('err', !!error);
+  }
+
+  function llamar(cuerpo){
+    // Se envía como texto simple para evitar bloqueos de CORS con Apps Script.
+    return fetch(API_URL, { method:'POST', body: JSON.stringify(cuerpo) })
+      .then(function(r){ return r.json(); });
+  }
+
+  $('form-codigo').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var btn = $('btn-codigo');
+    var cod = $('codigo').value.trim();
+    if (!cod) return;
+    btn.disabled = true; btn.textContent = 'REVISANDO...';
+    $('aviso').classList.add('hidden');
+    llamar({ accion:'codigo', codigo:cod }).then(function(r){
+      codigoIngresado = cod.toUpperCase();
+      if (r.estado === 'ganador'){ ficha = r.ficha; mostrar('pantalla-ganador'); }
+      else if (r.estado === 'tarde'){ $('cupon').textContent = codigoIngresado; mostrar('pantalla-tarde'); }
+      else if (r.estado === 'pronto'){ aviso($('aviso'), 'Todavía no revelamos el código. Estate atentx a nuestras historias.', false); }
+      else if (r.estado === 'incorrecto'){ aviso($('aviso'), 'Ese no es el código. Probá de nuevo.', true); }
+      else { aviso($('aviso'), 'Algo falló. Probá de nuevo en un momento.', true); }
+    }).catch(function(){
+      aviso($('aviso'), 'No pudimos conectarnos. Revisá tu internet y probá de nuevo.', true);
+    }).then(function(){
+      btn.disabled = false; btn.textContent = 'DESACTIVAR QR';
+    });
+  });
+
+  $('form-datos').addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var btn = $('btn-datos');
+    btn.disabled = true; btn.textContent = 'ENVIANDO...';
+    $('aviso-datos').classList.add('hidden');
+    llamar({
+      accion:'datos', ficha:ficha,
+      nombre:$('nombre').value, instagram:$('instagram').value, whatsapp:$('whatsapp').value
+    }).then(function(r){
+      if (r.estado === 'guardado' || r.estado === 'ya_guardado'){ mostrar('pantalla-listo'); }
+      else if (r.estado === 'faltan'){ aviso($('aviso-datos'), 'Completá tu nombre y tu WhatsApp.', true); }
+      else { aviso($('aviso-datos'), 'No pudimos guardar tus datos. Probá de nuevo o escribinos por Instagram.', true); }
+    }).catch(function(){
+      aviso($('aviso-datos'), 'No pudimos conectarnos. Probá de nuevo.', true);
+    }).then(function(){
+      btn.disabled = false; btn.textContent = 'ENVIAR MIS DATOS';
+    });
+  });
+})();
+</script>
+</body>
+</html>
