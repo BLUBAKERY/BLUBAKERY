@@ -1721,6 +1721,7 @@ var cpSeq = 0;
 var ent = null, diaId = null, franja = null, pago = null, disp = [];
 var esRegalo = false;
 var cuponAplicado = null; // { codigo, tipo, valor, valido }
+var CUPONES_SOLO_SUELTAS = ["BLUMANIA"]; // estos códigos descuentan solo sobre cookies sueltas y Box de minis
 var puntoRetiro = null;  // "olavarria" | "lomanegra" cuando ent === "retiro"
 var beQty = {};  // cantidad de cada box especial { idBoxEsp: cant }
 
@@ -3291,6 +3292,13 @@ function aplicarCupon(){
     return;
   }
 
+  // Códigos que aplican solo a sueltas / Box de minis
+  if(CUPONES_SOLO_SUELTAS.indexOf(codigo) >= 0 && t.sueltas <= 0){
+    cuponAplicado = { valido:false, error:"Este código aplica solo a cookies sueltas y a la Box de minis" };
+    renderResumen();
+    return;
+  }
+
   // Todo OK
   cuponAplicado = {
     valido: true,
@@ -3355,10 +3363,14 @@ function totales(){
   // Cupón de descuento (se aplica sobre el subtotal, no sobre el envío)
   var descCupon = 0;
   if(cuponAplicado && cuponAplicado.valido){
+    var baseCup = subtotal;
+    if(CUPONES_SOLO_SUELTAS.indexOf(String(cuponAplicado.codigo||"").toUpperCase()) >= 0){
+      baseCup = Math.max(0, sueltas - desc);
+    }
     if(cuponAplicado.tipo === "porcentaje"){
-      descCupon = subtotal * (parseFloat(cuponAplicado.valor)||0) / 100;
+      descCupon = baseCup * (parseFloat(cuponAplicado.valor)||0) / 100;
     } else {
-      descCupon = Math.min(subtotal, parseFloat(cuponAplicado.valor)||0);
+      descCupon = Math.min(baseCup, parseFloat(cuponAplicado.valor)||0);
     }
     descCupon = Math.round(descCupon);
   }
